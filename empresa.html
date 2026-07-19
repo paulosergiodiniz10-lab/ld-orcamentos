@@ -121,10 +121,36 @@
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8"><p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos. Todos os direitos reservados.</p></div>
     </footer>
 
+    <!-- Container do Pop-up (Toast) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
     <script>
         lucide.createIcons();
 
-        // Função de Preview da Imagem
+        // Sistema de Pop-up Profissional (Toast)
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+            
+            toast.className = `${bgColor} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i><span class="font-medium text-sm">${message}</span>`;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
         function previewImage(event) {
             const input = event.target;
             const preview = document.getElementById('logoPreview');
@@ -140,38 +166,30 @@
             }
         }
 
-        // Máscara Inteligente para CPF ou CNPJ
         function mascaraCpfCnpj(input) {
-            let value = input.value.replace(/\D/g, ""); // Remove tudo que não for número
-            
+            let value = input.value.replace(/\D/g, "");
             if (value.length <= 11) {
-                // Formato CPF
                 value = value.replace(/(\d{3})(\d)/, "$1.$2");
                 value = value.replace(/(\d{3})(\d)/, "$1.$2");
                 value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
             } else {
-                // Formato CNPJ
                 value = value.replace(/^(\d{2})(\d)/, "$1.$2");
                 value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
                 value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
                 value = value.replace(/(\d{4})(\d)/, "$1-$2");
             }
-            
             input.value = value;
         }
 
-        // Máscara para Telefone / WhatsApp
         function mascaraTelefone(input) {
             let value = input.value.replace(/\D/g, "");
-            
-            value = value.replace(/^(\d{2})(\d)/g, "($1) $2"); // Coloca parênteses
-            value = value.replace(/(\d)(\d{4})$/, "$1-$2");    // Coloca traço
-            
+            value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
+            value = value.replace(/(\d)(\d{4})$/, "$1-$2");
             input.value = value;
         }
 
         function salvarEmpresa() {
-            alert("Dados da empresa salvos com sucesso!");
+            showToast("Dados da empresa salvos com sucesso!", "success");
         }
     </script>
 </body>
