@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LD Orçamentos - Dashboard</title>
-    <!-- Importando Tailwind e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Barra de Navegação -->
     <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -22,13 +20,13 @@
                     <button onclick="window.location.href='empresa.html'" class="hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2">
                          <i data-lucide="briefcase" class="w-4 h-4"></i> Minha Empresa
                     </button>
-                    <button class="hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2">
+                    <button onclick="window.location.href='equipe.html'" class="hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2">
                          <i data-lucide="users" class="w-4 h-4"></i> Equipe
                     </button>
                     <button onclick="window.location.href='aptos.html'" class="hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2">
                         <i data-lucide="bed-double" class="w-4 h-4"></i> Aptos
                     </button>
-                    <button class="bg-orange-500 hover:bg-orange-600 px-5 py-2 rounded-md font-bold text-sm shadow-sm transition-colors flex items-center gap-2 ml-4">
+                    <button onclick="window.location.href='orcamentos.html'" class="bg-orange-500 hover:bg-orange-600 px-5 py-2 rounded-md font-bold text-sm shadow-sm transition-colors flex items-center gap-2 ml-4">
                         <i data-lucide="calculator" class="w-4 h-4"></i> Orçamentos
                     </button>
                 </div>
@@ -41,7 +39,6 @@
         </div>
     </nav>
 
-    <!-- Área Principal -->
     <main class="flex-grow max-w-7xl mx-auto w-full py-10 px-4 sm:px-6 lg:px-8">
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 px-5 py-6 sm:px-6">
             <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -52,7 +49,6 @@
         </div>
     </main>
 
-    <!-- Footer Simples -->
     <footer class="bg-white border-t border-gray-200 mt-auto">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
             <p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos. Todos os direitos reservados.</p>
@@ -60,7 +56,6 @@
     </footer>
 
     <script>
-        // Inicializa os ícones
         lucide.createIcons();
     </script>
 </body>
