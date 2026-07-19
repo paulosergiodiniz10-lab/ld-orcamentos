@@ -9,7 +9,6 @@
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Barra de Navegação -->
     <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -55,45 +54,43 @@
                          <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-4">
                             <div class="sm:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Nome do Imóvel / Hotel</label>
-                                <input type="text" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="Ex: Lacqua diRoma">
+                                <input type="text" id="nomeImovel" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="Ex: Lacqua diRoma">
                             </div>
                             <div class="sm:col-span-1">
                                 <label class="block text-sm font-medium text-gray-700">Unidade</label>
-                                <input type="text" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="101">
+                                <input type="text" id="unidadeImovel" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="101">
                             </div>
                             <div class="sm:col-span-1">
                                 <label class="block text-sm font-medium text-gray-700">Capacidade Máx. Absoluta</label>
-                                <input type="number" min="1" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-gray-50" placeholder="Ex: 4">
+                                <input type="number" id="capMaxImovel" min="1" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-gray-50" placeholder="Ex: 4">
                             </div>
                          </div>
                     </div>
 
-                    <!-- Limites de Idades (As idades não mudam, o que muda é o valor na tarifa) -->
+                    <!-- Limites de Idades -->
                     <div class="bg-blue-50 rounded-lg p-5 border border-blue-100">
                         <h3 class="text-sm font-semibold text-blue-900 tracking-wide uppercase mb-4 border-b border-blue-200 pb-2 flex items-center gap-2">
                             <i data-lucide="baby" class="w-4 h-4 text-blue-600"></i> Limites de Idade para Crianças
                         </h3>
                          <div class="grid grid-cols-1 gap-y-4 gap-x-6 sm:grid-cols-2">
-                            <!-- Limite Cortesia -->
                             <div class="bg-white p-4 rounded-md shadow-sm border border-gray-100">
                                 <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 border-b pb-2">Regra de Cortesia (Free)</p>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Idade Máxima</label>
-                                        <input type="number" class="mt-1 border block w-full rounded-md py-2 px-3 focus:ring-blue-500 outline-none" placeholder="Ex: 12">
+                                        <input type="number" id="idadeMaxCortesia" class="mt-1 border block w-full rounded-md py-2 px-3 focus:ring-blue-500 outline-none" placeholder="Ex: 12">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Qtd. Máxima Permitida</label>
-                                        <input type="number" class="mt-1 border block w-full rounded-md py-2 px-3 focus:ring-blue-500 outline-none" placeholder="Ex: 2">
+                                        <input type="number" id="qtdMaxCortesia" class="mt-1 border block w-full rounded-md py-2 px-3 focus:ring-blue-500 outline-none" placeholder="Ex: 2">
                                     </div>
                                 </div>
                             </div>
-                            <!-- Limite Taxa Jovem -->
                             <div class="bg-white p-4 rounded-md shadow-sm border border-gray-100">
                                 <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 border-b pb-2">Regra de Taxa Jovem (Pagante)</p>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Idade Máxima</label>
-                                    <input type="number" class="mt-1 border block w-full rounded-md py-2 px-3 focus:ring-blue-500 outline-none" placeholder="Ex: 15">
+                                    <input type="number" id="idadeMaxJovem" class="mt-1 border block w-full rounded-md py-2 px-3 focus:ring-blue-500 outline-none" placeholder="Ex: 15">
                                     <p class="text-xs text-gray-500 mt-2">Acima desta idade, o sistema cobrará como Adulto Adicional.</p>
                                 </div>
                             </div>
@@ -125,15 +122,15 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     <div class="sm:col-span-1">
                         <label class="block text-sm font-medium text-gray-700">Nome da Tarifa / Temporada</label>
-                        <input type="text" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="Ex: Alta Temporada, Feriado...">
+                        <input type="text" id="tarifaNome" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="Ex: Alta Temporada, Feriado...">
                     </div>
                     <div class="sm:col-span-1">
                         <label class="block text-sm font-medium text-gray-700">Data Início</label>
-                        <input type="date" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
+                        <input type="date" id="tarifaDataInicio" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
                     </div>
                     <div class="sm:col-span-1">
                         <label class="block text-sm font-medium text-gray-700">Data Fim</label>
-                        <input type="date" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
+                        <input type="date" id="tarifaDataFim" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
                     </div>
                 </div>
 
@@ -157,19 +154,20 @@
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Valor Single (1 pax)</label>
-                            <input type="number" step="0.01" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="R$ 0,00">
+                            <input type="number" id="tarifaValSingle" step="0.01" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="R$ 0,00">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Valor Duplo (2 pax)</label>
-                            <input type="number" step="0.01" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="R$ 0,00">
+                            <label class="block text-sm font-medium text-gray-700">Valor Duplo (Total p/ 2 pax)</label>
+                            <input type="number" id="tarifaValDuplo" step="0.01" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none border-green-500 focus:border-green-600 focus:ring-green-600" placeholder="R$ 0,00">
+                            <p class="text-[11px] text-gray-500 mt-1 leading-tight">Insira o valor total do quarto para 2 pessoas.</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Adicional Adulto (3º+)</label>
-                            <input type="number" step="0.01" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="R$ 0,00">
+                            <input type="number" id="tarifaValExtra" step="0.01" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="R$ 0,00">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Taxa Jovem (Fixo)</label>
-                            <input type="number" step="0.01" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="R$ 0,00">
+                            <input type="number" id="tarifaValJovem" step="0.01" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="R$ 0,00">
                         </div>
                     </div>
                 </div>
@@ -178,7 +176,7 @@
                 <div class="flex flex-col sm:flex-row items-end gap-6 pt-2">
                     <div class="w-full sm:w-1/4">
                         <label class="block text-sm font-medium text-gray-700">Mínimo de Noites</label>
-                        <input type="number" value="2" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
+                        <input type="number" id="tarifaMinNoites" value="2" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
                     </div>
                     <button type="button" onclick="showToast('Tarifa cadastrada com sucesso!', 'success')" class="w-full sm:w-3/4 bg-blue-600 text-white rounded-md py-3 font-bold hover:bg-blue-700 transition-colors shadow-sm">
                         Aplicar Valores e Regras no Calendário
@@ -187,8 +185,8 @@
             </div>
         </div>
 
+        <!-- Módulo de Ajuste em Massa (Simplificado visualmente) -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <!-- 2. Ajuste em Massa (%) -->
             <div class="bg-green-100/50 border-b border-green-200 px-6 py-4 flex items-center gap-2">
                 <i data-lucide="percent" class="w-5 h-5 text-green-700"></i>
                 <h3 class="font-bold text-green-800">Ajuste Rápido em Massa (%)</h3>
@@ -197,98 +195,27 @@
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Data Início</label>
-                        <input type="date" class="mt-1 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
+                        <input type="date" id="ajusteInicio" class="mt-1 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Data Fim</label>
-                        <input type="date" class="mt-1 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
+                        <input type="date" id="ajusteFim" class="mt-1 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Ação</label>
-                        <select class="mt-1 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
+                        <select id="ajusteAcao" class="mt-1 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
                             <option>Acrescentar (+)</option>
                             <option>Descontar (-)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Porcentagem (%)</label>
-                        <input type="number" class="mt-1 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="Ex: 10">
+                        <input type="number" id="ajustePorcentagem" class="mt-1 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="Ex: 10">
                     </div>
                 </div>
                 <button type="button" onclick="showToast('Ajuste de preço realizado!', 'success')" class="w-full bg-green-600 text-white rounded-md py-3 font-bold hover:bg-green-700 transition-colors">
                     Aplicar Ajuste de Preço
                 </button>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <!-- 3. Gestão do Calendário -->
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 class="font-bold text-gray-900 flex items-center gap-2">
-                    <i data-lucide="calendar-days" class="w-5 h-5 text-gray-600"></i> Calendário de Tarifas
-                </h3>
-                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">58 dias configurados</span>
-            </div>
-            
-            <div class="p-6">
-                <div class="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div class="flex-1">
-                        <label class="block text-xs font-bold text-gray-500 mb-1">Filtrar por Mês</label>
-                        <select class="block w-full text-sm border-gray-300 rounded-md py-2 px-3 border bg-white"><option>Todos os meses</option></select>
-                    </div>
-                    <div class="flex-1 flex items-end gap-3">
-                        <div class="flex-1">
-                            <label class="block text-xs font-bold text-gray-500 mb-1">Filtrar por Tarifa</label>
-                            <select class="block w-full text-sm border-gray-300 rounded-md py-2 px-3 border bg-white"><option>Todas as tarifas</option></select>
-                        </div>
-                        <button class="text-blue-600 text-sm font-medium hover:underline pb-2">Limpar</button>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-left text-sm whitespace-nowrap">
-                        <thead class="text-xs font-semibold uppercase tracking-wider text-gray-500 border-b">
-                            <tr>
-                                <th class="pb-3 px-2">DATA</th>
-                                <th class="pb-3 px-2">TARIFA</th>
-                                <th class="pb-3 px-2">SINGLE</th>
-                                <th class="pb-3 px-2">DUPLO</th>
-                                <th class="pb-3 px-2">AD. EXTRA</th>
-                                <th class="pb-3 px-2">JOVEM</th>
-                                <th class="pb-3 px-2">MÍN. NOITES</th>
-                                <th class="pb-3 px-2 text-right">AÇÕES</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100 text-gray-700">
-                            <tr class="hover:bg-gray-50">
-                                <td class="py-4 px-2 font-medium">01/08/2026<br><span class="text-xs text-gray-400">Sábado</span></td>
-                                <td class="py-4 px-2"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold border border-yellow-200">Alta Temp.</span></td>
-                                <td class="py-4 px-2 text-gray-900">R$ 250,00</td>
-                                <td class="py-4 px-2 font-bold text-gray-900">R$ 380,00</td>
-                                <td class="py-4 px-2 text-gray-600">R$ 120,00</td>
-                                <td class="py-4 px-2 text-gray-600">R$ 80,00</td>
-                                <td class="py-4 px-2 text-center">3</td>
-                                <td class="py-4 px-2 text-right space-x-3">
-                                    <button class="text-gray-400 hover:text-blue-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                                    <button class="text-gray-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="py-4 px-2 font-medium">02/08/2026<br><span class="text-xs text-gray-400">Domingo</span></td>
-                                <td class="py-4 px-2"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold border border-yellow-200">Alta Temp.</span></td>
-                                <td class="py-4 px-2 text-gray-900">R$ 250,00</td>
-                                <td class="py-4 px-2 font-bold text-gray-900">R$ 380,00</td>
-                                <td class="py-4 px-2 text-gray-600">R$ 120,00</td>
-                                <td class="py-4 px-2 text-gray-600">R$ 80,00</td>
-                                <td class="py-4 px-2 text-center">3</td>
-                                <td class="py-4 px-2 text-right space-x-3">
-                                    <button class="text-gray-400 hover:text-blue-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                                    <button class="text-gray-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
             </div>
         </div>
     </main>
@@ -321,23 +248,19 @@
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
-    </script>
-<!-- INÍCIO DA REGRA GERAL DE SALVAMENTO -->
-    <script>
+
+        // REGRA GERAL DE SALVAMENTO (localStorage)
         document.addEventListener("DOMContentLoaded", () => {
-            // Seleciona todos os campos de digitação e seleção da página
             const campos = document.querySelectorAll("input, select, textarea");
             
-            // 1. Quando a página carrega, ele puxa o que estava salvo na memória
             campos.forEach(campo => {
-                if (campo.id) { // Só funciona em campos que tem um ID definido
+                if (campo.id) {
                     const valorSalvo = localStorage.getItem(campo.id);
                     if (valorSalvo !== null) {
                         campo.value = valorSalvo;
                     }
                 }
                 
-                // 2. Toda vez que você digitar ou mudar algo, ele salva na hora
                 campo.addEventListener("input", () => {
                     if (campo.id) {
                         localStorage.setItem(campo.id, campo.value);
@@ -346,6 +269,5 @@
             });
         });
     </script>
-    <!-- FIM DA REGRA GERAL -->
 </body>
 </html>
