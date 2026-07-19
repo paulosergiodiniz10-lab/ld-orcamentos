@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LD Orçamentos - Minha Empresa</title>
+    <!-- Importando Tailwind e Ícones -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Barra de Navegação -->
+    <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="font-bold text-xl tracking-tight flex items-center gap-2 cursor-pointer" onclick="window.location.href='index.html'">
+                    <i data-lucide="building-2" class="w-6 h-6"></i>
+                    LD Orçamentos
+                </div>
+                <div class="hidden md:flex space-x-2">
+                    <button onclick="window.location.href='empresa.html'" class="bg-blue-700/50 hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2">
+                         <i data-lucide="briefcase" class="w-4 h-4"></i> Minha Empresa
+                    </button>
+                    <button class="hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2">
+                         <i data-lucide="users" class="w-4 h-4"></i> Equipe
+                    </button>
+                    <button class="hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2">
+                        <i data-lucide="bed-double" class="w-4 h-4"></i> Aptos
+                    </button>
+                    <button class="bg-orange-500 hover:bg-orange-600 px-5 py-2 rounded-md font-bold text-sm shadow-sm transition-colors flex items-center gap-2 ml-4">
+                        <i data-lucide="calculator" class="w-4 h-4"></i> Orçamentos
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Área Principal -->
+    <main class="flex-grow max-w-4xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
+        
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-900">Configurações da Empresa</h1>
+            <p class="text-sm text-gray-500 mt-1">Atualize as informações da sua agência que aparecerão nos orçamentos gerados.</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            
+            <div class="p-6 sm:p-8">
+                <form id="empresaForm" class="space-y-8">
+                    
+                    <!-- Seção Logotipo -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-4 border-b pb-2">Logotipo da Agência</h3>
+                        <div class="flex items-center gap-6">
+                            <!-- Preview da Logo -->
+                            <div class="w-24 h-24 bg-blue-50 rounded-lg flex items-center justify-center border-2 border-blue-100 overflow-hidden shrink-0">
+                                <img id="logoPreview" src="https://via.placeholder.com/150?text=Logo" alt="Logo preview" class="w-full h-full object-contain p-2" style="display: none;">
+                                <i data-lucide="image-plus" class="w-8 h-8 text-blue-300" id="logoPlaceholderIcon"></i>
+                            </div>
+                            
+                            <!-- Área de Upload -->
+                            <div class="flex-1">
+                                <label for="logoUpload" class="relative block w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer group">
+                                    <div class="space-y-1">
+                                        <i data-lucide="upload-cloud" class="mx-auto h-8 w-8 text-gray-400 group-hover:text-blue-500"></i>
+                                        <div class="text-sm text-gray-600">
+                                            <span class="font-semibold text-blue-600 group-hover:text-blue-700">Clique para enviar a logo</span> ou arraste
+                                        </div>
+                                        <p class="text-xs text-gray-500">Formatos JPG, PNG (Max. 2MB)</p>
+                                    </div>
+                                    <input id="logoUpload" type="file" class="sr-only" accept="image/png, image/jpeg" onchange="previewImage(event)">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção Informações de Contato -->
+                    <div>
+                         <h3 class="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-4 border-b pb-2">Informações Comerciais</h3>
+                         <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                            
+                            <div class="sm:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">Nome Fantasia / Razão Social</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i data-lucide="store" class="h-4 w-4 text-gray-400"></i>
+                                    </div>
+                                    <input type="text" id="razaoSocial" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="Ex: Caldas Novas Viagens">
+                                </div>
+                            </div>
+
+                            <div class="sm:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">CPF ou CNPJ</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i data-lucide="file-text" class="h-4 w-4 text-gray-400"></i>
+                                    </div>
+                                    <input type="text" id="cnpj" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="00.000.000/0000-00">
+                                </div>
+                            </div>
+
+                            <div class="sm:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">WhatsApp Comercial</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i data-lucide="smartphone" class="h-4 w-4 text-gray-400"></i>
+                                    </div>
+                                    <input type="tel" id="whatsapp" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="(00) 90000-0000">
+                                </div>
+                            </div>
+
+                            <div class="sm:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">E-mail Comercial</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i data-lucide="mail" class="h-4 w-4 text-gray-400"></i>
+                                    </div>
+                                    <input type="email" id="email" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="contato@suaagencia.com.br">
+                                </div>
+                            </div>
+
+                             <div class="sm:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700">CRECI (Opcional)</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i data-lucide="badge-check" class="h-4 w-4 text-gray-400"></i>
+                                    </div>
+                                    <input type="text" id="creci" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="Número do CRECI">
+                                </div>
+                            </div>
+
+                         </div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Rodapé com Botões -->
+            <div class="bg-gray-50 px-6 py-4 flex items-center justify-end border-t border-gray-200 gap-3">
+                <button type="button" class="bg-white border border-gray-300 rounded-md shadow-sm py-2.5 px-5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                    Cancelar
+                </button>
+                <button type="button" onclick="salvarEmpresa()" class="bg-blue-600 border border-transparent rounded-md shadow-sm py-2.5 px-6 text-sm font-medium text-white hover:bg-blue-700 transition-colors flex items-center gap-2">
+                    <i data-lucide="save" class="w-4 h-4"></i> Salvar Dados
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Inicializa os ícones do menu e campos
+        lucide.createIcons();
+
+        // Mostra a imagem quando o usuário escolhe uma
+        function previewImage(event) {
+            const input = event.target;
+            const preview = document.getElementById('logoPreview');
+            const placeholder = document.getElementById('logoPlaceholderIcon');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Simulação do botão salvar
+        function salvarEmpresa() {
+            const btn = event.currentTarget;
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Salvando...';
+            btn.disabled = true;
+            lucide.createIcons();
+
+            setTimeout(() => {
+                alert("Dados da empresa salvos com sucesso!");
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+                lucide.createIcons();
+            }, 800);
+        }
+    </script>
+</body>
+</html>
