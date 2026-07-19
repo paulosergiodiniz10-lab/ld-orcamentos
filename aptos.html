@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LD Orçamentos - Meus Aptos</title>
+    <title>LD Orçamentos - Meus Aptos e Tarifas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -34,20 +34,20 @@
         </div>
     </nav>
 
-    <main class="flex-grow max-w-5xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
+    <main class="flex-grow max-w-6xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-end mb-8">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Cadastro de Apartamento</h1>
-                <p class="text-sm text-gray-500 mt-1">Configure as regras de ocupação, capacidades e valores base do imóvel.</p>
+                <h1 class="text-2xl font-bold text-gray-900">Cadastro de Apartamento e Tarifas</h1>
+                <p class="text-sm text-gray-500 mt-1">Configure o imóvel, regras de ocupação e gerencie preços por período.</p>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
             <div class="p-6 sm:p-8">
                 <form id="aptoForm" class="space-y-8">
-                    <!-- Identificação -->
+                    <!-- Identificação e Valores (Já existentes) -->
                     <div>
-                        <h3 class="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-4 border-b pb-2 flex items-center gap-2"><i data-lucide="home" class="w-4 h-4 text-blue-500"></i> Identificação</h3>
+                        <h3 class="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-4 border-b pb-2 flex items-center gap-2"><i data-lucide="home" class="w-4 h-4 text-blue-500"></i> Dados Base do Imóvel</h3>
                          <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-4">
                             <div class="sm:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Nome do Imóvel</label>
@@ -64,27 +64,16 @@
                          </div>
                     </div>
 
-                    <!-- Valores Adultos -->
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-4 border-b pb-2 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4 text-blue-500"></i> Valores Base</h3>
-                         <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-3">
-                            <div><label class="block text-sm font-medium text-gray-700">Single (1 Pessoa)</label><input type="number" class="mt-1 border block w-full rounded-md py-2.5 px-3"></div>
-                            <div><label class="block text-sm font-medium text-gray-700">Duplo (2 Pessoas)</label><input type="number" class="mt-1 border block w-full rounded-md py-2.5 px-3"></div>
-                            <div><label class="block text-sm font-medium text-gray-700">Adicional (3º+)</label><input type="number" class="mt-1 border block w-full rounded-md py-2.5 px-3"></div>
-                         </div>
-                    </div>
-
-                    <!-- Regras Crianças -->
                     <div class="bg-blue-50 rounded-lg p-5 border border-blue-100">
                         <h3 class="text-sm font-semibold text-blue-900 tracking-wide uppercase mb-4 border-b border-blue-200 pb-2 flex items-center gap-2"><i data-lucide="baby" class="w-4 h-4 text-blue-600"></i> Regras Crianças</h3>
-                         <div class="grid grid-cols-1 gap-y-6 gap-x-6 sm:grid-cols-4">
+                         <div class="grid grid-cols-1 gap-y-4 gap-x-6 sm:grid-cols-4">
                             <div class="sm:col-span-2 grid grid-cols-2 gap-4 bg-white p-4 rounded-md shadow-sm border border-gray-100">
-                                <div class="col-span-2"><p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Cortesia (Free)</p></div>
+                                <div class="col-span-2"><p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Cortesia (Free)</p></div>
                                 <div><label class="block text-sm font-medium text-gray-700">Idade Limite</label><input type="number" class="mt-1 border block w-full rounded-md py-2 px-3"></div>
                                 <div><label class="block text-sm font-medium text-gray-700">Qtd. Máxima</label><input type="number" class="mt-1 border block w-full rounded-md py-2 px-3"></div>
                             </div>
                             <div class="sm:col-span-2 grid grid-cols-2 gap-4 bg-white p-4 rounded-md shadow-sm border border-gray-100">
-                                <div class="col-span-2"><p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Taxa Jovem (Pagante)</p></div>
+                                <div class="col-span-2"><p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Taxa Jovem</p></div>
                                 <div><label class="block text-sm font-medium text-gray-700">Idade Limite</label><input type="number" class="mt-1 border block w-full rounded-md py-2 px-3"></div>
                                 <div><label class="block text-sm font-medium text-gray-700">Valor Fixo R$</label><input type="number" class="mt-1 border block w-full rounded-md py-2 px-3"></div>
                             </div>
@@ -92,10 +81,157 @@
                     </div>
                 </form>
             </div>
+        </div>
+
+        <!-- MÓDULO DE TARIFAS (NOVO) -->
+        <h2 class="text-xl font-bold text-gray-900 mb-4 mt-10">Gestão de Tarifas e Calendário</h2>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <!-- 1. Cadastrar / Atualizar Tarifas -->
+            <div class="bg-yellow-100/50 border-b border-yellow-200 px-6 py-4 flex items-center gap-2">
+                <i data-lucide="zap" class="w-5 h-5 text-yellow-600"></i>
+                <h3 class="font-bold text-yellow-800">Cadastrar / Atualizar Tarifas</h3>
+            </div>
+            <div class="p-6 space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Nome da Tarifa</label>
+                    <input type="text" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="Ex: Padrão, Feriado...">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Data Início</label>
+                        <input type="date" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Data Fim</label>
+                        <input type="date" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Aplicar nestes dias da semana:</label>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-1.5 px-4 rounded-md transition-colors">Dom</button>
+                        <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-1.5 px-4 rounded-md transition-colors">Seg</button>
+                        <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-1.5 px-4 rounded-md transition-colors">Ter</button>
+                        <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-1.5 px-4 rounded-md transition-colors">Qua</button>
+                        <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-1.5 px-4 rounded-md transition-colors">Qui</button>
+                        <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-1.5 px-4 rounded-md transition-colors">Sex</button>
+                        <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-1.5 px-4 rounded-md transition-colors">Sáb</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Valor Diária (R$)</label>
+                        <input type="number" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="R$">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Mín. Noites</label>
+                        <input type="number" value="2" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
+                    </div>
+                </div>
+                <button type="button" onclick="showToast('Tarifas aplicadas com sucesso!', 'success')" class="w-full bg-blue-600 text-white rounded-md py-3 font-bold hover:bg-blue-700 transition-colors">
+                    Aplicar Tarifas
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <!-- 2. Ajuste em Massa (%) -->
+            <div class="bg-green-100/50 border-b border-green-200 px-6 py-4 flex items-center gap-2">
+                <i data-lucide="percent" class="w-5 h-5 text-green-700"></i>
+                <h3 class="font-bold text-green-800">Ajuste em Massa (%)</h3>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Data Início</label>
+                        <input type="date" class="mt-1 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Data Fim</label>
+                        <input type="date" class="mt-1 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Ação</label>
+                        <select class="mt-1 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
+                            <option>Acrescentar (+)</option>
+                            <option>Descontar (-)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Porcentagem (%)</label>
+                        <input type="number" class="mt-1 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none" placeholder="Ex: 10">
+                    </div>
+                </div>
+                <button type="button" onclick="showToast('Ajuste de preço realizado!', 'success')" class="w-full bg-green-600 text-white rounded-md py-3 font-bold hover:bg-green-700 transition-colors">
+                    Aplicar Ajuste de Preço
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <!-- 3. Gestão do Calendário -->
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="font-bold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="list" class="w-5 h-5 text-gray-600"></i> Gestão do Calendário
+                </h3>
+                <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">58 resultados</span>
+            </div>
             
-            <div class="bg-gray-50 px-6 py-4 flex items-center justify-end border-t border-gray-200 gap-3">
-                <button type="button" class="bg-white border rounded-md py-2.5 px-5 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancelar</button>
-                <button type="button" onclick="salvarApto()" class="bg-blue-600 text-white rounded-md py-2.5 px-6 text-sm font-medium hover:bg-blue-700 flex items-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> Salvar Apto</button>
+            <div class="p-6">
+                <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Filtrar por Mês</label>
+                        <select class="block w-full text-sm border-gray-300 rounded-md py-2 px-3 border bg-white"><option>Todos os meses</option></select>
+                    </div>
+                    <div class="flex-1 flex items-end gap-3">
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Filtrar por Tarifa</label>
+                            <select class="block w-full text-sm border-gray-300 rounded-md py-2 px-3 border bg-white"><option>Todas as tarifas</option></select>
+                        </div>
+                        <button class="text-blue-600 text-sm font-medium hover:underline pb-2">Limpar</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-left text-sm whitespace-nowrap">
+                        <thead class="text-xs font-semibold uppercase tracking-wider text-gray-500 border-b">
+                            <tr>
+                                <th class="pb-3">DATA</th>
+                                <th class="pb-3">DIA</th>
+                                <th class="pb-3">TARIFA</th>
+                                <th class="pb-3">PREÇO (R$)</th>
+                                <th class="pb-3">MÍN. DIÁRIAS</th>
+                                <th class="pb-3 text-right">AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-gray-700">
+                            <!-- Linha Exemplo -->
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-4 font-medium">27/06/2026</td>
+                                <td class="py-4">Sábado</td>
+                                <td class="py-4"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-semibold">Baixa temporada</span></td>
+                                <td class="py-4 font-bold text-gray-900">R$ 110,00</td>
+                                <td class="py-4">2</td>
+                                <td class="py-4 text-right space-x-3">
+                                    <button class="text-gray-400 hover:text-blue-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                    <button class="text-gray-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-4 font-medium">28/06/2026</td>
+                                <td class="py-4">Domingo</td>
+                                <td class="py-4"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-semibold">Baixa temporada</span></td>
+                                <td class="py-4 font-bold text-gray-900">R$ 110,00</td>
+                                <td class="py-4">2</td>
+                                <td class="py-4 text-right space-x-3">
+                                    <button class="text-gray-400 hover:text-blue-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                    <button class="text-gray-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
@@ -104,9 +240,30 @@
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8"><p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos. Todos os direitos reservados.</p></div>
     </footer>
 
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
     <script>
         lucide.createIcons();
-        function salvarApto() { alert("Apartamento salvo!"); }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+            
+            toast.className = `${bgColor} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i><span class="font-medium text-sm">${message}</span>`;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
     </script>
 </body>
 </html>
