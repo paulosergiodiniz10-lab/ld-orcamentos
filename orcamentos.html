@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LD Orçamentos - Nova Cotação</title>
-    <!-- Importando Tailwind e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Barra de Navegação -->
     <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -32,34 +30,23 @@
                         <i data-lucide="calculator" class="w-4 h-4"></i> Orçamentos
                     </button>
                 </div>
-                 <div class="md:hidden flex items-center">
-                     <button class="text-white hover:text-blue-200 focus:outline-none">
-                          <i data-lucide="menu" class="w-6 h-6"></i>
-                     </button>
-                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Área Principal -->
     <main class="flex-grow max-w-7xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
-        
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900">Gerador de Orçamentos</h1>
             <p class="text-sm text-gray-500 mt-1">Busque disponibilidade e calcule os valores com base nas regras do imóvel.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            <!-- COLUNA ESQUERDA: Formulário de Busca -->
             <div class="lg:col-span-5 bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit">
                 <h3 class="text-base font-bold text-gray-900 mb-5 flex items-center gap-2 border-b pb-3">
                     <i data-lucide="search" class="w-5 h-5 text-blue-600"></i> Dados da Reserva
                 </h3>
                 
                 <form id="buscaForm" class="space-y-5">
-                    
-                    <!-- Imóvel -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Selecione o Imóvel/Apto</label>
                         <select id="imovelSelect" class="focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
@@ -67,7 +54,6 @@
                         </select>
                     </div>
 
-                    <!-- Período -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
@@ -79,24 +65,20 @@
                         </div>
                     </div>
 
-                    <!-- Ocupação -->
                     <div class="grid grid-cols-2 gap-4 pt-2">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Adultos</label>
-                            <input type="number" id="qtdAdultos" min="1" value="2" class="focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
+                            <input type="number" id="qtdAdultos" min="1" value="2" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Crianças (0 a 15 anos)</label>
-                            <input type="number" id="qtdCriancas" min="0" value="0" onchange="gerarCamposIdade()" class="focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
+                            <input type="number" id="qtdCriancas" min="0" value="0" onchange="gerarCamposIdade()" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
                         </div>
                     </div>
 
-                    <!-- Idades das Crianças (Gerado via JS) -->
                     <div id="idadesContainer" class="hidden bg-blue-50 p-4 rounded-lg border border-blue-100 mt-3 space-y-3">
                         <p class="text-xs font-semibold text-blue-800 uppercase">Idade das Crianças</p>
-                        <div id="idadesGrid" class="grid grid-cols-3 gap-3">
-                            <!-- Inputs entram aqui -->
-                        </div>
+                        <div id="idadesGrid" class="grid grid-cols-3 gap-3"></div>
                     </div>
 
                     <div class="pt-4 border-t mt-6">
@@ -107,22 +89,14 @@
                 </form>
             </div>
 
-            <!-- COLUNA DIREITA: Resultado do Orçamento -->
             <div class="lg:col-span-7">
-                
-                <!-- Estado Inicial (Vazio) -->
                 <div id="estadoVazio" class="h-full min-h-[400px] bg-white rounded-xl shadow-sm border border-gray-200 border-dashed flex flex-col items-center justify-center text-center p-8">
-                    <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                        <i data-lucide="receipt" class="w-8 h-8 text-blue-300"></i>
-                    </div>
+                    <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4"><i data-lucide="receipt" class="w-8 h-8 text-blue-300"></i></div>
                     <h3 class="text-lg font-bold text-gray-700">Nenhum orçamento calculado</h3>
                     <p class="text-sm text-gray-500 mt-2 max-w-sm">Preencha os dados ao lado e clique em calcular para ver o detalhamento de valores e regras aplicadas.</p>
                 </div>
 
-                <!-- Resultado do Cálculo (Oculto inicialmente) -->
                 <div id="resultadoCotacao" class="hidden bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
-                    
-                    <!-- Aviso de Erro (Capacidade Excedida) -->
                     <div id="alertaErro" class="hidden bg-red-50 border-b border-red-200 p-4 flex items-start gap-3">
                         <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600 mt-0.5"></i>
                         <div>
@@ -143,32 +117,27 @@
                             </div>
                         </div>
 
-                        <!-- Detalhamento -->
                         <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Detalhamento por Diária</h4>
                         <div class="bg-gray-50 rounded-lg p-4 border border-gray-100 space-y-3 text-sm">
                             <div class="flex justify-between text-gray-700">
-                                <span id="labelBase">Valor Base (2 Adultos)</span>
-                                <span id="valBaseCalc" class="font-medium">R$ 0,00</span>
+                                <span id="labelBase">Valor Base (2 Adultos)</span><span id="valBaseCalc" class="font-medium">R$ 0,00</span>
                             </div>
                             <div id="linhaAdultoExtra" class="flex justify-between text-gray-700">
-                                <span>Adulto Extra (<span id="qtdAdExtra">0</span>)</span>
-                                <span id="valAdExtraCalc" class="font-medium">R$ 0,00</span>
+                                <span>Adulto Extra (<span id="qtdAdExtra">0</span>)</span><span id="valAdExtraCalc" class="font-medium">R$ 0,00</span>
                             </div>
                             <div id="linhaTaxaJovem" class="flex justify-between text-gray-700">
-                                <span>Taxa Jovem pagante (<span id="qtdTaxaJovem">0</span>)</span>
-                                <span id="valTaxaJovemCalc" class="font-medium">R$ 0,00</span>
+                                <span>Taxa Jovem pagante (<span id="qtdTaxaJovem">0</span>)</span><span id="valTaxaJovemCalc" class="font-medium">R$ 0,00</span>
                             </div>
                             <div class="flex justify-between text-green-600 font-medium pt-2 border-t border-gray-200 border-dashed mt-2">
-                                <span>Crianças Free (<span id="qtdFree">0</span>)</span>
-                                <span>Cortesia</span>
+                                <span>Crianças Free (<span id="qtdFree">0</span>)</span><span>Cortesia</span>
                             </div>
                         </div>
 
                         <div class="mt-8 flex gap-3">
-                            <button class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                            <button onclick="showToast('Cotação copiada para a área de transferência!', 'success')" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
                                 <i data-lucide="copy" class="w-4 h-4"></i> Copiar Texto
                             </button>
-                            <button class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2">
+                            <button onclick="showToast('Abrindo o WhatsApp Web...', 'success')" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2">
                                 <i data-lucide="message-circle" class="w-4 h-4"></i> Enviar WhatsApp
                             </button>
                         </div>
@@ -178,56 +147,56 @@
         </div>
     </main>
 
-    <!-- Footer Simples -->
     <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos. Todos os direitos reservados.</p>
-        </div>
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8"><p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos. Todos os direitos reservados.</p></div>
     </footer>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
         lucide.createIcons();
 
-        // Gera os campos de idade dinamicamente
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+            
+            toast.className = `${bgColor} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i><span class="font-medium text-sm">${message}</span>`;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
         function gerarCamposIdade() {
             const qtd = parseInt(document.getElementById('qtdCriancas').value) || 0;
             const container = document.getElementById('idadesContainer');
             const grid = document.getElementById('idadesGrid');
-            
-            grid.innerHTML = ''; // Limpa os campos
-            
+            grid.innerHTML = '';
             if (qtd > 0) {
                 container.classList.remove('hidden');
                 for (let i = 1; i <= qtd; i++) {
-                    grid.innerHTML += `
-                        <div>
-                            <input type="number" min="0" max="17" placeholder="Idade ${i}" class="idade-input focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-1.5 px-2 border outline-none text-center" required>
-                        </div>
-                    `;
+                    grid.innerHTML += `<div><input type="number" min="0" max="17" placeholder="Idade ${i}" class="idade-input focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-1.5 px-2 border outline-none text-center" required></div>`;
                 }
             } else {
                 container.classList.add('hidden');
             }
         }
 
-        // Simulação do Motor de Cálculo de Regras
         function calcularOrcamento() {
-            // 1. Regras mockadas do Apto (viriam do banco de dados)
-            const regras = {
-                capacidadeMax: 4,
-                valSingle: 200.00,
-                valDuplo: 300.00,
-                valAdExtra: 100.00,
-                cortesiaQtdMax: 2,
-                cortesiaIdadeMax: 12,
-                jovemIdadeMax: 15,
-                jovemTaxa: 50.00
-            };
-
-            // 2. Coletando dados da busca
+            const regras = { capacidadeMax: 4, valSingle: 200.00, valDuplo: 300.00, valAdExtra: 100.00, cortesiaQtdMax: 2, cortesiaIdadeMax: 12, jovemIdadeMax: 15, jovemTaxa: 50.00 };
+            
             let checkin = document.getElementById('checkin').value;
             let checkout = document.getElementById('checkout').value;
-            let noites = 2; // Simulação: caso não preencham as datas, assumimos 2 noites
+            let noites = 2; 
             
             if (checkin && checkout) {
                 const diffTime = Math.abs(new Date(checkout) - new Date(checkin));
@@ -238,14 +207,9 @@
             let adultos = parseInt(document.getElementById('qtdAdultos').value) || 0;
             let criancas = parseInt(document.getElementById('qtdCriancas').value) || 0;
             let totalPessoas = adultos + criancas;
-
-            // Coletar idades
             let idades = [];
-            document.querySelectorAll('.idade-input').forEach(input => {
-                idades.push(parseInt(input.value) || 0);
-            });
+            document.querySelectorAll('.idade-input').forEach(input => idades.push(parseInt(input.value) || 0));
 
-            // Elementos visuais
             const divVazia = document.getElementById('estadoVazio');
             const divResult = document.getElementById('resultadoCotacao');
             const alertaErro = document.getElementById('alertaErro');
@@ -254,40 +218,33 @@
             divVazia.classList.add('hidden');
             divResult.classList.remove('hidden');
 
-            // 3. Validação de Capacidade Absoluta
             if (totalPessoas > regras.capacidadeMax) {
                 alertaErro.classList.remove('hidden');
                 areaValores.classList.add('hidden');
-                document.getElementById('msgErro').innerText = `O apartamento acomoda no máximo ${regras.capacidadeMax} pessoas (independente da idade). Você buscou para ${totalPessoas} pessoas.`;
+                document.getElementById('msgErro').innerText = `O apartamento acomoda no máximo ${regras.capacidadeMax} pessoas. Você buscou para ${totalPessoas}.`;
+                showToast("Erro: Capacidade máxima excedida.", "error");
                 return;
             } else {
                 alertaErro.classList.add('hidden');
                 areaValores.classList.remove('hidden');
+                showToast("Cálculo realizado com sucesso!", "success");
             }
 
-            // 4. Lógica de Enquadramento de Crianças
-            let qtdFree = 0;
-            let qtdTaxaJovem = 0;
-            let criancasComoAdulto = 0;
+            let qtdFree = 0; let qtdTaxaJovem = 0; let criancasComoAdulto = 0;
 
             idades.forEach(idade => {
                 if (idade <= regras.cortesiaIdadeMax) {
-                    if (qtdFree < regras.cortesiaQtdMax) {
-                        qtdFree++; // Entra na cortesia
-                    } else {
-                        criancasComoAdulto++; // Passou do limite de cortesia, paga como adulto extra
-                    }
+                    if (qtdFree < regras.cortesiaQtdMax) qtdFree++;
+                    else criancasComoAdulto++;
                 } else if (idade <= regras.jovemIdadeMax) {
-                    qtdTaxaJovem++; // Paga a taxa fixa de jovem
+                    qtdTaxaJovem++;
                 } else {
-                    criancasComoAdulto++; // Acima de 15, o sistema trata como adulto
+                    criancasComoAdulto++;
                 }
             });
 
-            // 5. Cálculo dos Valores da Diária
             let totalAdultosPagantes = adultos + criancasComoAdulto;
-            let valorBaseDiaria = 0;
-            let adultosExtras = 0;
+            let valorBaseDiaria = 0; let adultosExtras = 0;
 
             if (totalAdultosPagantes === 1) {
                 valorBaseDiaria = regras.valSingle;
@@ -300,23 +257,16 @@
 
             let valorExtraDiaria = adultosExtras * regras.valAdExtra;
             let valorJovemDiaria = qtdTaxaJovem * regras.jovemTaxa;
-            
             let totalDiaria = valorBaseDiaria + valorExtraDiaria + valorJovemDiaria;
             let totalGeral = totalDiaria * noites;
 
-            // 6. Atualizando a Interface com os Resultados
             document.getElementById('resumoReserva').innerText = `Lacqua diRoma • ${noites} Noite(s) • ${adultos} Adulto(s), ${criancas} Criança(s)`;
-            
             document.getElementById('valBaseCalc').innerText = `R$ ${valorBaseDiaria.toFixed(2).replace('.', ',')}`;
-            
             document.getElementById('qtdAdExtra').innerText = adultosExtras;
             document.getElementById('valAdExtraCalc').innerText = `R$ ${valorExtraDiaria.toFixed(2).replace('.', ',')}`;
-            
             document.getElementById('qtdTaxaJovem').innerText = qtdTaxaJovem;
             document.getElementById('valTaxaJovemCalc').innerText = `R$ ${valorJovemDiaria.toFixed(2).replace('.', ',')}`;
-            
             document.getElementById('qtdFree').innerText = qtdFree;
-            
             document.getElementById('valorTotal').innerText = `R$ ${totalGeral.toFixed(2).replace('.', ',')}`;
         }
     </script>
