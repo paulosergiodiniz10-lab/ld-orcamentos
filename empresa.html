@@ -192,5 +192,30 @@
             showToast("Dados da empresa salvos com sucesso!", "success");
         }
     </script>
+<!-- INÍCIO DA REGRA GERAL DE SALVAMENTO -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Seleciona todos os campos de digitação e seleção da página
+            const campos = document.querySelectorAll("input, select, textarea");
+            
+            // 1. Quando a página carrega, ele puxa o que estava salvo na memória
+            campos.forEach(campo => {
+                if (campo.id) { // Só funciona em campos que tem um ID definido
+                    const valorSalvo = localStorage.getItem(campo.id);
+                    if (valorSalvo !== null) {
+                        campo.value = valorSalvo;
+                    }
+                }
+                
+                // 2. Toda vez que você digitar ou mudar algo, ele salva na hora
+                campo.addEventListener("input", () => {
+                    if (campo.id) {
+                        localStorage.setItem(campo.id, campo.value);
+                    }
+                });
+            });
+        });
+    </script>
+    <!-- FIM DA REGRA GERAL -->
 </body>
 </html>
