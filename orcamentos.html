@@ -68,7 +68,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
-                            <input type="date" id="orcCheckin" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none text-gray-600">
+                            <input type="date" id="orcCheckin" onchange="ajustarDataCheckoutAutomatica()" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none text-gray-600">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Check-out</label>
@@ -162,7 +162,7 @@
 
                         <!-- Botões de Ação -->
                         <div class="mt-8 flex gap-3">
-                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 flex items-center justify-center gap-2 shadow-sm">
                                 <i data-lucide="copy" class="w-4 h-4"></i> Copiar Texto
                             </button>
                             <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 shadow-sm flex items-center justify-center gap-2">
@@ -232,6 +232,25 @@
             setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
+        // TRAVAS DE DATA: BLOQUEIA RETROATIVAS E CONFIGURA CHECK-OUT AUTOMÁTICO
+        function aplicarTravasDeDataOrcamento() {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('orcCheckin').min = hoje;
+            document.getElementById('orcCheckout').min = hoje;
+        }
+
+        function ajustarDataCheckoutAutomatica() {
+            const checkin = document.getElementById('orcCheckin').value;
+            if (!checkin) return;
+
+            let dataCheckout = new Date(checkin + "T12:00:00");
+            dataCheckout.setDate(dataCheckout.getDate() + 1); // Soma exatamente 1 dia automaticamente
+
+            const checkoutString = dataCheckout.toISOString().split('T')[0];
+            document.getElementById('orcCheckout').value = checkoutString;
+            document.getElementById('orcCheckout').min = checkoutString; // Trava o check-out mínimo
+        }
+
         function mascaraTelefoneCliente(input) {
             let value = input.value.replace(/\D/g, "");
             value = value.replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d)(\d{4})$/, "$1-$2");
@@ -290,7 +309,7 @@
             const adultos = parseInt(document.getElementById('orcAdultos').value) || 0;
             const criancas = parseInt(document.getElementById('orcCriancas').value) || 0;
 
-            if(!aptoId || !dInicioStr || !dFimStr || !regimeId || isNaN(adultos)) {
+            if(!aptoId || !dInicioStr || !dFimStr || !regimeId || isNaN(adultos) || adultos <= 0) {
                 showToast("Selecione o imóvel, o regime, datas e quantidade de adultos!", "error");
                 return;
             }
@@ -361,9 +380,9 @@
             }
 
             let valorTotalGeral = valorAcumuladoBase + valorAcumuladoExtras;
-            let noitesLabel = totalNoites === 1 ? "01 Noite(s)" : (totalNoites < 10 ? "0" + totalNoites : totalNoites) + " Noite(s)";
+            let msgNoitesTexto = totalNoites === 1 ? "01 noite" : (totalNoites < 10 ? "0" + totalNoites : totalNoites) + " noites";
 
-            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${noitesLabel} • ${nomenclaturaRegimes[regimeId]}`;
+            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${totalNoites === 1 ? "01 Noite(s)" : (totalNoites < 10 ? "0" + totalNoites : totalNoites) + " Noite(s)"} • ${nomenclaturaRegimes[regimeId]}`;
             document.getElementById('valorTotal').innerText = `R$ ${valorTotalGeral.toFixed(2).replace('.', ',')}`;
             document.getElementById('txtSomaBase').innerText = `R$ ${valorAcumuladoBase.toFixed(2).replace('.', ',')}`;
             document.getElementById('txtSomaExtras').innerText = `R$ ${valorAcumuladoExtras.toFixed(2).replace('.', ',')}`;
@@ -375,7 +394,7 @@
                 regimeNome: nomenclatureRegimes[regimeId],
                 checkin: dInicioStr.split('-').reverse().join('/'),
                 checkout: dFimStr.split('-').reverse().join('/'),
-                noitesTxt: totalNoites === 1 ? "01 noite" : (totalNoites < 10 ? "0" + totalNoites : totalNoites) + " noites",
+                noitesTxt: msgNoitesTexto,
                 adQtd: adultos < 10 ? "0" + adultos : adultos,
                 criQtd: criancas < 10 ? "0" + criancas : criancas,
                 freeQtd: criancasFree,
@@ -420,7 +439,6 @@
             renderizarTabelaHistorico();
         }
 
-        // REGRA DE LIMPEZA COMPLETA DO FORMULÁRIO APÓS ENVIO/CÓPIA
         function resetarFormularioReserva() {
             document.getElementById('orcCheckin').value = "";
             document.getElementById('orcCheckout').value = "";
@@ -428,14 +446,10 @@
             document.getElementById('orcCriancas').value = "";
             document.getElementById('clienteNome').value = "";
             document.getElementById('clienteWhatsapp').value = "";
-            
             document.getElementById('orcIdadesContainer').classList.add('hidden');
             document.getElementById('orcIdadesGrid').innerHTML = "";
-            
-            // Oculta painel de resultados e mostra o estado vazio novamente
             document.getElementById('resultadoCotacao').classList.add('hidden');
             document.getElementById('estadoVazio').classList.remove('hidden');
-            
             dadosLocaisUltimoCalculo = null;
         }
 
@@ -444,8 +458,8 @@
             if(!texto) return;
             navigator.clipboard.writeText(texto);
             registrarNoHistorico();
-            resetarFormularioReserva(); // LIMPA TUDO COMPLETO
-            showToast("Orçamento copiado, salvo e campos limpos para nova consulta!", "success");
+            resetarFormularioReserva();
+            showToast("Orçamento copiado e salvo no histórico!", "success");
         }
 
         function enviarWhatsAppOrcamento() {
@@ -453,12 +467,9 @@
             if(!texto) return;
             const zap = document.getElementById('clienteWhatsapp').value.replace(/\D/g, "");
             registrarNoHistorico();
-            resetarFormularioReserva(); // LIMPA TUDO COMPLETO
-            
+            resetarFormularioReserva();
             if(zap) window.open(`https://api.whatsapp.com/send?phone=55${zap}&text=${encodeURIComponent(texto)}`, '_blank');
             else window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
-            
-            showToast("Orçamento disparado e campos limpos para nova consulta!", "success");
         }
 
         function reativarAtendimentoZap(index) {
@@ -473,7 +484,6 @@
                 historicoOrcamentos.splice(index, 1);
                 localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
                 renderizarTabelaHistorico();
-                showToast("Cotação removida do histórico.", "success");
             }
         }
 
@@ -508,11 +518,10 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             carregarAptosNoSelect();
+            aplicarTravasDeDataOrcamento();
             const histMemoria = localStorage.getItem('ld_historico_orcamentos');
             historicoOrcamentos = histMemoria ? JSON.parse(histMemoria) : [];
             renderizarTabelaHistorico();
-            
-            // Força reset visual inicial sem capturar cache antigo do formulário
             document.getElementById('buscaForm').reset();
         });
     </script>
