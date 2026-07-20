@@ -39,7 +39,7 @@
     <!-- Conteúdo Principal -->
     <main class="flex-grow max-w-6xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
         
-        <!-- VISTA A: LISTAGEM DE CARDS DOS HOTÉIS -->
+        <!-- SEÇÃO DE LISTAGEM DE CARDS -->
         <div id="secaoListagem">
             <div class="flex justify-between items-center mb-6">
                 <div>
@@ -50,12 +50,10 @@
                     <i data-lucide="plus" class="w-4 h-4"></i> Novo Apto
                 </button>
             </div>
-            
-            <!-- Grid onde os cards salvos vão aparecer -->
             <div id="gridCardsAptos" class="space-y-4"></div>
         </div>
 
-        <!-- VISTA B: FORMULÁRIO DE CADASTRO/EDIÇÃO (OCULTO POR PADRÃO) -->
+        <!-- SEÇÃO DO FORMULÁRIO COMPLETO -->
         <div id="secaoFormulario" class="hidden">
             <div class="flex justify-between items-end mb-6">
                 <div>
@@ -67,7 +65,7 @@
                 </button>
             </div>
 
-            <!-- Bloco 1: Informações Fixas do Imóvel -->
+            <!-- Dados do Quarto -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                 <div class="p-6 sm:p-8 space-y-8">
                     <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-4">
@@ -85,7 +83,6 @@
                         </div>
                     </div>
 
-                    <!-- Regras de Cortesia Infantil -->
                     <div class="bg-blue-50 rounded-lg p-5 border border-blue-100">
                         <h3 class="text-sm font-semibold text-blue-900 tracking-wide uppercase mb-4 border-b border-blue-200 pb-2 flex items-center gap-2">
                             <i data-lucide="baby" class="w-4 h-4 text-blue-600"></i> Limite de Idade e Cortesia para Crianças
@@ -97,7 +94,7 @@
                                     <input type="number" id="aptoIdadeFree" class="mt-1 border block w-full rounded-md py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="12">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Qtd. Máxima Free (Trava)</label>
+                                    <label class="block text-sm font-medium text-gray-700">Qtd. Máxima Free</label>
                                     <input type="number" id="aptoQtdFree" class="mt-1 border block w-full rounded-md py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="2">
                                 </div>
                             </div>
@@ -111,11 +108,8 @@
                 </div>
             </div>
 
-            <!-- Bloco 2: GESTÃO DE TARIFAS (Apenas visível se o Apto já existir/for salvo) -->
+            <!-- GESTÃO DE TARIFAS -->
             <div id="blocoTarifasAdicionais" class="hidden space-y-6">
-                <h2 class="text-xl font-bold text-gray-900 mt-10">Gestão de Tarifas e Calendário</h2>
-                
-                <!-- Cadastrar Nova Regra de Período -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="bg-yellow-100/50 border-b border-yellow-200 px-6 py-4 flex items-center gap-2">
                         <i data-lucide="zap" class="w-5 h-5 text-yellow-600"></i>
@@ -125,48 +119,47 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Nome da Tarifa / Temporada</label>
-                                <input type="text" id="tNome" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="Ex: Alta Temporada">
+                                <input type="text" id="tNome" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none" placeholder="Ex: Baixa">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Data Início</label>
-                                <input type="date" id="tInicio" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300">
+                                <input type="date" id="tInicio" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Data Fim</label>
-                                <input type="date" id="tFim" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300">
+                                <input type="date" id="tFim" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none">
                             </div>
                         </div>
 
-                        <!-- Valores Específicos para Hotelaria -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
                             <h4 class="text-sm font-bold text-gray-700 uppercase mb-4 border-b pb-2">Preços da Diária para este período</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Single (1 pessoa)</label>
-                                    <input type="number" id="tSingle" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="100">
+                                    <input type="number" id="tSingle" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none" placeholder="100">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Duplo (Total p/ 2 pessoas)</label>
-                                    <input type="number" id="tDuplo" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-green-500 outline-none focus:ring-2 focus:ring-green-500" placeholder="150">
+                                    <input type="number" id="tDuplo" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-green-500 outline-none shadow-sm" placeholder="150">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Adicional Adulto / Criança (3º+)</label>
-                                    <input type="number" id="tExtra" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="50">
+                                    <input type="number" id="tExtra" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none" placeholder="50">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Mín. Noites</label>
-                                    <input type="number" id="tMinNoites" value="2" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300">
+                                    <input type="number" id="tMinNoites" value="2" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none">
                                 </div>
                             </div>
                         </div>
 
-                        <button type="button" onclick="gerarTarifasNoCalendario()" class="w-full bg-blue-600 text-white rounded-md py-3 font-bold hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center gap-2">
+                        <button type="button" onclick="gerarTarifasNoCalendario()" class="w-full bg-blue-600 text-white rounded-md py-3 font-bold hover:bg-blue-700 flex items-center justify-center gap-2 shadow-sm">
                             <i data-lucide="calendar-plus"></i> Aplicar Valores no Calendário
                         </button>
                     </div>
                 </div>
 
-                <!-- Ferramenta de Ajuste Rápido em Massa (%) -->
+                <!-- Ajuste Rápido em Massa -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="bg-green-100/50 border-b border-green-200 px-6 py-4 flex items-center gap-2">
                         <i data-lucide="percent" class="w-5 h-5 text-green-700"></i>
@@ -194,13 +187,13 @@
                                 <input type="number" id="ajustePorcentagem" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none" placeholder="10">
                             </div>
                         </div>
-                        <button type="button" onclick="executarAjusteEmMassa()" class="w-full bg-green-600 text-white rounded-md py-3 font-bold hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                        <button type="button" onclick="executarAjusteEmMassa()" class="w-full bg-green-600 text-white rounded-md py-3 font-bold hover:bg-green-700 flex items-center justify-center gap-2">
                             <i data-lucide="refresh-cw"></i> Aplicar Ajuste de Preço
                         </button>
                     </div>
                 </div>
 
-                <!-- Tabela de Gestão de Calendário Dia a Dia -->
+                <!-- Gestão do Calendário (Com Filtros) -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                         <h3 class="font-bold text-gray-900 flex items-center gap-2">
@@ -209,11 +202,44 @@
                         <span id="contadorDias" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">0 dias configurados</span>
                     </div>
                     <div class="p-6">
+                        
+                        <!-- Filtros Avançados do Print -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 pb-4 border-b border-gray-100">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wide">Filtrar por Mês</label>
+                                <select id="filtroMes" onchange="renderizarLinhasCalendario()" class="block w-full text-sm border-gray-300 rounded-md py-2 px-3 border bg-white outline-none">
+                                    <option value="todos">Todos os meses</option>
+                                    <option value="01">Janeiro</option>
+                                    <option value="02">Fevereiro</option>
+                                    <option value="03">Março</option>
+                                    <option value="04">Abril</option>
+                                    <option value="05">Maio</option>
+                                    <option value="06">Junho</option>
+                                    <option value="07">Julho</option>
+                                    <option value="08">Agosto</option>
+                                    <option value="09">Setembro</option>
+                                    <option value="10">Outubro</option>
+                                    <option value="11">Novembro</option>
+                                    <option value="12">Dezembro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wide">Filtrar por Tarifa</label>
+                                <div class="flex items-center gap-3">
+                                    <select id="filtroTarifa" onchange="renderizarLinhasCalendario()" class="block w-full text-sm border-gray-300 rounded-md py-2 px-3 border bg-white outline-none">
+                                        <option value="todas">Todas as tarifas</option>
+                                    </select>
+                                    <button onclick="limparFiltrosCalendario()" class="text-blue-600 text-sm font-semibold hover:underline shrink-0">Limpar</button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="overflow-x-auto">
                             <table class="min-w-full text-left text-sm whitespace-nowrap">
                                 <thead class="text-xs font-semibold uppercase tracking-wider text-gray-500 border-b">
                                     <tr>
                                         <th class="pb-3 px-2">DATA</th>
+                                        <th class="pb-3 px-2">DIA</th>
                                         <th class="pb-3 px-2">TARIFA</th>
                                         <th class="pb-3 px-2">SINGLE (1 PAX)</th>
                                         <th class="pb-3 px-2">DUPLO (2 PAX)</th>
@@ -222,9 +248,7 @@
                                         <th class="pb-3 px-2 text-right">AÇÕES</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tbodyCalendario" class="divide-y divide-gray-100 text-gray-700">
-                                    <!-- Inserido via JS -->
-                                </tbody>
+                                <tbody id="tbodyCalendario" class="divide-y divide-gray-100 text-gray-700"></tbody>
                             </table>
                         </div>
                     </div>
@@ -233,7 +257,6 @@
         </div>
     </main>
 
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
@@ -244,10 +267,8 @@
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
-            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
-            toast.className = `${bgColor} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
-            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i><span class="font-medium text-sm">${message}</span>`;
+            toast.className = `${type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
+            toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-5 h-5"></i><span class="font-medium text-sm">${message}</span>`;
             container.appendChild(toast);
             lucide.createIcons();
             setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
@@ -265,36 +286,29 @@
             renderizarListagemCards();
         }
 
-        // 1. Renderiza os Cards dos hotéis na tela inicial
         function renderizarListagemCards() {
             const grid = document.getElementById('gridCardsAptos');
             grid.innerHTML = "";
-            
             if(listaAptos.length === 0) {
-                grid.innerHTML = `<div class="bg-white p-8 border rounded-xl border-dashed text-center text-gray-400">Nenhum apartamento cadastrado. Clique em "+ Novo Apto" para começar.</div>`;
+                grid.innerHTML = `<div class="bg-white p-8 border rounded-xl border-dashed text-center text-gray-400">Nenhum apartamento cadastrado. Clique em "+ Novo Apto".</div>`;
                 return;
             }
-
             listaAptos.forEach(apto => {
                 const totalDias = apto.calendario ? apto.calendario.length : 0;
                 grid.innerHTML += `
                     <div class="bg-white rounded-xl border border-gray-200 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 font-bold shrink-0">
-                                <i data-lucide="hotel" class="w-6 h-6"></i>
-                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 shrink-0"><i data-lucide="hotel" class="w-6 h-6"></i></div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900">${apto.nome} (Apto/Bloco: ${apto.unidade})</h3>
+                                <h3 class="text-lg font-bold text-gray-900">${apto.nome} (Apto: ${apto.unidade})</h3>
                                 <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 mt-1">
-                                    <span class="flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5"></i> Limite: Até ${apto.capMax || 0} pessoas</span>
+                                    <span class="flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5"></i> Até ${apto.capMax || 0} pessoas</span>
                                     <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">${totalDias} Dias Tarifados</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                            <button onclick="abrirFormularioEdicao('${apto.id}')" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium px-4 py-2 rounded-md text-sm transition-colors flex items-center gap-2 shadow-sm">
-                                <i data-lucide="edit" class="w-4 h-4"></i> Editar
-                            </button>
+                        <div class="flex items-center gap-2 justify-end">
+                            <button onclick="abrirFormularioEdicao('${apto.id}')" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium px-4 py-2 rounded-md text-sm transition-colors flex items-center gap-2 shadow-sm"><i data-lucide="edit" class="w-4 h-4"></i> Editar</button>
                             <button onclick="deletarApto('${apto.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-md transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </div>
                     </div>`;
@@ -305,12 +319,7 @@
         function abrirFormularioNovo() {
             aptoAtualId = 'apto_' + Date.now();
             document.getElementById('tituloFormApto').innerText = "Cadastrar Novo Apartamento";
-            document.getElementById('aptoNome').value = "";
-            document.getElementById('aptoUnidade').value = "";
-            document.getElementById('aptoCapMax').value = "";
-            document.getElementById('aptoIdadeFree').value = "12";
-            document.getElementById('aptoQtdFree').value = "2";
-            
+            document.getElementById('aptoNome').value = ""; document.getElementById('aptoUnidade').value = ""; document.getElementById('aptoCapMax').value = "";
             document.getElementById('blocoTarifasAdicionais').classList.add('hidden');
             document.getElementById('secaoListagem').classList.add('hidden');
             document.getElementById('secaoFormulario').classList.remove('hidden');
@@ -319,18 +328,16 @@
         function abrirFormularioEdicao(id) {
             aptoAtualId = id;
             const apto = listaAptos.find(a => a.id === id);
-            
             document.getElementById('tituloFormApto').innerText = `Configurar ${apto.nome} (${apto.unidade})`;
             document.getElementById('aptoNome').value = apto.nome || "";
             document.getElementById('aptoUnidade').value = apto.unidade || "";
             document.getElementById('aptoCapMax').value = apto.capMax || "";
             document.getElementById('aptoIdadeFree').value = apto.idadeFree || "12";
             document.getElementById('aptoQtdFree').value = apto.qtdFree || "2";
-
             document.getElementById('blocoTarifasAdicionais').classList.remove('hidden');
             document.getElementById('secaoListagem').classList.add('hidden');
             document.getElementById('secaoFormulario').classList.remove('hidden');
-            
+            atualizarDropdownFiltroTarifas(apto);
             renderizarLinhasCalendario();
         }
 
@@ -340,60 +347,43 @@
             aptoAtualId = null;
         }
 
-        // Salva as informações base do Hotel
         function salvarDadosBaseApto() {
             const nome = document.getElementById('aptoNome').value.trim();
             const unidade = document.getElementById('aptoUnidade').value.trim();
             const capMax = document.getElementById('aptoCapMax').value;
-
-            if(!nome || !unidade || !capMax) {
-                alert("Por favor, preencha o Nome do Hotel, Unidade e Ocupação!");
-                return;
-            }
-
+            if(!nome || !unidade || !capMax) { alert("Preencha os dados obrigatórios!"); return; }
             let index = listaAptos.findIndex(a => a.id === aptoAtualId);
             if(index > -1) {
-                listaAptos[index].nome = nome;
-                listaAptos[index].unidade = unidade;
-                listaAptos[index].capMax = parseInt(capMax);
+                listaAptos[index].nome = nome; listaAptos[index].unidade = unidade; listaAptos[index].capMax = parseInt(capMax);
                 listaAptos[index].idadeFree = parseInt(document.getElementById('aptoIdadeFree').value) || 12;
                 listaAptos[index].qtdFree = parseInt(document.getElementById('aptoQtdFree').value) || 2;
             } else {
-                listaAptos.push({
-                    id: aptoAtualId, nome, unidade, 
-                    capMax: parseInt(capMax),
-                    idadeFree: parseInt(document.getElementById('aptoIdadeFree').value) || 12,
-                    qtdFree: parseInt(document.getElementById('aptoQtdFree').value) || 2,
-                    calendario: []
-                });
+                listaAptos.push({ id: aptoAtualId, nome, unidade, capMax: parseInt(capMax), idadeFree: 12, qtdFree: 2, calendario: [] });
             }
-
             salvarListaAptos();
             document.getElementById('blocoTarifasAdicionais').classList.remove('hidden');
-            showToast("Dados do imóvel salvos com sucesso!", "success");
+            showToast("Dados do imóvel salvos!", "success");
         }
 
         function deletarApto(id) {
-            if(confirm("Excluir este apartamento e todo o seu calendário de tarifas?")) {
-                listaAptos = listaAptos.filter(a => a.id !== id);
-                salvarListaAptos();
-                showToast("Imóvel excluído.", "success");
-            }
+            if(confirm("Excluir este apartamento?")) { listaAptos = listaAptos.filter(a => a.id !== id); salvarListaAptos(); }
         }
 
-        // 2. Geração de datas no Calendário
         function gerarTarifasNoCalendario() {
             const nomeTarifa = document.getElementById('tNome').value.trim() || "Padrão";
-            const dInicioStr = document.getElementById('tInicio').value;
-            const dFimStr = document.getElementById('tFim').value;
+            let dInicioStr = document.getElementById('tInicio').value;
+            let dFimStr = document.getElementById('tFim').value;
             const sVal = parseFloat(document.getElementById('tSingle').value) || 0;
             const dVal = parseFloat(document.getElementById('tDuplo').value) || 0;
             const eVal = parseFloat(document.getElementById('tExtra').value) || 0;
             const minNoites = parseInt(document.getElementById('tMinNoites').value) || 1;
 
-            if(!dInicioStr || !dFimStr) {
-                alert("Preencha as datas de início e fim da temporada!");
-                return;
+            if(!dInicioStr || !dFimStr) { alert("Preencha o período de datas!"); return; }
+            
+            // Trava inteligente caso o usuário digite o fim menor que o início (como no print)
+            if(new Date(dFimStr) < new Date(dInicioStr)) {
+                let temp = dInicioStr; dInicioStr = dFimStr; dFimStr = temp;
+                document.getElementById('tInicio').value = dInicioStr; document.getElementById('tFim').value = dFimStr;
             }
 
             let apto = listaAptos.find(a => a.id === aptoAtualId);
@@ -402,100 +392,110 @@
 
             while(dCorrente <= dFinal) {
                 let dataIso = dCorrente.toISOString().split('T')[0];
-                let itemExistenteIdx = apto.calendario.findIndex(c => c.data === dataIso);
-
+                let itemIdx = apto.calendario.findIndex(c => c.data === dataIso);
                 let novoItem = { data: dataIso, nome: nomeTarifa, single: sVal, duplo: dVal, extra: eVal, minNoites };
-
-                if(itemExistenteIdx > -1) apto.calendario[itemExistenteIdx] = novoItem;
+                if(itemIdx > -1) apto.calendario[itemIdx] = novoItem;
                 else apto.calendario.push(novoItem);
-
                 dCorrente.setDate(dCorrente.getDate() + 1);
             }
 
             apto.calendario.sort((a,b) => new Date(a.data) - new Date(b.data));
             salvarListaAptos();
+            atualizarDropdownFiltroTarifas(apto);
             renderizarLinhasCalendario();
-            showToast("Temporada injetada com sucesso no calendário!", "success");
+            showToast("Diárias configuradas com sucesso!", "success");
         }
 
-        // 3. Lógica de Ajuste Dinâmico em Massa (%)
-        function ejecutarAjusteEmMassa() {
+        function executarAjusteEmMassa() {
             const dInicioStr = document.getElementById('ajusteInicio').value;
             const dFimStr = document.getElementById('ajusteFim').value;
             const acao = document.getElementById('ajusteAcao').value;
             const porcentagem = parseFloat(document.getElementById('ajustePorcentagem').value) || 0;
-
-            if(!dInicioStr || !dFimStr || porcentagem <= 0) {
-                alert("Preencha o intervalo de datas e a porcentagem corretamente!");
-                return;
-            }
+            if(!dInicioStr || !dFimStr || porcentagem <= 0) { alert("Preencha os campos!"); return; }
 
             let apto = listaAptos.find(a => a.id === aptoAtualId);
-            let dStart = new Date(dInicioStr + "T00:00:00");
-            let dEnd = new Date(dFimStr + "T23:59:59");
-            let alterados = 0;
+            let dStart = new Date(dInicioStr + "T00:00:00"); let dEnd = new Date(dFimStr + "T23:59:59");
 
             apto.calendario.forEach(dia => {
                 let diaData = new Date(dia.data + "T12:00:00");
                 if(diaData >= dStart && diaData <= dEnd) {
                     let fator = (porcentagem / 100);
-                    if(acao === "acrescentar") {
-                        dia.single += dia.single * fator;
-                        dia.duplo += dia.duplo * fator;
-                        dia.extra += dia.extra * fator;
-                    } else {
-                        dia.single -= dia.single * fator;
-                        dia.duplo -= dia.duplo * fator;
-                        dia.extra -= dia.extra * fator;
-                    }
-                    alterados++;
+                    let mult = acao === "acrescentar" ? (1 + fator) : (1 - fator);
+                    dia.single *= mult; dia.duplo *= mult; dia.extra *= mult;
                 }
             });
-
             salvarListaAptos();
             renderizarLinhasCalendario();
-            showToast(`Ajuste em massa de ${porcentagem}% aplicado com sucesso!`, "success");
+            showToast("Ajuste percentual aplicado!", "success");
+        }
+
+        function atualizarDropdownFiltroTarifas(apto) {
+            const select = document.getElementById('filtroTarifa');
+            select.innerHTML = `<option value="todas">Todas as tarifas</option>`;
+            if(!apto.calendario) return;
+            let nomesUnicos = [...new Set(apto.calendario.map(c => c.nome))];
+            nomesUnicos.forEach(nome => {
+                select.innerHTML += `<option value="${nome}">${nome}</option>`;
+            });
+        }
+
+        function limparFiltrosCalendario() {
+            document.getElementById('filtroMes').value = "todos";
+            document.getElementById('filtroTarifa').value = "todas";
+            renderizarLinhasCalendario();
         }
 
         function deletarDiaCalendario(dataStr) {
             let apto = listaAptos.find(a => a.id === aptoAtualId);
             apto.calendario = apto.calendario.filter(c => c.data !== dataStr);
-            salvarListaAptos();
-            renderizarLinhasCalendario();
-            showToast("Data removida do calendário.", "success");
+            salvarListaAptos(); renderizarLinhasCalendario();
         }
 
-        // Desenha a tabela dia a dia do calendário
+        // MOTOR DE RENDERIZAÇÃO COM FILTRO DE MÊS E TARIFA (Exatamente igual ao print)
         function renderizarLinhasCalendario() {
             const tbody = document.getElementById('tbodyCalendario');
             const contador = document.getElementById('contadorDias');
             tbody.innerHTML = "";
-            
             const apto = listaAptos.find(a => a.id === aptoAtualId);
             if(!apto || !apto.calendario || apto.calendario.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-gray-400">Nenhum dia configurado neste calendário.</td></tr>`;
-                contador.innerText = "0 dias configurados";
+                tbody.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-gray-400">Nenhum dia configurado neste calendário.</td></tr>`;
+                contador.innerText = "0 resultados"; return;
+            }
+
+            const fMes = document.getElementById('filtroMes').value;
+            const fTarifa = document.getElementById('filtroTarifa').value;
+            const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+            
+            let itensFiltrados = apto.calendario.filter(dia => {
+                let partes = dia.data.split('-'); // [Ano, Mês, Dia]
+                let bateMes = fMes === "todos" || partes[1] === fMes;
+                let bateTarifa = fTarifa === "todas" || dia.nome === fTarifa;
+                return bateMes && bateTarifa;
+            });
+
+            contador.innerText = `${itensFiltrados.length} resultados`;
+
+            if(itensFiltrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-gray-400">Nenhuma diária corresponde aos filtros selecionados.</td></tr>`;
                 return;
             }
 
-            contador.innerText = `${apto.calendario.length} dias configurados`;
-            const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
-
-            apto.calendario.forEach(dia => {
+            itensFiltrados.forEach(dia => {
                 let partes = dia.data.split('-');
                 let dataObjeto = new Date(partes[0], partes[1] - 1, partes[2]);
                 let diaNome = diasSemana[dataObjeto.getDay()];
                 let dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 border-b border-gray-100 text-gray-700">
-                        <td class="py-3 px-2 font-medium">${dataFormatada}<br><span class="text-xs text-gray-400">${diaNome}</span></td>
-                        <td class="py-3 px-2"><span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-xs font-semibold border border-yellow-200">${dia.nome}</span></td>
-                        <td class="py-3 px-2">R$ ${dia.single.toFixed(2).replace('.', ',')}</td>
-                        <td class="py-3 px-2 font-bold text-gray-900">R$ ${dia.duplo.toFixed(2).replace('.', ',')}</td>
+                    <tr class="hover:bg-gray-50 border-b border-gray-100 font-medium">
+                        <td class="py-3 px-2 font-bold text-gray-900">${dataFormatada}</td>
+                        <td class="py-3 px-2 text-gray-500">${diaNome}</td>
+                        <td class="py-3 px-2"><span class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded text-xs font-bold border border-blue-100">${dia.nome}</span></td>
+                        <td class="py-3 px-2 text-gray-600">R$ ${dia.single.toFixed(2).replace('.', ',')}</td>
+                        <td class="py-3 px-2 text-gray-900 font-bold">R$ ${dia.duplo.toFixed(2).replace('.', ',')}</td>
                         <td class="py-3 px-2 text-gray-600">R$ ${dia.extra.toFixed(2).replace('.', ',')}</td>
-                        <td class="py-3 px-2 text-center">${dia.minNoites}</td>
-                        <td class="py-3 px-2 text-right">
+                        <td class="py-3 px-2 text-center text-gray-700">${dia.minNoites}</td>
+                        <td class="py-3 px-2 text-right space-x-2">
                             <button onclick="deletarDiaCalendario('${dia.data}')" class="text-gray-400 hover:text-red-600 transition-colors"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
                         </td>
                     </tr>`;
