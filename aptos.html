@@ -208,7 +208,7 @@
                             </div>
                         </div>
 
-                        <button type="button" onclick="generarTarifasNoCalendario()" class="w-full bg-blue-600 text-white rounded-md py-3 font-bold hover:bg-blue-700 flex items-center justify-center gap-2 shadow-sm">
+                        <button type="button" onclick="gerarTarifasNoCalendario()" class="w-full bg-blue-600 text-white rounded-md py-3 font-bold hover:bg-blue-700 flex items-center justify-center gap-2 shadow-sm">
                             <i data-lucide="calendar-plus"></i> Aplicar Valores no Calendário
                         </button>
                     </div>
@@ -302,7 +302,6 @@
                                         <option value="map">Café + Almoço ou Jantar (MAP)</option>
                                         <option value="fap">Pensão Completa (FAP)</option>
                                     </select>
-                                    <!-- NOVO: BOTÃO DE LIMPEZA EM MASSA BASEADO NO FILTRO ATIVO -->
                                     <div class="flex items-center gap-2 shrink-0">
                                         <button onclick="limparFiltrosCalendario()" class="text-blue-600 text-xs font-bold hover:underline">Limpar</button>
                                         <button onclick="dispararExclusaoEmMassaPorFiltro()" class="text-red-600 text-xs font-bold hover:bg-red-50 px-2 py-1 rounded border border-red-200 transition-colors flex items-center gap-1" title="Apagar todas as diárias correspondentes a este filtro">
@@ -337,7 +336,7 @@
         </div>
     </main>
 
-    <!-- MODAL CUSTOMIZADO DE CONFIRMAÇÃO (MEIO DA TELA) -->
+    <!-- MODAL CUSTOMIZADO DE CONFIRMAÇÃO -->
     <div id="modalConfirmacao" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl max-w-sm w-full shadow-xl border border-gray-100 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
             <div class="p-6 text-center">
@@ -362,11 +361,9 @@
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
-        lucide.createIcons();
         let listaAptos = [];
         let aptoAtualId = null;
         let funcaoCallbackConfirmacao = null;
-        
         let fpInicio, fpFim, fpAjusteInicio, fpAjusteFim;
         
         const nomenclaturaRegimes = {
@@ -484,6 +481,7 @@
             document.getElementById('regime_bb').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('bb') : true;
             document.getElementById('regime_map').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('map') : false;
             document.getElementById('regime_fap').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('fap') : false;
+
             document.getElementById('blocoTarifasAdicionais').classList.remove('hidden');
             document.getElementById('secaoListagem').classList.add('hidden');
             document.getElementById('secaoFormulario').classList.remove('hidden');
@@ -495,63 +493,12 @@
             renderizarLinesCalendario();
         }
 
-        function zerarCamposPrecoFormulario() {
-            document.getElementById('tSingle').value = "";
-            document.getElementById('tDuplo').value = "";
-            document.getElementById('tExtra').value = "";
-            document.getElementById('tMinNoites').value = "2";
-        }
-
-        function montarAbasDeRegimeFormulario(apto) {
-            const container = document.getElementById('abasRegimesContainer');
-            container.innerHTML = "";
-            let regimes = apto.regimesAtivos || ['ro', 'bb'];
-            regimeAtivoAba = regimes[0];
-            regimes.forEach(regId => {
-                const ativo = regId === regimeAtivoAba;
-                const classeCor = ativo ? "border-blue-600 text-blue-600 border-b-2" : "border-transparent text-gray-500 hover:text-gray-700";
-                container.innerHTML += `<button type="button" onclick="mudarAbaRegimePreco('${regId}')" class="py-3 px-1 font-bold tracking-wide transition-all outline-none ${classeCor}" id="aba_btn_${regId}">${nomenclaturaRegimes[regId]}</button>`;
-            });
-            mudarAbaRegimePreco(regimeAtivoAba);
-        }
-
-        function mudarAbaRegimePreco(regId) {
-            document.getElementById('txtRegimeAtivoLabel').innerText = nomenclaturaRegimes[regId];
-            if (regimeAtivoAba && regimeAtivoAba !== regId) {
-                cacheValoresTemporariosForm[regimeAtivoAba] = {
-                    single: document.getElementById('tSingle').value,
-                    duplo: document.getElementById('tDuplo').value,
-                    extra: document.getElementById('tExtra').value,
-                    minNoites: document.getElementById('tMinNoites').value
-                };
-                document.getElementById(`aba_btn_${regimeAtivoAba}`)?.classList.remove('border-blue-600', 'text-blue-600', 'border-b-2');
-                document.getElementById(`aba_btn_${regimeAtivoAba}`)?.classList.add('border-transparent', 'text-gray-500');
-            }
-            regimeAtivoAba = regId;
-            document.getElementById(`aba_btn_${regId}`)?.classList.remove('border-transparent', 'text-gray-500');
-            document.getElementById(`aba_btn_${regId}`)?.classList.add('border-blue-600', 'text-blue-600', 'border-b-2');
-            if (cacheValoresTemporariosForm[regId]) {
-                document.getElementById('tSingle').value = cacheValoresTemporariosForm[regId].single;
-                document.getElementById('tDuplo').value = cacheValoresTemporariosForm[regId].duplo;
-                document.getElementById('tExtra').value = cacheValoresTemporariosForm[regId].extra;
-                document.getElementById('tMinNoites').value = cacheValoresTemporariosForm[regId].minNoites || "2";
-            } else {
-                zerarCamposPrecoFormulario();
-            }
-        }
-
-        function voltarParaListagem() {
-            document.getElementById('secaoFormulario').classList.add('hidden');
-            document.getElementById('secaoListagem').classList.remove('hidden');
-            aptoAtualId = null;
-            cacheValoresTemporariosForm = {};
-        }
-
         function salvarDadosBaseApto() {
             const nome = document.getElementById('aptoNome').value.trim();
             const unidad = document.getElementById('aptoUnidade').value.trim();
             const capMax = document.getElementById('aptoCapMax').value;
             if(!nome || !unidad || !capMax) { alert("Preencha os dados obrigatórios!"); return; }
+
             let regimesMarcados = [];
             if(document.getElementById('regime_ro').checked) regimesMarcados.push('ro');
             if(document.getElementById('regime_bb').checked) regimesMarcados.push('bb');
@@ -573,7 +520,7 @@
             };
 
             if(index > -1) listaAptos[index] = aptoObjeto;
-            else listaA Solucoes; listaAptos.push(aptoObjeto);
+            else listaAptos.push(aptoObjeto);
 
             salvarListaAptos();
             montarAbasDeRegimeFormulario(aptoObjeto);
@@ -682,7 +629,6 @@
             });
         }
 
-        // NOVO: RECURSO EXCLUSÃO EM MASSA BASEADO NOS FILTROS ATIVOS DO COMPONENTE
         function dispararExclusaoEmMassaPorFiltro() {
             const apto = listaAptos.find(a => a.id === aptoAtualId);
             if(!apto || !apto.calendario || apto.calendario.length === 0) return;
@@ -691,13 +637,11 @@
             const fTarifa = document.getElementById('filtroTarifa').value;
             const fRegime = document.getElementById('filtroRegime').value;
 
-            // Se o usuário não filtrou nada, impede para não apagar o calendário inteiro por engano
             if(fMes === "todos" && fTarifa === "todas" && fRegime === "todos") {
-                showToast("Selecione pelo menos um filtro (Mês, Tarifa ou Regime) para usar a exclusão em massa!", "error");
+                showToast("Selecione ao menos um filtro para usar a exclusão em massa!", "error");
                 return;
             }
 
-            // Descobre quantas linhas batem com o filtro para alertar no modal
             let totalParaApagar = apto.calendario.filter(dia => {
                 let partes = dia.data.split('-');
                 let regimeEfetivoDoDia = dia.regime || "ro";
@@ -708,27 +652,24 @@
             }).length;
 
             if(totalParaApagar === 0) {
-                showToast("Nenhuma diária corresponde aos filtros ativos atuais.", "error");
+                showToast("Nenhuma diária corresponde aos filtros ativos.", "error");
                 return;
             }
 
-            chamarModalConfirmacaoExclusao(`Você tem certeza que deseja excluir permanentemente todas as ${totalParaApagar} diárias correspondentes aos filtros selecionados?`, () => {
-                // Filtra o array removendo os itens correspondentes de forma reversa
+            chamarModalConfirmacaoExclusao(`Você tem certeza que deseja excluir todas as ${totalParaApagar} diárias correspondentes aos filtros selecionados?`, () => {
                 apto.calendario = apto.calendario.filter(dia => {
                     let partes = dia.data.split('-');
                     let regimeEfetivoDoDia = dia.regime || "ro";
                     let bateMes = fMes === "todos" || partes[1] === fMes;
                     let bateTarifa = fTarifa === "todas" || dia.nome === fTarifa;
                     let bateRegime = fRegime === "todos" || regimeEfetivoDoDia === fRegime;
-                    
-                    // Retorna TRUE para manter o registro se ele NÃO bater com o filtro
                     return !(bateMes && bateTarifa && bateRegime);
                 });
 
                 salvarListaAptos();
                 atualizarDropdownFiltroTarifas(apto);
                 renderizarLinesCalendario();
-                showToast(`${totalParaApagar} diárias excluídas em massa com sucesso!`, "success");
+                showToast(`${totalParaApagar} diárias excluídas com sucesso!`, "success");
             });
         }
 
@@ -800,6 +741,20 @@
                     </tr>`;
             });
             lucide.createIcons();
+        }
+
+        function montarAbasDeRegimeFormulario(apto) {
+            const container = document.getElementById('abasRegimesContainer');
+            if(!container) return;
+            container.innerHTML = "";
+            let regimes = apto.regimesAtivos || ['ro', 'bb'];
+            regimeAtivoAba = regimes[0];
+            regimes.forEach(regId => {
+                const ativo = regId === regimeAtivoAba;
+                const classeCor = ativo ? "border-blue-600 text-blue-600 border-b-2" : "border-transparent text-gray-500 hover:text-gray-700";
+                container.innerHTML += `<button type="button" onclick="mudarAbaRegimePreco('${regId}')" class="py-3 px-1 font-bold tracking-wide transition-all outline-none ${classeCor}" id="aba_btn_${regId}">${nomenclaturaRegimes[regId]}</button>`;
+            });
+            mudarAbaRegimePreco(regimeAtivoAba);
         }
 
         document.addEventListener("DOMContentLoaded", () => {
