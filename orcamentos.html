@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LD Orçamentos - Nova Cotação</title>
+    <title>LD Orçamentos - Gerador de Cotação</title>
+    <!-- Tailwind CSS e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
+    <!-- Menu Superior Padrão -->
     <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -34,13 +36,15 @@
         </div>
     </nav>
 
+    <!-- Conteúdo Principal -->
     <main class="flex-grow max-w-7xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900">Gerador de Orçamentos</h1>
-            <p class="text-sm text-gray-500 mt-1">Busque disponibilidade e calcule os valores com base nas regras do imóvel.</p>
+            <p class="text-sm text-gray-500 mt-1">Busque a disponibilidade e calcule os valores reais salvos no calendário.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Formulário de Parâmetros (Esquerda) -->
             <div class="lg:col-span-5 bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit">
                 <h3 class="text-base font-bold text-gray-900 mb-5 flex items-center gap-2 border-b pb-3">
                     <i data-lucide="search" class="w-5 h-5 text-blue-600"></i> Dados da Reserva
@@ -48,59 +52,62 @@
                 
                 <form id="buscaForm" class="space-y-5">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Selecione o Imóvel/Apto</label>
-                        <select id="imovelSelect" class="focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
-                            <option value="lacqua">Lacqua diRoma - Apto 101 (Máx 4 pax)</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Selecione o Apartamento</label>
+                        <select id="orcAptoSelect" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
+                            <!-- Inserido via JS -->
                         </select>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
-                            <input type="date" id="checkin" class="focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none text-gray-600">
+                            <input type="date" id="orcCheckin" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none text-gray-600">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Check-out</label>
-                            <input type="date" id="checkout" class="focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none text-gray-600">
+                            <input type="date" id="orcCheckout" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none text-gray-600">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 pt-2">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Adultos</label>
-                            <input type="number" id="qtdAdultos" min="1" value="2" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
+                            <input type="number" id="orcAdultos" min="1" value="2" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Crianças (0 a 17 anos)</label>
-                            <input type="number" id="qtdCriancas" min="0" value="0" onchange="gerarCamposIdade()" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Crianças</label>
+                            <input type="number" id="orcCriancas" min="0" value="0" onchange="gerarCamposIdade()" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
                         </div>
                     </div>
 
-                    <div id="idadesContainer" class="hidden bg-blue-50 p-4 rounded-lg border border-blue-100 mt-3 space-y-3">
+                    <!-- Bloco das Idades -->
+                    <div id="orcIdadesContainer" class="hidden bg-blue-50 p-4 rounded-lg border border-blue-100 mt-3 space-y-3">
                         <p class="text-xs font-semibold text-blue-800 uppercase">Idade das Crianças</p>
-                        <div id="idadesGrid" class="grid grid-cols-3 gap-3"></div>
+                        <div id="orcIdadesGrid" class="grid grid-cols-3 gap-3"></div>
                     </div>
 
                     <div class="pt-4 border-t mt-6">
-                        <button type="button" onclick="calcularOrcamento()" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-md py-3 px-4 text-sm font-bold transition-colors shadow-sm flex items-center justify-center gap-2">
-                            <i data-lucide="calculator" class="w-5 h-5"></i> Calcular Orçamento
+                        <button type="button" onclick="calcularOrcamentoReal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-md py-3 px-4 text-sm font-bold transition-colors shadow-sm flex items-center justify-center gap-2">
+                            <i data-lucide="calculator" class="w-5 h-5"></i> Calcular Cotação
                         </button>
                     </div>
                 </form>
             </div>
 
+            <!-- Painel de Resultados (Direita) -->
             <div class="lg:col-span-7">
                 <div id="estadoVazio" class="h-full min-h-[400px] bg-white rounded-xl shadow-sm border border-gray-200 border-dashed flex flex-col items-center justify-center text-center p-8">
                     <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4"><i data-lucide="receipt" class="w-8 h-8 text-blue-300"></i></div>
                     <h3 class="text-lg font-bold text-gray-700">Nenhum orçamento calculado</h3>
-                    <p class="text-sm text-gray-500 mt-2 max-w-sm">Preencha os dados ao lado e clique em calcular para ver o detalhamento de valores e regras aplicadas.</p>
+                    <p class="text-sm text-gray-500 mt-2 max-w-sm">Insira as informações ao lado e clique em calcular para extrair o valor final.</p>
                 </div>
 
                 <div id="resultadoCotacao" class="hidden bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+                    <!-- Tarjeta de Alerta de Erro -->
                     <div id="alertaErro" class="hidden bg-red-50 border-b border-red-200 p-4 flex items-start gap-3">
                         <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600 mt-0.5"></i>
                         <div>
-                            <h4 class="text-sm font-bold text-red-800">Atenção: Capacidade Máxima Excedida</h4>
+                            <h4 class="text-sm font-bold text-red-800">Aviso do Sistema</h4>
                             <p id="msgErro" class="text-sm text-red-600 mt-1"></p>
                         </div>
                     </div>
@@ -109,7 +116,7 @@
                         <div class="flex justify-between items-start mb-6 pb-6 border-b border-gray-100">
                             <div>
                                 <h2 class="text-xl font-bold text-gray-900">Resumo da Cotação</h2>
-                                <p id="resumoReserva" class="text-sm text-gray-500 mt-1">Lacqua diRoma • 0 Noites • 0 Adultos, 0 Crianças</p>
+                                <p id="resumoReserva" class="text-sm text-gray-500 mt-1"></p>
                             </div>
                             <div class="text-right">
                                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Valor Total</p>
@@ -117,24 +124,24 @@
                             </div>
                         </div>
 
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Detalhamento por Diária</h4>
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Detalhamento dos Valores</h4>
                         <div class="bg-gray-50 rounded-lg p-4 border border-gray-100 space-y-3 text-sm">
                             <div class="flex justify-between text-gray-700">
-                                <span id="labelBase">Valor Base (2 Adultos)</span><span id="valBaseCalc" class="font-medium">R$ 0,00</span>
+                                <span>Soma das Diárias Base (Quarto)</span><span id="txtSomaBase" class="font-medium">R$ 0,00</span>
                             </div>
                             <div class="flex justify-between text-gray-700">
-                                <span>Adicional Adulto (<span id="qtdAdExtra">0</span>)</span><span id="valAdExtraCalc" class="font-medium">R$ 0,00</span>
+                                <span>Soma dos Adicionais (Extra)</span><span id="txtSomaExtras" class="font-medium">R$ 0,00</span>
                             </div>
-                            <div class="flex justify-between text-green-600 font-medium pt-2 border-t border-gray-200 border-dashed mt-2">
-                                <span>Crianças Free (<span id="qtdFree">0</span>)</span><span>Cortesia</span>
+                            <div class="flex justify-between text-green-600 font-medium pt-2 border-t border-gray-200 border-dashed">
+                                <span>Crianças Free na Cortesia</span><span id="txtQtdFree">0 free</span>
                             </div>
                         </div>
 
                         <div class="mt-8 flex gap-3">
-                            <button onclick="showToast('Cotação copiada para a área de transferência!', 'success')" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
                                 <i data-lucide="copy" class="w-4 h-4"></i> Copiar Texto
                             </button>
-                            <button onclick="showToast('Abrindo o WhatsApp Web...', 'success')" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2">
+                            <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 shadow-sm flex items-center justify-center gap-2">
                                 <i data-lucide="message-circle" class="w-4 h-4"></i> Enviar WhatsApp
                             </button>
                         </div>
@@ -148,133 +155,196 @@
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8"><p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos.</p></div>
     </footer>
 
+    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
         lucide.createIcons();
+        let listaAptos = [];
+        let textoCotaçãoGlobal = "";
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
-            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
-            toast.className = `${bgColor} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
-            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i><span class="font-medium text-sm">${message}</span>`;
+            toast.className = `${type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
+            toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-5 h-5"></i><span class="font-medium text-sm">${message}</span>`;
             container.appendChild(toast);
             lucide.createIcons();
             setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
             setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
-        function gerarCamposIdade() {
-            const qtd = parseInt(document.getElementById('qtdCriancas').value) || 0;
-            const container = document.getElementById('idadesContainer');
-            const grid = document.getElementById('idadesGrid');
+        // Carrega os apartamentos salvos da memória para o dropdown
+        function carregarAptosNoSelect() {
+            const memoria = localStorage.getItem('ld_lista_aptos');
+            listaAptos = memoria ? JSON.parse(memoria) : [];
+            const select = document.getElementById('orcAptoSelect');
+            select.innerHTML = "";
             
-            // Salva as idades que já foram preenchidas para não perder ao digitar um número maior
-            let idadesSalvas = [];
-            document.querySelectorAll('.idade-input').forEach(input => {
-                idadesSalvas.push(input.value);
+            if(listaAptos.length === 0) {
+                select.innerHTML = `<option value="">Nenhum apartamento cadastrado</option>`;
+                return;
+            }
+            listaAptos.forEach(apto => {
+                select.innerHTML += `<option value="${apto.id}">${apto.nome} - Unidade ${apto.unidade} (Até ${apto.capMax} pessoas)</option>`;
             });
+        }
 
+        function gerarCamposIdade() {
+            const qtd = parseInt(document.getElementById('orcCriancas').value) || 0;
+            const container = document.getElementById('orcIdadesContainer');
+            const grid = document.getElementById('orcIdadesGrid');
+            
+            let idadesSalvas = [];
+            document.querySelectorAll('.orc-idade-input').forEach(input => idadesSalvas.push(input.value));
             grid.innerHTML = '';
             
             if (qtd > 0) {
                 container.classList.remove('hidden');
                 for (let i = 1; i <= qtd; i++) {
                     let valor = idadesSalvas[i-1] ? idadesSalvas[i-1] : '';
-                    grid.innerHTML += `<div><input type="number" min="0" max="17" placeholder="Idade ${i}" value="${valor}" class="idade-input focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-1.5 px-2 border outline-none text-center" required></div>`;
+                    grid.innerHTML += `<div><input type="number" min="0" max="17" placeholder="Idade ${i}" value="${valor}" class="orc-idade-input focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-1.5 px-2 border outline-none text-center" required></div>`;
                 }
             } else {
                 container.classList.add('hidden');
             }
         }
 
-        function calcularOrcamento() {
-            // Regras Simuladas (que viriam do cadastro)
-            const regras = { capacidadeMax: 4, valSingle: 200.00, valDuplo: 300.00, valAdExtra: 100.00, cortesiaQtdMax: 2, cortesiaIdadeMax: 12 };
-            
-            let checkin = document.getElementById('checkin').value;
-            let checkout = document.getElementById('checkout').value;
-            let noites = 2; 
-            
-            if (checkin && checkout) {
-                const diffTime = Math.abs(new Date(checkout) - new Date(checkin));
-                noites = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                if (noites === 0) noites = 1;
+        // MOTOR DE CÁLCULO INTELIGENTE DIA A DIA
+        function calcularOrcamentoReal() {
+            const aptoId = document.getElementById('orcAptoSelect').value;
+            const dInicioStr = document.getElementById('orcCheckin').value;
+            const dFimStr = document.getElementById('orcCheckout').value;
+            const adultos = parseInt(document.getElementById('orcAdultos').value) || 0;
+            const criancas = parseInt(document.getElementById('orcCriancas').value) || 0;
+
+            if(!aptoId || !dInicioStr || !dFimStr) {
+                showToast("Selecione o imóvel e as datas da cotação!", "error");
+                return;
             }
 
-            let adultos = parseInt(document.getElementById('qtdAdultos').value) || 0;
-            let criancas = parseInt(document.getElementById('qtdCriancas').value) || 0;
-            let totalPessoas = adultos + criancas;
-            
-            let idades = [];
-            document.querySelectorAll('.idade-input').forEach(input => idades.push(parseInt(input.value) || 0));
+            const apto = listaAptos.find(a => a.id === aptoId);
+            const totalPessoas = adultos + criancas;
 
             const divVazia = document.getElementById('estadoVazio');
             const divResult = document.getElementById('resultadoCotacao');
             const alertaErro = document.getElementById('alertaErro');
             const areaValores = document.getElementById('areaValores');
-            
+
             divVazia.classList.add('hidden');
             divResult.classList.remove('hidden');
 
-            if (totalPessoas > regras.capacidadeMax) {
+            // Validação de Capacidade Absoluta
+            if(totalPessoas > apto.capMax) {
                 alertaErro.classList.remove('hidden');
                 areaValores.classList.add('hidden');
-                document.getElementById('msgErro').innerText = `O apartamento acomoda no máximo ${regras.capacidadeMax} pessoas. Você buscou para ${totalPessoas}.`;
-                showToast("Erro: Capacidade máxima excedida.", "error");
+                document.getElementById('msgErro').innerText = `A capacidade deste apartamento é de no máximo ${apto.capMax} pessoas. Sua busca contém ${totalPessoas} pessoas.`;
+                showToast("Capacidade máxima do quarto violada!", "error");
                 return;
-            } else {
-                alertaErro.classList.add('hidden');
-                areaValores.classList.remove('hidden');
-                showToast("Cálculo realizado com sucesso!", "success");
             }
 
-            // Lógica Simplificada: Criança é Free ou Paga como Adulto
-            let qtdFree = 0; 
-            let criancasComoAdulto = 0;
+            alertaErro.classList.add('hidden');
+            areaValores.classList.remove('hidden');
 
-            idades.forEach(idade => {
-                if (idade <= regras.cortesiaIdadeMax) {
-                    if (qtdFree < regras.cortesiaQtdMax) {
-                        qtdFree++;
-                    } else {
-                        criancasComoAdulto++; // Passou da quantidade, vira pagante
-                    }
+            let idades = [];
+            document.querySelectorAll('.orc-idade-input').forEach(input => idades.push(parseInt(input.value) || 0));
+
+            // Filtragem da Regra de Crianças
+            let criancasFree = 0;
+            let criancasPagantes = 0;
+            let limiteFreeMax = apto.qtdFree || 2;
+            let idadeFreeMax = apto.idadeFree || 12;
+
+            // Prioriza dar cortesia para as crianças mais velhas primeiro (vantagem comercial)
+            残酷 = idades.sort((a,b) => b - a).forEach(idade => {
+                if (idade <= idadeFreeMax && criancasFree < limiteFreeMax) {
+                    criancasFree++;
                 } else {
-                    criancasComoAdulto++; // Acima da idade, vira pagante
+                    criancasPagantes++;
                 }
             });
 
-            let totalAdultosPagantes = adultos + criancasComoAdulto;
-            let valorBaseDiaria = 0; 
-            let adultosExtras = 0;
+            let pagantesAdicionais = criancasPagantes;
+            let adultosEfetivos = adultos;
+            let valorAcumuladoBase = 0;
+            let valorAcumuladoExtras = 0;
 
-            if (totalAdultosPagantes === 1) {
-                valorBaseDiaria = regras.valSingle;
-                document.getElementById('labelBase').innerText = "Valor Base (1 Adulto/Single)";
-            } else if (totalAdultosPagantes >= 2) {
-                valorBaseDiaria = regras.valDuplo;
-                document.getElementById('labelBase').innerText = "Valor Base (2 Adultos/Duplo)";
-                adultosExtras = totalAdultosPagantes - 2;
+            let dCorrente = new Date(dInicioStr + "T12:00:00");
+            let dFinal = new Date(dFimStr + "T12:00:00");
+            let totalNoites = 0;
+            let erroFaltaTarifa = false;
+
+            // Percorre o calendário dia por dia pegando o preço dinâmico da data
+            while(dCorrente < dFinal) {
+                totalNoites++;
+                let dataIso = dCorrente.toISOString().split('T')[0];
+                let tarifaDia = apto.calendario ? apto.calendario.find(c => c.data === dataIso) : null;
+
+                if(!tarifaDia) {
+                    erroFaltaTarifa = true;
+                    break;
+                }
+
+                let totalAdultosEfetivosNoDia = adultosEfetivos + pagantesAdicionais;
+                let precoBaseQuarto = 0;
+                let extrasNoDia = 0;
+
+                if (totalAdultosEfetivosNoDia === 1) {
+                    precoBaseQuarto = tarifaDia.single;
+                } else {
+                    precoBaseQuarto = tarifaDia.duplo; // Pega o Valor Duplo cheio cadastrado
+                    extrasNoDia = (totalAdultosEfetivosNoDia - 2) > 0 ? (totalAdultosEfetivosNoDia - 2) : 0;
+                }
+
+                valorAcumuladoBase += precoBaseQuarto;
+                valorAcumuladoExtras += (extrasNoDia * tarifaDia.extra);
+
+                dCorrente.setDate(dCorrente.getDate() + 1);
             }
 
-            let valorExtraDiaria = adultosExtras * regras.valAdExtra;
-            let totalDiaria = valorBaseDiaria + valorExtraDiaria;
-            let totalGeral = totalDiaria * noites;
+            if(erroFaltaTarifa) {
+                alertaErro.classList.remove('hidden');
+                areaValores.classList.add('hidden');
+                document.getElementById('msgErro').innerText = `O calendário está sem tarifas configuradas para este período. Configure os preços na aba "Aptos" primeiro.`;
+                showToast("Erro: Data sem tarifa.", "error");
+                return;
+            }
 
-            document.getElementById('resumoReserva').innerText = `Lacqua diRoma • ${noites} Noite(s) • ${adultos} Adulto(s), ${criancas} Criança(s)`;
-            document.getElementById('valBaseCalc').innerText = `R$ ${valorBaseDiaria.toFixed(2).replace('.', ',')}`;
-            document.getElementById('qtdAdExtra').innerText = adultosExtras;
-            document.getElementById('valAdExtraCalc').innerText = `R$ ${valorExtraDiaria.toFixed(2).replace('.', ',')}`;
-            document.getElementById('qtdFree').innerText = qtdFree;
-            document.getElementById('valorTotal').innerText = `R$ ${totalGeral.toFixed(2).replace('.', ',')}`;
+            let valorTotalGeral = valorAcumuladoBase + valorAcumuladoExtras;
+
+            document.getElementById('resumoReserva').innerText = `${apto.nome} (Unidade ${apto.unidade}) • ${totalNoites} Noite(s) • ${adultos} Ad, ${criancas} Criança(s)`;
+            document.getElementById('valorTotal').innerText = `R$ ${valorTotalGeral.toFixed(2).replace('.', ',')}`;
+            document.getElementById('txtSomaBase').innerText = `R$ ${valorAcumuladoBase.toFixed(2).replace('.', ',')}`;
+            document.getElementById('txtSomaExtras').innerText = `R$ ${valorAcumuladoExtras.toFixed(2).replace('.', ',')}`;
+            document.getElementById('txtQtdFree').innerText = `${criancasFree} criança(s) free (Até ${idadeFreeMax} anos)`;
+
+            // Gera o texto profissional limpo pronto para colar no WhatsApp
+            textoCotaçãoGlobal = `*Orçamento de Hospedagem - ${apto.nome}*\n` +
+                                 `• Período: ${dInicioStr.split('-').reverse().join('/')} a ${dFimStr.split('-').reverse().join('/')} (${totalNoites} noites)\n` +
+                                 `• Acomodação: Unidade ${apto.unidade}\n` +
+                                 `• Configuração: ${adultos} Adulto(s) e ${criancas} Criança(s)\n` +
+                                 `• Cortesias aplicadas: ${criancasFree} criança(s) grátis\n` +
+                                 `*Valor Total da Estadia: R$ ${valorTotalGeral.toFixed(2).replace('.', ',')}*`;
+            
+            showToast("Cotação processada com sucesso!", "success");
         }
 
-        // REGRA GERAL DE SALVAMENTO (localStorage)
+        function copiarTextoOrcamento() {
+            if(!textoCotaçãoGlobal) return;
+            navigator.clipboard.writeText(textoCotaçãoGlobal);
+            showToast("Texto copiado para a área de transferência!", "success");
+        }
+
+        function enviarWhatsAppOrcamento() {
+            if(!textoCotaçãoGlobal) return;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(textoCotaçãoGlobal)}`, '_blank');
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
-            const campos = document.querySelectorAll("input, select, textarea");
+            carregarAptosNoSelect();
+            
+            // Regra de gravação nos inputs
+            const campos = document.querySelectorAll("input, select");
             campos.forEach(campo => {
                 if (campo.id) {
                     const valorSalvo = localStorage.getItem(campo.id);
@@ -284,9 +354,7 @@
                     }
                 }
                 campo.addEventListener("input", () => {
-                    if (campo.id) {
-                        localStorage.setItem(campo.id, campo.value);
-                    }
+                    if (campo.id) localStorage.setItem(campo.id, campo.value);
                 });
             });
         });
