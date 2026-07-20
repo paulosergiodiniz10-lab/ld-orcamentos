@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LD Orçamentos - Minha Equipe</title>
+    <!-- Tailwind CSS e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
+    <!-- Menu Superior Padrão -->
     <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -34,17 +36,21 @@
         </div>
     </nav>
 
-    <main class="flex-grow max-w-6xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Conteúdo da Página -->
+    <main class="flex-grow max-w-5xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
+        
+        <!-- Cabeçalho com Botão de Criar -->
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Minha Equipe</h1>
-                <p class="text-sm text-gray-500 mt-1">Gerencie os atendentes e operadores que utilizam o sistema.</p>
+                <p class="text-sm text-gray-500 mt-1">Gerencie os atendentes e vendedores do sistema.</p>
             </div>
-            <button onclick="toggleModal(true)" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+            <button onclick="abrirModal(true)" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md text-sm font-bold shadow transition-colors flex items-center gap-2">
                 <i data-lucide="user-plus" class="w-4 h-4"></i> Novo Integrante
             </button>
         </div>
 
+        <!-- Tabela de Membros -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
@@ -56,96 +62,136 @@
                             <th class="px-6 py-4 text-right">Ações</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white text-gray-700">
-                        <tr class="hover:bg-gray-50/70">
-                            <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">PS</div>
-                                Paulo Sérgio (Você)
-                            </td>
-                            <td class="px-6 py-4 text-gray-500">paulo.diniz@agencia.com</td>
-                            <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Administrador</span></td>
-                            <td class="px-6 py-4 text-right space-x-2"><button class="text-gray-400 hover:text-blue-600"><i data-lucide="edit-2" class="w-4 h-4 inline"></i></button></td>
-                        </tr>
+                    <tbody id="tabelaEquipeBody" class="divide-y divide-gray-200 bg-white text-gray-700">
+                        <!-- Os dados entram aqui via JavaScript -->
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
 
-    <!-- Modal de Cadastro -->
+    <!-- Modal Form de Cadastro (Oculto por padrão) -->
     <div id="membroModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-xl border border-gray-200 max-w-md w-full overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 class="text-base font-bold text-gray-900 flex items-center gap-2"><i data-lucide="user-plus" class="w-5 h-5 text-blue-600"></i> Cadastrar Integrante</h3>
-                <button onclick="toggleModal(false)" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="user-plus" class="w-5 h-5 text-blue-600"></i> Cadastrar Integrante
+                </h3>
+                <button onclick="abrirModal(false)" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
             <div class="p-6">
                 <form id="membroForm" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Nome</label>
-                        <input type="text" id="membroNome" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
+                        <label class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                        <input type="text" id="nomeMembro" class="mt-1 border block w-full rounded-md py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">E-mail</label>
-                        <input type="email" id="membroEmail" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
+                        <label class="block text-sm font-medium text-gray-700">E-mail Comercial</label>
+                        <input type="email" id="emailMembro" class="mt-1 border block w-full rounded-md py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nível de Acesso</label>
+                        <select id="acessoMembro" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300 bg-white">
+                            <option value="Atendente">Atendente (Apenas faz cotações)</option>
+                            <option value="Administrador">Administrador (Acesso total)</option>
+                        </select>
                     </div>
                 </form>
             </div>
             <div class="bg-gray-50 px-6 py-4 border-t flex justify-end gap-3">
-                <button onclick="toggleModal(false)" class="bg-white border rounded-md py-2 px-4 text-sm font-medium text-gray-700">Cancelar</button>
-                <button onclick="salvarMembro()" class="bg-blue-600 text-white rounded-md py-2 px-4 text-sm font-medium hover:bg-blue-700">Salvar</button>
+                <button onclick="abrirModal(false)" class="bg-white border rounded-md py-2 px-4 text-sm font-medium text-gray-700">Cancelar</button>
+                <button onclick="adicionarMembroLista()" class="bg-blue-600 text-white rounded-md py-2 px-4 text-sm font-bold hover:bg-blue-700 shadow-sm">Salvar Integrante</button>
             </div>
         </div>
     </div>
 
-    <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8"><p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos.</p></div>
-    </footer>
-
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+    <!-- Pop-up Toast Profissional -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0 z-50">
+        <i data-lucide="check-circle" class="w-5 h-5"></i>
+        <span id="toastTexto" class="font-medium text-sm">Operação realizada!</span>
+    </div>
 
     <script>
         lucide.createIcons();
-        
-        function toggleModal(open) {
-            document.getElementById('membroModal').style.display = open ? 'flex' : 'none';
+        let listaEquipe = [];
+
+        function dispararToast(mensagem) {
+            document.getElementById('toastTexto').innerText = mensagem;
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-10', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-10', 'opacity-0'), 3000);
         }
 
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
-            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
-            toast.className = `${bgColor} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
-            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i><span class="font-medium text-sm">${message}</span>`;
-            container.appendChild(toast);
-            lucide.createIcons();
-            setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
-            setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
+        function abrirModal(abrir) {
+            document.getElementById('membroModal').style.display = abrir ? 'flex' : 'none';
+            if(!abrir) document.getElementById('membroForm').reset();
         }
 
-        function salvarMembro() {
-            showToast("Integrante salvo na equipe!", "success");
-            toggleModal(false);
-        }
+        // Desenha a tabela de funcionários com base no que está salvo
+        function renderizarTabelaMembros() {
+            const tbody = document.getElementById('tabelaEquipeBody');
+            tbody.innerHTML = "";
 
-        // REGRA GERAL DE SALVAMENTO (localStorage)
-        document.addEventListener("DOMContentLoaded", () => {
-            const campos = document.querySelectorAll("input, select, textarea");
-            campos.forEach(campo => {
-                if (campo.id) {
-                    const valorSalvo = localStorage.getItem(campo.id);
-                    if (valorSalvo !== null) {
-                        campo.value = valorSalvo;
-                        campo.dispatchEvent(new Event('change'));
-                    }
-                }
-                campo.addEventListener("input", () => {
-                    if (campo.id) {
-                        localStorage.setItem(campo.id, campo.value);
-                    }
-                });
+            listaEquipe.forEach((membro, index) => {
+                const badgeCor = membro.acesso === 'Administrador' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800';
+                
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50/70 transition-colors">
+                        <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">EQ</div>
+                            ${membro.nome}
+                        </td>
+                        <td class="px-6 py-4 text-gray-500">${membro.email}</td>
+                        <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${badgeCor}">${membro.acesso}</span></td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="removerMembroLista(${index})" class="text-gray-400 hover:text-red-600 transition-colors"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
+                        </td>
+                    </tr>`;
             });
+            lucide.createIcons();
+        }
+
+        // Pega os dados digitados, joga no array e salva permanente
+        function adicionarMembroLista() {
+            const nome = document.getElementById('nomeMembro').value.trim();
+            const email = document.getElementById('emailMembro').value.trim();
+            const acesso = document.getElementById('acessoMembro').value;
+
+            if(!nome || !email) {
+                alert("Por favor, preencha todos os campos!");
+                return;
+            }
+
+            listaEquipe.push({ nome, email, acesso });
+            localStorage.setItem('ld_lista_equipe', JSON.stringify(listaEquipe));
+            
+            renderizarTabelaMembros();
+            abrirModal(false);
+            dispararToast("Funcionário cadastrado com sucesso!");
+        }
+
+        function removerMembroLista(index) {
+            if(confirm("Deseja realmente remover este integrante da equipe?")) {
+                listaEquipe.splice(index, 1);
+                localStorage.setItem('ld_lista_equipe', JSON.stringify(listaEquipe));
+                renderizarTabelaMembros();
+                dispararToast("Integrante removido da equipe.");
+            }
+        }
+
+        // AO DAR F5: Carrega os funcionários já existentes
+        document.addEventListener("DOMContentLoaded", () => {
+            const memoria = localStorage.getItem('ld_lista_equipe');
+            if (memoria) {
+                listaEquipe = JSON.parse(memoria);
+            } else {
+                // Se o sistema estiver zerado, cria você como padrão
+                listaEquipe = [{ nome: "Paulo Sérgio (Você)", email: "paulo.diniz@agencia.com", acesso: "Administrador" }];
+                localStorage.setItem('ld_lista_equipe', JSON.stringify(listaEquipe));
+            }
+            renderizarTabelaMembros();
         });
     </script>
 </body>
