@@ -131,8 +131,8 @@
             </div>
 
             <!-- GESTÃO DE TARIFAS -->
-            <div id="blocoTarifasAdicionais" class="hidden space-y-6">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div id="blocoTarifasAdicionais" class="hidden space-y-6 scroll-mt-20">
+                <div id="formularioAncoragemTarifas" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="bg-yellow-100/50 border-b border-yellow-200 px-6 py-4 flex items-center gap-2">
                         <i data-lucide="zap" class="w-5 h-5 text-yellow-600"></i>
                         <h3 class="font-bold text-yellow-800">Cadastrar / Atualizar Tarifas</h3>
@@ -286,7 +286,7 @@
         </div>
     </main>
 
-    <!-- Toast Container Avançado para dar o Alerta de Sucesso -->
+    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
@@ -393,7 +393,6 @@
             document.getElementById('regime_ro').checked = true; document.getElementById('regime_bb').checked = true;
             document.getElementById('regime_map').checked = false; document.getElementById('regime_fap').checked = false;
             
-            // Garante campos limpos/zerados ao nascer
             zerarCamposPrecoFormulario();
             cacheValoresTemporariosForm = {};
 
@@ -455,7 +454,6 @@
         }
 
         function mudarAbaRegimePreco(regId) {
-            // Regra de sincronização do título da aba com o painel de digitação de valores
             document.getElementById('txtRegimeAtivoLabel').innerText = nomenclaturaRegimes[regId];
 
             if (regimeAtivoAba && regimeAtivoAba !== regId) {
@@ -473,7 +471,6 @@
             document.getElementById(`aba_btn_${regId}`)?.classList.remove('border-transparent', 'text-gray-500');
             document.getElementById(`aba_btn_${regId}`)?.classList.add('border-blue-600', 'text-blue-600', 'border-b-2');
 
-            // REGRA: SE NÃO HOUVER PREÇO CACHED, NASCE EM BRANCO/ZERADO
             if (cacheValoresTemporariosForm[regId]) {
                 document.getElementById('tSingle').value = cacheValoresTemporariosForm[regId].single;
                 document.getElementById('tDuplo').value = cacheValoresTemporariosForm[regId].duplo;
@@ -521,7 +518,6 @@
             montarAbasDeRegimeFormulario(aptoObjeto);
             document.getElementById('blocoTarifasAdicionais').classList.remove('hidden');
             
-            // BARRA DE INFORMAÇÃO VISUAL (TOAST)
             showToast("Imóvel e regimes salvos com sucesso!", "success");
         }
 
@@ -580,7 +576,6 @@
             atualizarDropdownFiltroTarifas(apto);
             renderizarLinhasCalendario();
             
-            // BARRA DE INFORMAÇÃO VISUAL (TOAST)
             showToast(`Tarifas aplicadas em ${contadorDiasInjetados} dias de ${nomenclaturaRegimes[regimeAtivoAba]}!`, "success");
         }
 
@@ -608,7 +603,6 @@
             salvarListaAptos();
             renderizarLinhasCalendario();
             
-            // BARRA DE INFORMAÇÃO VISUAL (TOAST)
             if(alterados > 0) {
                 showToast(`Reajuste de ${porcentagem}% aplicado em ${alterados} diárias!`, "success");
             } else {
@@ -632,12 +626,46 @@
             renderizarLinhasCalendario();
         }
 
+        // NOVO CORREÇÃO: REMOVE A LINHA DE QUALQUER FORMAb, BLINDADO CONTRA UNDEFINED
         function deletarDiaCalendario(dataStr, regId) {
             let apto = listaAptos.find(a => a.id === aptoAtualId);
-            apto.calendario = apto.calendario.filter(c => !(c.data === dataStr && c.regime === regId));
+            
+            // Filtra removendo o item correspondente de forma implacável
+            apto.calendario = apto.calendario.filter(c => {
+                let eAlvo = c.data === dataStr && (c.regime === regId || (!c.regime && regId === 'undefined'));
+                return !eAlvo;
+            });
+
             salvarListaAptos(); 
             renderizarLinhasCalendario();
-            showToast("Diária removida.", "success");
+            showToast("Diária removida com sucesso!", "success");
+        }
+
+        // NOVO RECURSO: EDITA RÁPIDO UMA LINHA ESPECÍFICA DO CALENDÁRIO
+        function carregarLinhaParaEdicaoRapida(dataStr, regId) {
+            let apto = listaAptos.find(a => a.id === aptoAtualId);
+            let dia = apto.calendario.find(c => c.data === dataStr && (c.regime === regId || (!c.regime && regId === 'undefined')));
+            
+            if(!dia) return;
+
+            // Injeta o regime correto ativo e força abrir a aba certa
+            let regimeAlvo = dia.regime || "ro";
+            
+            // Preenche o formulário lá no topo
+            document.getElementById('tNome').value = dia.nome || "";
+            document.getElementById('tInicio').value = dia.data;
+            document.getElementById('tFim').value = dia.data;
+            
+            mudarAbaRegimePreco(regimeAlvo);
+            
+            document.getElementById('tSingle').value = dia.single;
+            document.getElementById('tDuplo').value = dia.duplo;
+            document.getElementById('tExtra').value = dia.extra;
+            document.getElementById('tMinNoites').value = dia.minNoites;
+
+            // Rola a tela suavemente para o bloco de edição
+            document.getElementById('formularioAncoragemTarifas').scrollIntoView({ behavior: 'smooth' });
+            showToast("Valores carregados no painel de edição acima!", "success");
         }
 
         function renderizarLinhasCalendario() {
@@ -673,19 +701,24 @@
                 let dataObjeto = new Date(partes[0], partes[1] - 1, partes[2]);
                 let diaNome = diasSemana[dataObjeto.getDay()];
                 let dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                
+                // Trata o undefined visual antigo
+                let textoRegime = dia.regime ? nomenclaturaRegimes[dia.regime] : "<span class='text-red-500 font-normal'>Não definido (Clique em Editar)</span>";
+                let identificadorRegimeParaFuncao = dia.regime ? dia.regime : 'undefined';
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100 font-medium text-gray-700">
                         <td class="py-3 px-2 font-bold text-gray-900">${dataFormatada}</td>
                         <td class="py-3 px-2 text-gray-400 text-xs">${diaNome}</td>
                         <td class="py-3 px-2"><span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-xs font-bold border border-blue-100">${dia.nome}</span></td>
-                        <td class="py-3 px-2 font-bold text-orange-700">${nomenclaturaRegimes[dia.regime]}</td>
+                        <td class="py-3 px-2 font-bold text-orange-700">${textoRegime}</td>
                         <td class="py-3 px-2 text-gray-500">R$ ${dia.single.toFixed(2).replace('.', ',')}</td>
                         <td class="py-3 px-2 text-gray-900 font-bold">R$ ${dia.duplo.toFixed(2).replace('.', ',')}</td>
                         <td class="py-3 px-2 text-gray-500">R$ ${dia.extra.toFixed(2).replace('.', ',')}</td>
-                        <td class="py-3 px-2 text-center text-gray-600">${dia.minNoites}</td>
-                        <td class="py-3 px-2 text-right">
-                            <button onclick="deletarDiaCalendario('${dia.data}', '${dia.regime}')" class="text-gray-400 hover:text-red-600 transition-colors"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
+                        <td class="py-3 px-2 text-center text-gray-700">${dia.minNoites}</td>
+                        <td class="py-3 px-2 text-right space-x-2">
+                            <button onclick="carregarLinhaParaEdicaoRapida('${dia.data}', '${identificadorRegimeParaFuncao}')" class="text-gray-400 hover:text-blue-600 transition-colors" title="Editar Diária Rápido"><i data-lucide="edit" class="w-4 h-4 inline"></i></button>
+                            <button onclick="deletarDiaCalendario('${dia.data}', '${identificadorRegimeParaFuncao}')" class="text-gray-400 hover:text-red-600 transition-colors" title="Remover"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
                         </td>
                     </tr>`;
             });
