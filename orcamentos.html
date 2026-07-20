@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LD Orçamentos - Gerador de Cotação</title>
+    <!-- Tailwind CSS e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
+    <!-- Menu Superior Padrão -->
     <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -26,7 +28,7 @@
                     <button onclick="window.location.href='aptos.html'" class="hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2">
                         <i data-lucide="bed-double" class="w-4 h-4"></i> Aptos
                     </button>
-                    <button onclick="window.location.href='orcamentos.html'" class="bg-orange-500 hover:bg-orange-600 px-5 py-2 rounded-md font-bold text-sm shadow-sm transition-colors flex items-center gap-2 ml-4 border-2 border-white/20">
+                    <button onclick="window.location.href='orcamentos.html'" class="bg-orange-500 hover:bg-orange-600 px-5 py-2 rounded-md text-sm font-bold shadow-sm transition-colors flex items-center gap-2 ml-4 border-2 border-white/20">
                         <i data-lucide="calculator" class="w-4 h-4"></i> Orçamentos
                     </button>
                 </div>
@@ -34,6 +36,7 @@
         </div>
     </nav>
 
+    <!-- Conteúdo Principal -->
     <main class="flex-grow max-w-7xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900">Gerador de Orçamentos</h1>
@@ -41,6 +44,7 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Formulário de Parâmetros -->
             <div class="lg:col-span-5 bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit">
                 <h3 class="text-base font-bold text-gray-900 mb-5 flex items-center gap-2 border-b pb-3">
                     <i data-lucide="search" class="w-5 h-5 text-blue-600"></i> Dados da Reserva
@@ -49,8 +53,17 @@
                 <form id="buscaForm" class="space-y-5">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Selecione o Apartamento</label>
-                        <select id="orcAptoSelect" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
-                            </select>
+                        <select id="orcAptoSelect" onchange="atualizarRegimesDisponiveisNoForm()" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
+                            <!-- Inserido via JS -->
+                        </select>
+                    </div>
+
+                    <!-- NOVO CAMPO: REGIME SELECIONÁVEL DINAMICAMENTE -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Regime de Alimentação</label>
+                        <select id="orcRegimeSelect" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
+                            <!-- Atualizado dinamicamente -->
+                        </select>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -88,7 +101,8 @@
                 </form>
             </div>
 
-            <div class="lg:col-span-7 prose-none">
+            <!-- Painel de Resultados -->
+            <div class="lg:col-span-7">
                 <div id="estadoVazio" class="h-full min-h-[400px] bg-white rounded-xl shadow-sm border border-gray-200 border-dashed flex flex-col items-center justify-center text-center p-8">
                     <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4"><i data-lucide="receipt" class="w-8 h-8 text-blue-300"></i></div>
                     <h3 class="text-lg font-bold text-gray-700">Nenhum orçamento calculado</h3>
@@ -129,6 +143,7 @@
                             </div>
                         </div>
 
+                        <!-- CAMPOS: DADOS DO CLIENTE PARA ENVIO -->
                         <div class="border-t pt-4 mt-4 space-y-4">
                             <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
                                 <i data-lucide="user" class="w-3.5 h-3.5"></i> Identificação de Envio (Opcional)
@@ -145,8 +160,9 @@
                             </div>
                         </div>
 
+                        <!-- Botões de Ação -->
                         <div class="mt-8 flex gap-3">
-                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 flex items-center justify-center gap-2 shadow-sm">
                                 <i data-lucide="copy" class="w-4 h-4"></i> Copiar Texto
                             </button>
                             <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 shadow-sm flex items-center justify-center gap-2">
@@ -158,6 +174,7 @@
             </div>
         </div>
 
+        <!-- SEÇÃO: HISTÓRICO DE COTAÇÕES -->
         <div class="mt-12 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                 <h3 class="font-bold text-gray-900 flex items-center gap-2">
@@ -165,7 +182,6 @@
                 </h3>
                 <span id="badgeContadorHistorico" class="bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1 rounded-full">0 registros</span>
             </div>
-            
             <div class="overflow-x-auto">
                 <table class="min-w-full text-left text-xs text-gray-700 whitespace-nowrap">
                     <thead class="bg-gray-50 text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b">
@@ -179,8 +195,7 @@
                             <th class="py-3 px-4 text-right">Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="tbodyHistorico" class="divide-y divide-gray-100">
-                        </tbody>
+                    <tbody id="tbodyHistorico" class="divide-y divide-gray-100"></tbody>
                 </table>
             </div>
         </div>
@@ -197,6 +212,13 @@
         let listaAptos = [];
         let historicoOrcamentos = [];
         let dadosLocaisUltimoCalculo = null;
+
+        const nomenclaturaRegimes = {
+            ro: "Sem refeição",
+            bb: "Café da Manhã",
+            map: "Café + Almoço ou Jantar (Meia Pensão)",
+            fap: "Pensão Completa"
+        };
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -227,6 +249,22 @@
             listaAptos.forEach(apto => {
                 select.innerHTML += `<option value="${apto.id}">${apto.nome} - ${apto.unidade} (Até ${apto.capMax} pessoas)</option>`;
             });
+            atualizarRegimesDisponiveisNoForm();
+        }
+
+        // ATUALIZA O SELETOR DE ALIMENTAÇÃO CONFORME O APARTAMENTO SELECIONADO
+        function atualizarRegimesDisponiveisNoForm() {
+            const aptoId = document.getElementById('orcAptoSelect').value;
+            const selectRegime = document.getElementById('orcRegimeSelect');
+            selectRegime.innerHTML = "";
+            
+            if(!aptoId) return;
+            const apto = listaAptos.find(a => a.id === aptoId);
+            let regimes = apto.regimesAtivos || ['ro', 'bb'];
+
+            regimes.forEach(regId => {
+                selectRegime.innerHTML += `<option value="${regId}">${nomenclaturaRegimes[regId]}</option>`;
+            });
         }
 
         function gerarCamposIdade() {
@@ -249,13 +287,14 @@
 
         function calcularOrcamentoReal() {
             const aptoId = document.getElementById('orcAptoSelect').value;
+            const regimeId = document.getElementById('orcRegimeSelect').value;
             const dInicioStr = document.getElementById('orcCheckin').value;
             const dFimStr = document.getElementById('orcCheckout').value;
             const adultos = parseInt(document.getElementById('orcAdultos').value) || 0;
             const criancas = parseInt(document.getElementById('orcCriancas').value) || 0;
 
-            if(!aptoId || !dInicioStr || !dFimStr) {
-                showToast("Selecione o imóvel e as datas da cotação!", "error");
+            if(!aptoId || !dInicioStr || !dFimStr || !regimeId) {
+                showToast("Selecione o imóvel, o regime e as datas da cotação!", "error");
                 return;
             }
 
@@ -271,15 +310,12 @@
             divResult.classList.remove('hidden');
 
             if(totalPessoas > apto.capMax) {
-                alertaErro.classList.remove('hidden');
-                areaValores.classList.add('hidden');
+                alertaErro.classList.remove('hidden'); areaValores.classList.add('hidden');
                 document.getElementById('msgErro').innerText = `A capacidade deste apartamento é de no máximo ${apto.capMax} pessoas. Sua busca contém ${totalPessoas} pessoas.`;
-                showToast("Capacidade máxima do quarto violada!", "error");
-                return;
+                showToast("Capacidade máxima do quarto violada!", "error"); return;
             }
 
-            alertaErro.classList.add('hidden');
-            areaValores.classList.remove('hidden');
+            alertaErro.classList.add('hidden'); areaValores.classList.remove('hidden');
 
             let idades = [];
             document.querySelectorAll('.orc-idade-input').forEach(input => idades.push(parseInt(input.value) || 0));
@@ -303,7 +339,9 @@
             while(dCorrente < dFinal) {
                 totalNoites++;
                 let dataIso = dCorrente.toISOString().split('T')[0];
-                let tarifaDia = apto.calendario ? apto.calendario.find(c => c.data === dataIso) : null;
+                
+                // BUSCA FILTRANDO POR DATA + REGIME SELECIONADO
+                let tarifaDia = apto.calendario ? apto.calendario.find(c => c.data === dataIso && c.regime === regimeId) : null;
                 if(!tarifaDia) { erroFaltaTarifa = true; break; }
 
                 let totalAdultosEfetivosNoDia = adultosEfetivos + pagantesAdicionais;
@@ -322,14 +360,14 @@
 
             if(erroFaltaTarifa) {
                 alertaErro.classList.remove('hidden'); areaValores.classList.add('hidden');
-                document.getElementById('msgErro').innerText = `O calendário está sem tarifas configuradas para este período. Configure os preços na aba "Aptos" primeiro.`;
-                showToast("Erro: Data sem tarifa.", "error"); return;
+                document.getElementById('msgErro').innerText = `Não há tarifas para o regime "${nomenclaturaRegimes[regimeId]}" cadastradas neste período. Preencha na aba "Aptos".`;
+                showToast("Erro: Sem tarifa para este regime.", "error"); return;
             }
 
             let valorTotalGeral = valorAcumuladoBase + valorAcumuladoExtras;
             let noitesLabel = totalNoites === 1 ? "01 Noite(s)" : (totalNoites < 10 ? "0" + totalNoites : totalNoites) + " Noite(s)";
 
-            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${noitesLabel} • ${adultos} Ad, ${criancas} Criança(s)`;
+            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${noitesLabel} • ${nomenclaturaRegimes[regimeId]}`;
             document.getElementById('valorTotal').innerText = `R$ ${valorTotalGeral.toFixed(2).replace('.', ',')}`;
             document.getElementById('txtSomaBase').innerText = `R$ ${valorAcumuladoBase.toFixed(2).replace('.', ',')}`;
             document.getElementById('txtSomaExtras').innerText = `R$ ${valorAcumuladoExtras.toFixed(2).replace('.', ',')}`;
@@ -338,6 +376,7 @@
             dadosLocaisUltimoCalculo = {
                 hotelNome: apto.nome,
                 quartoNome: apto.unidade,
+                regimeNome: nomenclatureRegimes[regimeId],
                 checkin: dInicioStr.split('-').reverse().join('/'),
                 checkout: dFimStr.split('-').reverse().join('/'),
                 noitesTxt: totalNoites === 1 ? "01 noite" : (totalNoites < 10 ? "0" + totalNoites : totalNoites) + " noites",
@@ -349,16 +388,16 @@
             showToast("Orçamento calculado com sucesso!", "success");
         }
 
-        function construirTextoFinalTemplate(nomeManual = null) {
+        function construirTextoFinalTemplate() {
             if(!dadosLocaisUltimoCalculo) return "";
-            const nomeCliente = nomeManual !== null ? nomeManual : document.getElementById('clienteNome').value.trim();
+            const nomeCliente = document.getElementById('clienteNome').value.trim();
             let cabecalho = nomeCliente ? `${nomeCliente}\n\n` : "";
 
             return `${cabecalho}*Segue orçamento de Hospedagem - ${dadosLocaisUltimoCalculo.hotelNome}*\n` +
                    `• Entrada: ${dadosLocaisUltimoCalculo.checkin}\n` +
                    `• Saída: ${dadosLocaisUltimoCalculo.checkout}\n` +
                    `• Total de noites: ${dadosLocaisUltimoCalculo.noitesTxt}\n` +
-                   `• Acomodação: ${dadosLocaisUltimoCalculo.quartoNome}\n` +
+                   `• Acomodação: ${dadosLocaisUltimoCalculo.quartoNome} (${dadosLocaisUltimoCalculo.regimeNome})\n` +
                    `*Configuração*\n` +
                    `• ${dadosLocaisUltimoCalculo.adQtd} Adulto(s)\n` +
                    `• ${dadosLocaisUltimoCalculo.criQtd} criança (s)\n` +
@@ -366,24 +405,21 @@
                    `*Valor total do Pacote: R$ ${dadosLocaisUltimoCalculo.total}*`;
         }
 
-        // SALVA AUTOMÁTICO NO HISTÓRICO NO CLIQUE DOS BOTÕES
         function registrarNoHistorico() {
             if(!dadosLocaisUltimoCalculo) return;
-            
             const novoRegistro = {
                 id: 'hist_' + Date.now(),
                 nome: document.getElementById('clienteNome').value.trim() || "Não informado",
                 zap: document.getElementById('clienteWhatsapp').value.trim() || "Não informado",
-                hotel: `${dadosLocaisUltimoCalculo.hotelNome} (${dadosLocaisUltimoCalculo.quartoNome})`,
+                hotel: `${dadosLocaisUltimoCalculo.hotelNome} (${dadosLocaisUltimoCalculo.quartoNome}) - ${dadosLocaisUltimoCalculo.regimeNome}`,
                 entrada: dadosLocaisUltimoCalculo.checkin,
                 saida: dadosLocaisUltimoCalculo.checkout,
                 adultos: dadosLocaisUltimoCalculo.adQtd,
                 criancas: dadosLocaisUltimoCalculo.criQtd,
                 valor: dadosLocaisUltimoCalculo.total,
-                textoBruto: construirTextoFinalTemplate() // Salva o texto completo para reenvio
+                textoBruto: construirTextoFinalTemplate()
             };
-
-            historicoOrcamentos.unshift(novoRegistro); // Adiciona no início da lista
+            historicoOrcamentos.unshift(novoRegistro);
             localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
             renderizarTabelaHistorico();
         }
@@ -392,7 +428,7 @@
             const texto = construirTextoFinalTemplate();
             if(!texto) return;
             navigator.clipboard.writeText(texto);
-            registrarNoHistorico(); // DISPARA A REGRA DO HISTÓRICO
+            registrarNoHistorico();
             showToast("Orçamento copiado e salvo no histórico!", "success");
         }
 
@@ -400,42 +436,34 @@
             const texto = construirTextoFinalTemplate();
             if(!texto) return;
             const zap = document.getElementById('clienteWhatsapp').value.replace(/\D/g, "");
-            registrarNoHistorico(); // DISPARA A REGRA DO HISTÓRICO
-            
+            registrarNoHistorico();
             if(zap) window.open(`https://api.whatsapp.com/send?phone=55${zap}&text=${encodeURIComponent(texto)}`, '_blank');
             else window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
         }
 
-        // REENVIA O ZAP DIRETO DA TABELA DO HISTÓRICO
         function reativarAtendimentoZap(index) {
             const item = historicoOrcamentos[index];
             const foneLimpo = item.zap.replace(/\D/g, "");
-            if(foneLimpo && item.zap !== "Não informado") {
-                window.open(`https://api.whatsapp.com/send?phone=55${foneLimpo}&text=${encodeURIComponent(item.textoBruto)}`, '_blank');
-            } else {
-                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(item.textoBruto)}`, '_blank');
-            }
+            if(foneLimpo && item.zap !== "Não informado") window.open(`https://api.whatsapp.com/send?phone=55${foneLimpo}&text=${encodeURIComponent(item.textoBruto)}`, '_blank');
+            else window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(item.textoBruto)}`, '_blank');
         }
 
         function removerItemHistorico(index) {
-            if(confirm("Deseja deletar esta cotação do histórico?")) {
+            if(confirm("Deseja deletar esta cotação?")) {
                 historicoOrcamentos.splice(index, 1);
                 localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
                 renderizarTabelaHistorico();
-                showToast("Registro removido.", "success");
             }
         }
 
-        // DESENHA A LISTA DE REGISTROS NA TABELA INFERIOR
         function renderizarTabelaHistorico() {
             const tbody = document.getElementById('tbodyHistorico');
             const badge = document.getElementById('badgeContadorHistorico');
             tbody.innerHTML = "";
-            
             badge.innerText = `${historicoOrcamentos.length} registros`;
 
             if(historicoOrcamentos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400">Nenhum orçamento arquivado no histórico até o momento.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400">Nenhum orçamento arquivado.</td></tr>`;
                 return;
             }
 
@@ -443,14 +471,14 @@
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100 font-medium">
                         <td class="py-3 px-4 font-bold text-gray-900">${item.nome}<br><span class="text-gray-400 text-[11px] font-normal">${item.zap}</span></td>
-                        <td class="py-3 px-4 text-gray-600">${item.hotel}</td>
+                        <td class="py-3 px-4 text-gray-600 text-xs truncate max-w-[180px]">${item.hotel}</td>
                         <td class="py-3 px-4 font-semibold text-gray-700">${item.entrada}</td>
                         <td class="py-3 px-4 font-semibold text-gray-700">${item.saida}</td>
-                        <td class="py-3 px-4 text-center text-gray-500">${parseInt(item.adultos)} Ad / ${parseInt(item.criancas)} Criança(s)</td>
+                        <td class="py-3 px-4 text-center text-gray-500">${parseInt(item.adultos)} Ad / ${parseInt(item.criancas)} Cr</td>
                         <td class="py-3 px-4 text-blue-600 font-bold">R$ ${item.valor}</td>
                         <td class="py-3 px-4 text-right space-x-3">
-                            <button onclick="reativarAtendimentoZap(${idx})" class="text-green-500 hover:text-green-700 transition-colors" title="Reenviar pelo WhatsApp"><i data-lucide="message-circle" class="w-4 h-4 inline"></i></button>
-                            <button onclick="removerItemHistorico(${idx})" class="text-gray-400 hover:text-red-600 transition-colors" title="Remover"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
+                            <button onclick="reativarAtendimentoZap(${idx})" class="text-green-500 hover:text-green-700 transition-colors"><i data-lucide="message-circle" class="w-4 h-4 inline"></i></button>
+                            <button onclick="removerItemHistorico(${idx})" class="text-gray-400 hover:text-red-600 transition-colors"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
                         </td>
                     </tr>`;
             });
@@ -459,8 +487,6 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             carregarAptosNoSelect();
-            
-            // Carrega o histórico da memória
             const histMemoria = localStorage.getItem('ld_historico_orcamentos');
             historicoOrcamentos = histMemoria ? JSON.parse(histMemoria) : [];
             renderizarTabelaHistorico();
