@@ -188,6 +188,7 @@
                 <table class="min-w-full text-left text-xs text-gray-700 whitespace-nowrap">
                     <thead class="bg-gray-50 text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b">
                         <tr>
+                            <th class="py-3 px-4">ID</th>
                             <th class="py-3 px-4">Cliente / WhatsApp</th>
                             <th class="py-3 px-4">Imóvel</th>
                             <th class="py-3 px-4">Entrada</th>
@@ -283,7 +284,7 @@
             });
         }
 
-        function gerarCamposIdade() {
+        function generarCamposIdade() {
             const qtd = parseInt(document.getElementById('orcCriancas').value) || 0;
             const container = document.getElementById('orcIdadesContainer');
             const grid = document.getElementById('orcIdadesGrid');
@@ -406,7 +407,12 @@
             document.getElementById('txtSomaExtras').innerText = `R$ ${valorAcumuladoExtras.toFixed(2).replace('.', ',')}`;
             document.getElementById('txtQtdFree').innerText = `${criancasFree} criança(s) free (Até ${idadeFreeMax} anos)`;
 
+            // CALCULA O PRÓXIMO ID DO WHATSAPP SEQUENCIAL
+            let proximoIdNumero = historicoOrcamentos.length + 1;
+            let idLabelFormatado = proximoIdNumero < 10 ? "0" + proximoIdNumero : proximoIdNumero;
+
             dadosLocaisUltimoCalculo = {
+                idCodigo: idLabelFormatado,
                 hotelNome: apto.nome,
                 quartoNome: apto.unidade,
                 regimeNome: nomenclaturaRegimes[regimeId],
@@ -421,12 +427,14 @@
             showToast("Orçamento calculado com sucesso!", "success");
         }
 
+        // NOVO: INCLUI O ID SEQUENCIAL FORMATADO NO TEXTO QUE VAI PARA O CLIENTE
         function construirTextoFinalTemplate() {
             if(!dadosLocaisUltimoCalculo) return "";
             const nomeCliente = document.getElementById('clienteNome').value.trim();
             let cabecalho = nomeCliente ? `${nomeCliente}\n\n` : "";
 
             return `${cabecalho}*Segue orçamento de Hospedagem - ${dadosLocaisUltimoCalculo.hotelNome}*\n` +
+                   `• Orçamento: ID ${dadosLocaisUltimoCalculo.idCodigo}\n` +
                    `• Entrada: ${dadosLocaisUltimoCalculo.checkin}\n` +
                    `• Saída: ${dadosLocaisUltimoCalculo.checkout}\n` +
                    `• Total de noites: ${dadosLocaisUltimoCalculo.noitesTxt}\n` +
@@ -441,7 +449,7 @@
         function registrarNoHistorico() {
             if(!dadosLocaisUltimoCalculo) return;
             const novoRegistro = {
-                id: 'hist_' + Date.now(),
+                idCodigo: dadosLocaisUltimoCalculo.idCodigo,
                 nome: document.getElementById('clienteNome').value.trim() || "Não informado",
                 zap: document.getElementById('clienteWhatsapp').value.trim() || "Não informado",
                 hotel: `${dadosLocaisUltimoCalculo.hotelNome} (${dadosLocaisUltimoCalculo.quartoNome}) - ${dadosLocaisUltimoCalculo.regimeNome}`,
@@ -473,10 +481,7 @@
 
         function copiarTextoOrcamento() {
             const texto = construirTextoFinalTemplate();
-            if(!texto) {
-                showToast("Por favor, calcule uma cotação antes!", "error");
-                return;
-            }
+            if(!texto) return;
             navigator.clipboard.writeText(texto);
             registrarNoHistorico();
             resetarFormularioReserva();
@@ -485,15 +490,19 @@
 
         function enviarWhatsAppOrcamento() {
             const texto = construirTextoFinalTemplate();
-            if(!texto) {
-                showToast("Por favor, calcule uma cotação antes!", "error");
-                return;
-            }
+            if(!texto) return;
             const zap = document.getElementById('clienteWhatsapp').value.replace(/\D/g, "");
             registrarNoHistorico();
             resetarFormularioReserva();
             if(zap) window.open(`https://api.whatsapp.com/send?phone=55${zap}&text=${encodeURIComponent(texto)}`, '_blank');
             else window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
+        }
+
+        // FUNÇÃO ADICIONADA: COPIA DIRETO DA TABELA DO HISTÓRICO
+        function copiarTextoDiretoDoHistorico(index) {
+            const item = historicoOrcamentos[index];
+            navigator.clipboard.writeText(item.textoBruto);
+            showToast(`Orçamento ID ${item.idCodigo} copiado novamente!`, "success");
         }
 
         function reativarAtendimentoZap(index) {
@@ -508,6 +517,7 @@
                 historicoOrcamentos.splice(index, 1);
                 localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
                 renderizarTabelaHistorico();
+                showToast("Orçamento removido do histórico.", "success");
             }
         }
 
@@ -518,13 +528,15 @@
             badge.innerText = `${historicoOrcamentos.length} registros`;
 
             if(historicoOrcamentos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400">Nenhum orçamento arquivado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-gray-400">Nenhum orçamento arquivado.</td></tr>`;
                 return;
             }
 
+            // Renderização incluindo a nova coluna ID e o novo botão de cópia rápido
             historicoOrcamentos.forEach((item, idx) => {
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100 font-medium text-gray-700">
+                        <td class="py-3 px-4 font-bold text-blue-600">#${item.idCodigo || '00'}</td>
                         <td class="py-3 px-4 font-bold text-gray-900">${item.nome}<br><span class="text-gray-400 text-[11px] font-normal">${item.zap}</span></td>
                         <td class="py-3 px-4 text-gray-600 text-xs truncate max-w-[180px]">${item.hotel}</td>
                         <td class="py-3 px-4 font-semibold text-gray-700">${item.entrada}</td>
@@ -532,8 +544,9 @@
                         <td class="py-3 px-4 text-center text-gray-500">${parseInt(item.adultos)} Ad / ${parseInt(item.criancas)} Cr</td>
                         <td class="py-3 px-4 text-blue-600 font-bold">R$ ${item.valor}</td>
                         <td class="py-3 px-4 text-right space-x-3">
-                            <button onclick="reativarAtendimentoZap(${idx})" class="text-green-500 hover:text-green-700 transition-colors"><i data-lucide="message-circle" class="w-4 h-4 inline"></i></button>
-                            <button onclick="removerItemHistorico(${idx})" class="text-gray-400 hover:text-red-600 transition-colors"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
+                            <button onclick="copiarTextoDiretoDoHistorico(${idx})" class="text-gray-500 hover:text-blue-600 transition-colors" title="Copiar este orçamento de novo"><i data-lucide="clipboard" class="w-4 h-4 inline"></i></button>
+                            <button onclick="reativarAtendimentoZap(${idx})" class="text-green-500 hover:text-green-700 transition-colors" title="Enviar pelo WhatsApp"><i data-lucide="message-circle" class="w-4 h-4 inline"></i></button>
+                            <button onclick="removerItemHistorico(${idx})" class="text-gray-400 hover:text-red-600 transition-colors" title="Remover"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
                         </td>
                     </tr>`;
             });
