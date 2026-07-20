@@ -28,7 +28,7 @@
                     <button onclick="window.location.href='aptos.html'" class="bg-blue-700/50 hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2">
                         <i data-lucide="bed-double" class="w-4 h-4"></i> Aptos
                     </button>
-                    <button onclick="window.location.href='orcamentos.html'" class="bg-orange-500 hover:bg-orange-600 px-5 py-2 rounded-md font-bold text-sm shadow-sm transition-colors flex items-center gap-2 ml-4">
+                    <button onclick="window.location.href='orcamentos.html'" class="bg-orange-500 hover:bg-orange-600 px-5 py-2 rounded-md text-sm font-bold shadow-sm transition-colors flex items-center gap-2 ml-4">
                         <i data-lucide="calculator" class="w-4 h-4"></i> Orçamentos
                     </button>
                 </div>
@@ -196,7 +196,7 @@
                         <h3 class="font-bold text-green-800">Ajuste Rápido em Massa (%)</h3>
                     </div>
                     <div class="p-6 space-y-6">
-                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Data Início</label>
                                 <input type="date" id="ajusteInicio" onchange="ajustarDataFimAjuste()" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none">
@@ -212,6 +212,17 @@
                                     <option value="descontar">Diminuir Preço (-)</option>
                                 </select>
                             </div>
+                            <!-- NOVO FILTRO DE REGIME DENTRO DO AJUSTE EM MASSA -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Regime de Pensão</label>
+                                <select id="ajusteRegime" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none bg-white">
+                                    <option value="todos">Todos os regimes</option>
+                                    <option value="ro">Sem refeição (RO)</option>
+                                    <option value="bb">Café da Manhã (BB)</option>
+                                    <option value="map">Café + Almoço ou Jantar (MAP)</option>
+                                    <option value="fap">Pensão Completa (FAP)</option>
+                                </select>
+                            </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Porcentagem (%)</label>
                                 <input type="number" id="ajustePorcentagem" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none" placeholder="10">
@@ -223,7 +234,7 @@
                     </div>
                 </div>
 
-                <!-- Gestão do Calendário (MÊS, TARIFA E AGORA REGIME DE PENSÃO) -->
+                <!-- Gestão do Calendário -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                         <h3 class="font-bold text-gray-900 flex items-center gap-2">
@@ -232,8 +243,6 @@
                         <span id="contadorDias" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">0 dias</span>
                     </div>
                     <div class="p-6">
-                        
-                        <!-- FILTROS DO PRINT + REGIME DE PENSÃO -->
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 pb-4 border-b border-gray-100">
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wide">Filtrar por Mês</label>
@@ -568,7 +577,6 @@
                 
                 let novoItem = { 
                     data: dataIso, 
-                    name: nomeTarifa, // Consertado chave interna do motor legada
                     nome: nomeTarifa, 
                     regime: regimeAtivoAba, 
                     single: sVal, 
@@ -592,10 +600,12 @@
             showToast(`Tarifas aplicadas em ${contadorDiasInjetados} dias de ${nomenclaturaRegimes[regimeAtivoAba]}!`, "success");
         }
 
+        // EXECUTA AJUSTE EM MASSA RESPEITANDO O FILTRO DO REGIME DE PENSÃO SELECIONADO
         function executarAjusteEmMassa() {
             const dInicioStr = document.getElementById('ajusteInicio').value;
             const dFimStr = document.getElementById('ajusteFim').value;
             const acao = document.getElementById('ajusteAcao').value;
+            const regimeFiltro = document.getElementById('ajusteRegime').value; // Regime a ser alterado
             const porcentagem = parseFloat(document.getElementById('ajustePorcentagem').value) || 0;
             if(!dInicioStr || !dFimStr || porcentagem <= 0) { alert("Preencha os campos!"); return; }
 
@@ -605,11 +615,16 @@
 
             apto.calendario.forEach(dia => {
                 let diaData = new Date(dia.data + "T12:00:00");
+                let regimeEfetivoDoDia = dia.regime || "ro";
+
+                // Só aplica o reajuste se a data coincidir e bater com o regime escolhido (ou se marcou todos)
                 if(diaData >= dStart && diaData <= dEnd) {
-                    let f = (porcentagem / 100);
-                    let mult = acao === "acrescentar" ? (1 + f) : (1 - f);
-                    dia.single *= mult; dia.duplo *= mult; dia.extra *= mult;
-                    alterados++;
+                    if (regimeFiltro === "todos" || regimeEfetivoDoDia === regimeFiltro) {
+                        let f = (porcentagem / 100);
+                        let mult = acao === "acrescentar" ? (1 + f) : (1 - f);
+                        dia.single *= mult; dia.duplo *= mult; dia.extra *= mult;
+                        alterados++;
+                    }
                 }
             });
             
@@ -617,9 +632,10 @@
             renderizarLinhasCalendario();
             
             if(alterados > 0) {
-                showToast(`Reajuste de ${porcentagem}% aplicado em ${alterados} diárias!`, "success");
+                let regimeLabel = regimeFiltro === "todos" ? "todos os regimes" : nomenclaturaRegimes[regimeFiltro];
+                showToast(`Reajuste de ${porcentagem}% aplicado em ${alterados} diárias de ${regimeLabel}!`, "success");
             } else {
-                showToast("Nenhuma diária localizada no período escolhido.", "error");
+                showToast("Nenhuma diária localizada com esse regime no período escolhido.", "error");
             }
         }
 
@@ -636,7 +652,7 @@
         function limparFiltrosCalendario() {
             document.getElementById('filtroMes').value = "todos";
             document.getElementById('filtroTarifa').value = "todas";
-            document.getElementById('filtroRegime').value = "todos"; // Limpa o terceiro filtro também
+            document.getElementById('filtroRegime').value = "todos";
             renderizarLinhasCalendario();
         }
 
@@ -673,7 +689,6 @@
             showToast("Valores carregados no painel de edição acima!", "success");
         }
 
-        // MOTOR DE RENDERIZAÇÃO COORDENANDO OS 3 FILTROS SIMULTANEAMENTE (Mês, Tarifa e Regime)
         function renderizarLinhasCalendario() {
             const tbody = document.getElementById('tbodyCalendario');
             const contador = document.getElementById('contadorDias');
@@ -686,7 +701,7 @@
 
             const fMes = document.getElementById('filtroMes').value;
             const fTarifa = document.getElementById('filtroTarifa').value;
-            const fRegime = document.getElementById('filtroRegime').value; // Captura do novo seletor
+            const fRegime = document.getElementById('filtroRegime').value;
             const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
             
             let itensFiltrados = apto.calendario.filter(dia => {
@@ -695,7 +710,7 @@
 
                 let bateMes = fMes === "todos" || partes[1] === fMes;
                 let bateTarifa = fTarifa === "todas" || dia.nome === fTarifa;
-                let bateRegime = fRegime === "todos" || regimeEfetivoDoDia === fRegime; // Cruzamento de dados
+                let bateRegime = fRegime === "todos" || regimeEfetivoDoDia === fRegime;
 
                 return bateMes && bateTarifa && bateRegime;
             });
