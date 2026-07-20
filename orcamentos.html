@@ -191,7 +191,7 @@
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <i data-lucide="search" class="w-4 h-4"></i>
                     </span>
-                    <input type="text" id="inputBuscaHistorico" oninput="mudarPaginaHistorico(1)" class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Buscar por Nome, ID, Data ou Zap...">
+                    <input type="text" id="inputBuscaHistorico" oninput="mudarPaginaHistorico(1)" class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Buscar por Nome, ID ou WhatsApp...">
                 </div>
                 
                 <span id="badgeContadorHistorico" class="bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1 rounded-full shrink-0">0 registros</span>
@@ -484,7 +484,6 @@
                 
                 descontoPromocionalCalculado = valorMedioPorDiaria * quantidadeDiariasCortesia;
                 
-                // MUDANÇA: Exibe apenas o nome comercial da promoção no zap, como na imagem branca
                 textoNomePromoAplicadaNoZap = apto.promoNome;
                 
                 document.getElementById('linhaVisualPromo').classList.remove('hidden');
@@ -499,6 +498,7 @@
             let valorTotalGeral = (valorAcumuladoBase + valorAcumuladoExtras) - descontoPromocionalCalculado;
             let msgNoitesTexto = totalNoitesBusca === 1 ? "01 noite" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " noites";
 
+            // MATEMÁTICA DO ID BLINDADA: Pega o maior número real do histórico e soma +1
             let maiorIdAtual = 0;
             if (historicoOrcamentos && historicoOrcamentos.length > 0) {
                 historicoOrcamentos.forEach(item => {
@@ -509,7 +509,7 @@
                 });
             }
             let proximoIdNumero = maiorIdAtual + 1;
-            let idLabelFormatado = proximoIdNumero < 10 ? "0" + proximoIdNumero : proximoIdNumero.toString();
+            let idLabelFormatado = proximoIdNumero.toString().padStart(2, '0');
 
             const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
             let dataCheckinObj = new Date(dInicioStr + "T12:00:00");
@@ -544,7 +544,6 @@
             showToast("Orçamento calculado com sucesso!", "success");
         }
 
-        // NOVO: FORMATADOR DE TEXTO REFEITO PARA FICAR IDÊNTICO À IMAGEM BRANCA
         function construirTextoFinalTemplate() {
             if(!dadosLocaisUltimoCalculo) return "";
             
@@ -613,7 +612,7 @@
             document.getElementById('resultadoCotacao').classList.add('hidden');
             document.getElementById('estadoVazio').classList.remove('hidden');
             dadosLocaisUltimoCalculo = null;
-            atualizarRegimesDisponiveisNoForm(); // Sincroniza o apto resetado para trazer a Obs correta
+            atualizarRegimesDisponiveisNoForm();
         }
 
         function copiarTextoOrcamento() {
@@ -669,13 +668,12 @@
             let listaOrdenadaParaExibicao = [...historicoOrcamentos].sort((a, b) => b.timestamp - a.timestamp);
             const termoBusca = document.getElementById('inputBuscaHistorico').value.trim().toLowerCase();
             
+            // CORREÇÃO: IGNORA DATAS NA BUSCA PARA NÃO CONFUNDIR MÊS COM ID
             if(termoBusca) {
                 listaOrdenadaParaExibicao = listaOrdenadaParaExibicao.filter(item => {
-                    let idString = String(item.idCodigo || "").toLowerCase();
-                    let dataEmissaoString = String(item.dataEmissao || "").toLowerCase();
+                    let idString = String(item.idCodigo || "").padStart(2, '0');
                     return item.nome.toLowerCase().includes(termoBusca) || 
                            idString.includes(termoBusca) || 
-                           dataEmissaoString.includes(termoBusca) ||
                            item.zap.replace(/\D/g, "").includes(termoBusca);
                 });
             }
@@ -694,12 +692,9 @@
             const itensPaginaAtiva = listaOrdenadaParaExibicao.slice(indexInicial, indexFinal);
             txtInfo.innerText = `Mostrando ${indexInicial + 1}-${indexFinal} de ${totalRegistrosFiltrados} cotações`;
 
-            itensPaginaAtiva.forEach((item, indexNoLoop) => {
-                let idNum = parseInt(item.idCodigo, 10);
-                let idRealTratado = !isNaN(idNum) ? idNum : (totalRegistrosFiltrados - indexInicial - indexNoLoop);
-                let idDisplay = idRealTratado < 10 ? "0" + idRealTratado : idRealTratado.toString();
-
-                let dataEmissaoTratada = item.dataEmissao ? item.dataEmissao : new Date(item.timestamp || Date.now()).toLocaleDateString('pt-BR') + ' às 09:00';
+            itensPaginaAtiva.forEach((item) => {
+                let idDisplay = item.idCodigo ? item.idCodigo.toString().padStart(2, '0') : "00";
+                let dataEmissaoTratada = item.dataEmissao ? item.dataEmissao : new Date(item.timestamp).toLocaleDateString('pt-BR') + ' às 09:00';
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100 font-medium text-gray-700">
@@ -733,7 +728,23 @@
             carregarAptosNoSelect();
             inicializarCalendarOrcamentoFlatpickr();
             const histMemoria = localStorage.getItem('ld_historico_orcamentos');
-            historicoOrcamentos = histMemoria ? JSON.parse(histMemoria) : [];
+            let tempHist = histMemoria ? JSON.parse(histMemoria) : [];
+            
+            // NOVO: AUTO-CORRETOR INVISÍVEL (Arruma todos os registros velhos do banco com IDs falhos)
+            let precisaSalvar = false;
+            tempHist.forEach((item, idx) => {
+                if (!item.idCodigo || item.idCodigo === "undefined" || item.idCodigo === "NaN") {
+                    item.idCodigo = (tempHist.length - idx).toString().padStart(2, '0');
+                    precisaSalvar = true;
+                }
+                if (!item.timestamp) {
+                    item.timestamp = Date.now() - (idx * 60000); // Cria a linha do tempo retroativa segura
+                    precisaSalvar = true;
+                }
+            });
+            historicoOrcamentos = tempHist;
+            if(precisaSalvar) localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
+
             renderizarTabelaHistorico();
         });
     </script>
