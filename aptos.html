@@ -83,7 +83,6 @@
                         </div>
                     </div>
 
-                    <!-- REGRAS DE REGIME NO CADASTRO DO APTO -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Cortesia Infantil -->
                         <div class="bg-blue-50 rounded-lg p-5 border border-blue-100">
@@ -154,7 +153,7 @@
                             </div>
                         </div>
 
-                        <!-- ABAS DINÂMICAS DE REFEIÇÃO CONFORME SELEÇÃO DO PROPRIETÁRIO -->
+                        <!-- ABAS DINÂMICAS DE REFEIÇÃO -->
                         <div class="border-b border-gray-200">
                             <nav id="abasRegimesContainer" class="-mb-px flex space-x-6 text-sm font-semibold"></nav>
                         </div>
@@ -162,20 +161,20 @@
                         <!-- BLOCO DOS VALORES DA DIÁRIA -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
                             <h4 class="text-sm font-bold text-gray-700 uppercase mb-4 border-b pb-2 flex items-center gap-2">
-                                <i data-lucide="utensils-crossopened" class="w-4 h-4 text-gray-500"></i> Preços para o Regime Ativo: <span id="txtRegimeAtivoLabel" class="text-blue-600 text-sm font-bold">Sem Refeição</span>
+                                <i data-lucide="utensils" class="w-4 h-4 text-gray-500"></i> Preços para o Regime Ativo: <span id="txtRegimeAtivoLabel" class="text-blue-600 text-sm font-bold">Sem Refeição</span>
                             </h4>
                             <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Single (1 pessoa)</label>
-                                    <input type="number" id="tSingle" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00">
+                                    <input type="number" id="tSingle" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none focus:ring-2 focus:ring-blue-500" placeholder="0">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Duplo (Total p/ 2 pessoas)</label>
-                                    <input type="number" id="tDuplo" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-green-500 outline-none focus:ring-2 focus:ring-green-500" placeholder="0.00">
+                                    <input type="number" id="tDuplo" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-green-500 outline-none focus:ring-2 focus:ring-green-500" placeholder="0">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Adicional Adulto / Criança (3º+)</label>
-                                    <input type="number" id="tExtra" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00">
+                                    <input type="number" id="tExtra" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none focus:ring-2 focus:ring-blue-500" placeholder="0">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Mín. Noites</label>
@@ -287,6 +286,7 @@
         </div>
     </main>
 
+    <!-- Toast Container Avançado para dar o Alerta de Sucesso -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
@@ -294,7 +294,6 @@
         let listaAptos = [];
         let aptoAtualId = null;
         
-        // Mapeamento global de códigos de regimes e nomes comerciais
         const nomenclaturaRegimes = {
             ro: "Sem refeição (RO)",
             bb: "Café da Manhã (BB)",
@@ -302,14 +301,16 @@
             fap: "Pensão Completa (FAP)"
         };
         
-        let regimeAtivoAba = "ro"; // Aba default ativa ao abrir
-        let cacheValoresTemporariosForm = {}; // Guarda o que digita em uma aba ao trocar para outra
+        let regimeAtivoAba = "ro";
+        let cacheValoresTemporariosForm = {};
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = `${type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
-            toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-5 h-5"></i><span class="font-medium text-sm">${message}</span>`;
+            const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+            toast.className = `${bgColor} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i><span class="font-medium text-sm">${message}</span>`;
             container.appendChild(toast);
             lucide.createIcons();
             setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
@@ -392,6 +393,10 @@
             document.getElementById('regime_ro').checked = true; document.getElementById('regime_bb').checked = true;
             document.getElementById('regime_map').checked = false; document.getElementById('regime_fap').checked = false;
             
+            // Garante campos limpos/zerados ao nascer
+            zerarCamposPrecoFormulario();
+            cacheValoresTemporariosForm = {};
+
             document.getElementById('blocoTarifasAdicionais').classList.add('hidden');
             document.getElementById('secaoListagem').classList.add('hidden');
             document.getElementById('secaoFormulario').classList.remove('hidden');
@@ -408,7 +413,6 @@
             document.getElementById('aptoIdadeFree').value = apto.idadeFree || "12";
             document.getElementById('aptoQtdFree').value = apto.qtdFree || "2";
 
-            // Restaura as marcações de regime salvas
             document.getElementById('regime_ro').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('ro') : true;
             document.getElementById('regime_bb').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('bb') : true;
             document.getElementById('regime_map').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('map') : false;
@@ -418,19 +422,28 @@
             document.getElementById('secaoListagem').classList.add('hidden');
             document.getElementById('secaoFormulario').classList.remove('hidden');
             
+            zerarCamposPrecoFormulario();
+            cacheValoresTemporariosForm = {};
+
             aplicarTravasDeData();
             montarAbasDeRegimeFormulario(apto);
             atualizarDropdownFiltroTarifas(apto);
             renderizarLinhasCalendario();
         }
 
-        // 4. CRIA AS ABAS DE TARIFA BASEADO NO QUE O ATENDENTE MARCOU NO HOTEL
+        function zerarCamposPrecoFormulario() {
+            document.getElementById('tSingle').value = "";
+            document.getElementById('tDuplo').value = "";
+            document.getElementById('tExtra').value = "";
+            document.getElementById('tMinNoites').value = "2";
+        }
+
         function montarAbasDeRegimeFormulario(apto) {
             const container = document.getElementById('abasRegimesContainer');
             container.innerHTML = "";
 
             let regimes = apto.regimesAtivos || ['ro', 'bb'];
-            regimeAtivoAba = regimes[0]; // Força ativar a primeira aba disponível
+            regimeAtivoAba = regimes[0];
             
             regimes.forEach(regId => {
                 const ativo = regId === regimeAtivoAba;
@@ -442,12 +455,15 @@
         }
 
         function mudarAbaRegimePreco(regId) {
-            // Salva o valor antigo da aba anterior no cache temporário para não apagar ao clicar
-            if (regimeAtivoAba) {
+            // Regra de sincronização do título da aba com o painel de digitação de valores
+            document.getElementById('txtRegimeAtivoLabel').innerText = nomenclaturaRegimes[regId];
+
+            if (regimeAtivoAba && regimeAtivoAba !== regId) {
                 cacheValoresTemporariosForm[regimeAtivoAba] = {
                     single: document.getElementById('tSingle').value,
                     duplo: document.getElementById('tDuplo').value,
-                    extra: document.getElementById('tExtra').value
+                    extra: document.getElementById('tExtra').value,
+                    minNoites: document.getElementById('tMinNoites').value
                 };
                 document.getElementById(`aba_btn_${regimeAtivoAba}`)?.classList.remove('border-blue-600', 'text-blue-600', 'border-b-2');
                 document.getElementById(`aba_btn_${regimeAtivoAba}`)?.classList.add('border-transparent', 'text-gray-500');
@@ -456,17 +472,15 @@
             regimeAtivoAba = regId;
             document.getElementById(`aba_btn_${regId}`)?.classList.remove('border-transparent', 'text-gray-500');
             document.getElementById(`aba_btn_${regId}`)?.classList.add('border-blue-600', 'text-blue-600', 'border-b-2');
-            document.getElementById('txtRegimeAtivoLabel').innerText = nomenclatureRegimes[regId];
 
-            // Puxa do cache ou limpa os inputs para preenchimento do novo regime
+            // REGRA: SE NÃO HOUVER PREÇO CACHED, NASCE EM BRANCO/ZERADO
             if (cacheValoresTemporariosForm[regId]) {
                 document.getElementById('tSingle').value = cacheValoresTemporariosForm[regId].single;
                 document.getElementById('tDuplo').value = cacheValoresTemporariosForm[regId].duplo;
                 document.getElementById('tExtra').value = cacheValoresTemporariosForm[regId].extra;
+                document.getElementById('tMinNoites').value = cacheValoresTemporariosForm[regId].minNoites || "2";
             } else {
-                document.getElementById('tSingle').value = "";
-                document.getElementById('tDuplo').value = "";
-                document.getElementById('tExtra').value = "";
+                zerarCamposPrecoFormulario();
             }
         }
 
@@ -483,14 +497,13 @@
             const capMax = document.getElementById('aptoCapMax').value;
             if(!nome || !unidad || !capMax) { alert("Preencha os dados obrigatórios!"); return; }
 
-            // Junta os regimes que foram ticados nas caixinhas
             let regimesMarcados = [];
             if(document.getElementById('regime_ro').checked) regimesMarcados.push('ro');
             if(document.getElementById('regime_bb').checked) regimesMarcados.push('bb');
             if(document.getElementById('regime_map').checked) regimesMarcados.push('map');
             if(document.getElementById('regime_fap').checked) regimesMarcados.push('fap');
 
-            if(regimesMarcados.length === 0) { alert("Selecione pelo menos um regime de alimentação para o imóvel!"); return; }
+            if(regimesMarcados.length === 0) { alert("Selecione pelo menos um regime de alimentação!"); return; }
 
             let index = listaAptos.findIndex(a => a.id === aptoAtualId);
             let aptoObjeto = {
@@ -507,14 +520,19 @@
             salvarListaAptos();
             montarAbasDeRegimeFormulario(aptoObjeto);
             document.getElementById('blocoTarifasAdicionais').classList.remove('hidden');
-            showToast("Dados base salvos. Abas de tarifas atualizadas!", "success");
+            
+            // BARRA DE INFORMAÇÃO VISUAL (TOAST)
+            showToast("Imóvel e regimes salvos com sucesso!", "success");
         }
 
         function deletarApto(id) {
-            if(confirm("Excluir este apartamento?")) { listaAptos = listaAptos.filter(a => a.id !== id); salvarListaAptos(); }
+            if(confirm("Excluir este apartamento?")) { 
+                listaAptos = listaAptos.filter(a => a.id !== id); 
+                salvarListaAptos(); 
+                showToast("Apartamento removido.", "success");
+            }
         }
 
-        // 5. INJETA NO CALENDÁRIO AMARRANDO O REGIME QUE ESTAVA ATIVO NA ABA
         function gerarTarifasNoCalendario() {
             const nomeTarifa = document.getElementById('tNome').value.trim() || "Padrão";
             let dInicioStr = document.getElementById('tInicio').value;
@@ -534,17 +552,16 @@
             let apto = listaAptos.find(a => a.id === aptoAtualId);
             let dCorrente = new Date(dInicioStr + "T12:00:00");
             let dFinal = new Date(dFimStr + "T12:00:00");
+            let contadorDiasInjetados = 0;
 
             while(dCorrente <= dFinal) {
                 let dataIso = dCorrente.toISOString().split('T')[0];
-                
-                // A chave primária única agora leva em conta a DATA + REGIME ALIMENTAR
                 let itemIdx = apto.calendario.findIndex(c => c.data === dataIso && c.regime === regimeAtivoAba);
                 
                 let novoItem = { 
                     data: dataIso, 
                     nome: nomeTarifa, 
-                    regime: regimeAtivoAba, // Guarda o código da aba (ro, bb, etc)
+                    regime: regimeAtivoAba, 
                     single: sVal, 
                     duplo: dVal, 
                     extra: eVal, 
@@ -554,6 +571,7 @@
                 if(itemIdx > -1) apto.calendario[itemIdx] = novoItem;
                 else apto.calendario.push(novoItem);
                 
+                contadorDiasInjetados++;
                 dCorrente.setDate(dCorrente.getDate() + 1);
             }
 
@@ -561,7 +579,9 @@
             salvarListaAptos();
             atualizarDropdownFiltroTarifas(apto);
             renderizarLinhasCalendario();
-            showToast(`Diárias com ${nomenclaturaRegimes[regimeAtivoAba]} aplicadas!`, "success");
+            
+            // BARRA DE INFORMAÇÃO VISUAL (TOAST)
+            showToast(`Tarifas aplicadas em ${contadorDiasInjetados} dias de ${nomenclaturaRegimes[regimeAtivoAba]}!`, "success");
         }
 
         function executarAjusteEmMassa() {
@@ -573,6 +593,7 @@
 
             let apto = listaAptos.find(a => a.id === aptoAtualId);
             let dStart = new Date(dInicioStr + "T00:00:00"); let dEnd = new Date(dFimStr + "T23:59:59");
+            let alterados = 0;
 
             apto.calendario.forEach(dia => {
                 let diaData = new Date(dia.data + "T12:00:00");
@@ -580,14 +601,22 @@
                     let f = (porcentagem / 100);
                     let mult = acao === "acrescentar" ? (1 + f) : (1 - f);
                     dia.single *= mult; dia.duplo *= mult; dia.extra *= mult;
+                    alterados++;
                 }
             });
+            
             salvarListaAptos();
             renderizarLinhasCalendario();
-            showToast("Ajuste percentual realizado!", "success");
+            
+            // BARRA DE INFORMAÇÃO VISUAL (TOAST)
+            if(alterados > 0) {
+                showToast(`Reajuste de ${porcentagem}% aplicado em ${alterados} diárias!`, "success");
+            } else {
+                showToast("Nenhuma diária localizada no período escolhido.", "error");
+            }
         }
 
-        function actualizarDropdownFiltroTarifas(apto) {
+        function atualizarDropdownFiltroTarifas(apto) {
             const select = document.getElementById('filtroTarifa');
             select.innerHTML = `<option value="todas">Todas as tarifas</option>`;
             if(!apto.calendario) return;
@@ -606,7 +635,9 @@
         function deletarDiaCalendario(dataStr, regId) {
             let apto = listaAptos.find(a => a.id === aptoAtualId);
             apto.calendario = apto.calendario.filter(c => !(c.data === dataStr && c.regime === regId));
-            salvarListaAptos(); renderizarLinhasCalendario();
+            salvarListaAptos(); 
+            renderizarLinhasCalendario();
+            showToast("Diária removida.", "success");
         }
 
         function renderizarLinhasCalendario() {
@@ -648,7 +679,7 @@
                         <td class="py-3 px-2 font-bold text-gray-900">${dataFormatada}</td>
                         <td class="py-3 px-2 text-gray-400 text-xs">${diaNome}</td>
                         <td class="py-3 px-2"><span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-xs font-bold border border-blue-100">${dia.nome}</span></td>
-                        <td class="py-3 px-2 font-semibold text-orange-700">${nomenclaturaRegimes[dia.regime]}</td>
+                        <td class="py-3 px-2 font-bold text-orange-700">${nomenclaturaRegimes[dia.regime]}</td>
                         <td class="py-3 px-2 text-gray-500">R$ ${dia.single.toFixed(2).replace('.', ',')}</td>
                         <td class="py-3 px-2 text-gray-900 font-bold">R$ ${dia.duplo.toFixed(2).replace('.', ',')}</td>
                         <td class="py-3 px-2 text-gray-500">R$ ${dia.extra.toFixed(2).replace('.', ',')}</td>
