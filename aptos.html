@@ -223,7 +223,7 @@
                     </div>
                 </div>
 
-                <!-- Gestão do Calendário -->
+                <!-- Gestão do Calendário (MÊS, TARIFA E AGORA REGIME DE PENSÃO) -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                         <h3 class="font-bold text-gray-900 flex items-center gap-2">
@@ -232,7 +232,9 @@
                         <span id="contadorDias" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">0 dias</span>
                     </div>
                     <div class="p-6">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 pb-4 border-b border-gray-100">
+                        
+                        <!-- FILTROS DO PRINT + REGIME DE PENSÃO -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 pb-4 border-b border-gray-100">
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wide">Filtrar por Mês</label>
                                 <select id="filtroMes" onchange="renderizarLinhasCalendario()" class="block w-full text-sm border-gray-300 rounded-md py-2 px-3 border bg-white outline-none">
@@ -253,9 +255,19 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wide">Filtrar por Tarifa</label>
+                                <select id="filtroTarifa" onchange="renderizarLinhasCalendario()" class="block w-full text-sm border-gray-300 rounded-md py-2 px-3 border bg-white outline-none">
+                                    <option value="todas">Todas as tarifas</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wide">Filtrar por Regime Pensão</label>
                                 <div class="flex items-center gap-3">
-                                    <select id="filtroTarifa" onchange="renderizarLinhasCalendario()" class="block w-full text-sm border-gray-300 rounded-md py-2 px-3 border bg-white outline-none">
-                                        <option value="todas">Todas as tarifas</option>
+                                    <select id="filtroRegime" onchange="renderizarLinhasCalendario()" class="block w-full text-sm border-gray-300 rounded-md py-2 px-3 border bg-white outline-none">
+                                        <option value="todos">Todos os regimes</option>
+                                        <option value="ro">Sem refeição (RO)</option>
+                                        <option value="bb">Café da Manhã (BB)</option>
+                                        <option value="map">Café + Almoço ou Jantar (MAP)</option>
+                                        <option value="fap">Pensão Completa (FAP)</option>
                                     </select>
                                     <button onclick="limparFiltrosCalendario()" class="text-blue-600 text-sm font-semibold hover:underline shrink-0">Limpar</button>
                                 </div>
@@ -556,6 +568,7 @@
                 
                 let novoItem = { 
                     data: dataIso, 
+                    name: nomeTarifa, // Consertado chave interna do motor legada
                     nome: nomeTarifa, 
                     regime: regimeAtivoAba, 
                     single: sVal, 
@@ -623,14 +636,12 @@
         function limparFiltrosCalendario() {
             document.getElementById('filtroMes').value = "todos";
             document.getElementById('filtroTarifa').value = "todas";
+            document.getElementById('filtroRegime').value = "todos"; // Limpa o terceiro filtro também
             renderizarLinhasCalendario();
         }
 
-        // NOVO CORREÇÃO: REMOVE A LINHA DE QUALQUER FORMAb, BLINDADO CONTRA UNDEFINED
         function deletarDiaCalendario(dataStr, regId) {
             let apto = listaAptos.find(a => a.id === aptoAtualId);
-            
-            // Filtra removendo o item correspondente de forma implacável
             apto.calendario = apto.calendario.filter(c => {
                 let eAlvo = c.data === dataStr && (c.regime === regId || (!c.regime && regId === 'undefined'));
                 return !eAlvo;
@@ -641,17 +652,12 @@
             showToast("Diária removida com sucesso!", "success");
         }
 
-        // NOVO RECURSO: EDITA RÁPIDO UMA LINHA ESPECÍFICA DO CALENDÁRIO
         function carregarLinhaParaEdicaoRapida(dataStr, regId) {
             let apto = listaAptos.find(a => a.id === aptoAtualId);
             let dia = apto.calendario.find(c => c.data === dataStr && (c.regime === regId || (!c.regime && regId === 'undefined')));
-            
             if(!dia) return;
 
-            // Injeta o regime correto ativo e força abrir a aba certa
             let regimeAlvo = dia.regime || "ro";
-            
-            // Preenche o formulário lá no topo
             document.getElementById('tNome').value = dia.nome || "";
             document.getElementById('tInicio').value = dia.data;
             document.getElementById('tFim').value = dia.data;
@@ -663,11 +669,11 @@
             document.getElementById('tExtra').value = dia.extra;
             document.getElementById('tMinNoites').value = dia.minNoites;
 
-            // Rola a tela suavemente para o bloco de edição
             document.getElementById('formularioAncoragemTarifas').scrollIntoView({ behavior: 'smooth' });
             showToast("Valores carregados no painel de edição acima!", "success");
         }
 
+        // MOTOR DE RENDERIZAÇÃO COORDENANDO OS 3 FILTROS SIMULTANEAMENTE (Mês, Tarifa e Regime)
         function renderizarLinhasCalendario() {
             const tbody = document.getElementById('tbodyCalendario');
             const contador = document.getElementById('contadorDias');
@@ -680,13 +686,18 @@
 
             const fMes = document.getElementById('filtroMes').value;
             const fTarifa = document.getElementById('filtroTarifa').value;
+            const fRegime = document.getElementById('filtroRegime').value; // Captura do novo seletor
             const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
             
             let itensFiltrados = apto.calendario.filter(dia => {
                 let partes = dia.data.split('-');
+                let regimeEfetivoDoDia = dia.regime || "ro";
+
                 let bateMes = fMes === "todos" || partes[1] === fMes;
                 let bateTarifa = fTarifa === "todas" || dia.nome === fTarifa;
-                return bateMes && bateTarifa;
+                let bateRegime = fRegime === "todos" || regimeEfetivoDoDia === fRegime; // Cruzamento de dados
+
+                return bateMes && bateTarifa && bateRegime;
             });
 
             contador.innerText = `${itensFiltrados.length} resultados`;
@@ -702,8 +713,7 @@
                 let diaNome = diasSemana[dataObjeto.getDay()];
                 let dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
                 
-                // Trata o undefined visual antigo
-                let textoRegime = dia.regime ? nomenclaturaRegimes[dia.regime] : "<span class='text-red-500 font-normal'>Não definido (Clique em Editar)</span>";
+                let textoRegime = dia.regime ? nomenclaturaRegimes[dia.regime] : "<span class='text-red-500 font-normal'>Não definido</span>";
                 let identificadorRegimeParaFuncao = dia.regime ? dia.regime : 'undefined';
 
                 tbody.innerHTML += `
