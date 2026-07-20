@@ -191,7 +191,6 @@
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <i data-lucide="search" class="w-4 h-4"></i>
                     </span>
-                    <!-- PLACEHOLDER MODIFICADO PARA INSTRUIR O USUÁRIO SOBRE A BUSCA POR # -->
                     <input type="text" id="inputBuscaHistorico" oninput="mudarPaginaHistorico(1)" class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Buscar por Nome, Zap ou digite #ID (Ex: #08)">
                 </div>
                 
@@ -508,7 +507,7 @@
                 });
             }
             let proximoIdNumero = maiorIdAtual + 1;
-            let idLabelFormatado = proximoIdNumero < 10 ? "0" + proximoIdNumero : proximoIdNumero.toString();
+            let idLabelFormatado = proximoIdNumero.toString().padStart(2, '0');
 
             const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
             let dataCheckinObj = new Date(dInicioStr + "T12:00:00");
@@ -559,13 +558,15 @@
 
             let linhaObs = obsTexto ? `\n*Informações Importantes:*\n${obsTexto}` : "";
 
+            // MODIFICAÇÃO DO TEMPLATE AQUI: O REGIME FOI PARA UMA LINHA SEPARADA
             return `${cabecalho}*Segue orçamento de Hospedagem em Caldas Novas*\n` +
                    `• Orçamento: ID #${dadosLocaisUltimoCalculo.idCodigo}\n` +
                    `• *${dadosLocaisUltimoCalculo.hotelNome.toUpperCase()}*\n` +
                    `• Entrada: ${dadosLocaisUltimoCalculo.checkin}\n` +
                    `• Saída: ${dadosLocaisUltimoCalculo.checkout}\n` +
                    `• Total de noites: ${dadosLocaisUltimoCalculo.noitesTxt}\n` +
-                   `• Acomodação: ${dadosLocaisUltimoCalculo.quartoNome} (${dadosLocaisUltimoCalculo.regimeNome})\n` +
+                   `• Acomodação: ${dadosLocaisUltimoCalculo.quartoNome}\n` +
+                   `• Regime: ${dadosLocaisUltimoCalculo.regimeNome}\n` +
                    linhaOfertaZap + 
                    `\n*Configuração*\n` +
                    `• ${dadosLocaisUltimoCalculo.adQtd} Adulto(s)\n` +
@@ -668,7 +669,6 @@
             const termoBusca = document.getElementById('inputBuscaHistorico').value.trim().toLowerCase();
             
             if(termoBusca) {
-                // REGRA INTELIGENTE DE BUSCA: Se começar com #, busca SOMENTE no ID e ignora nomes, telefones e datas.
                 if(termoBusca.startsWith('#')) {
                     let idBuscado = termoBusca.replace('#', '').trim();
                     listaOrdenadaParaExibicao = listaOrdenadaParaExibicao.filter(item => {
