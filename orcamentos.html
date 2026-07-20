@@ -58,7 +58,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Regime de Alimentação</label>
-                        <select id="orcRegimeSelect" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
+                        <select id="orcRegimeSelect" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white font-semibold text-blue-800">
                         </select>
                     </div>
 
@@ -126,9 +126,9 @@
                                 <h2 class="text-xl font-bold text-gray-900">Resumo da Cotação</h2>
                                 <p id="resumoReserva" class="text-sm text-gray-500 mt-1"></p>
                             </div>
-                            <div class="text-right">
+                            <div class="text-right flex flex-col items-end">
                                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Valor Total</p>
-                                <p id="valorTotal" class="text-3xl font-black text-blue-600 mt-1">R$ 0,00</p>
+                                <div id="valorTotal" class="text-3xl font-black text-blue-600 mt-1">R$ 0,00</div>
                             </div>
                         </div>
 
@@ -346,6 +346,9 @@
             const apto = listaAptos.find(a => a.id === aptoId);
             
             let regimes = apto.regimesAtivos || ['ro', 'bb'];
+            
+            // NOVO: Adiciona a opção de todos os regimes no topo
+            selectRegime.innerHTML = `<option value="todos">Todos os Regimes Disponíveis</option>`;
             regimes.forEach(regId => {
                 selectRegime.innerHTML += `<option value="${regId}">${nomenclaturaRegimes[regId]}</option>`;
             });
@@ -426,76 +429,134 @@
 
             let pagantesAdicionais = criancasPagantes;
             let adultosEfetivos = adultos;
-            let valorAcumuladoBase = 0; let valorAcumuladoExtras = 0;
 
-            let dCorrente = new Date(dInicioStr + "T12:00:00");
-            let dFinal = new Date(dFimStr + "T12:00:00");
-            let erroFaltaTarifa = false;
-            let noitesMinimasExigidasDoPeriodo = 0;
+            // NOVO MOTOR DE CÁLCULO: Prepara a lista de regimes que serão calculados
+            let regimesParaCalcular = regimeId === "todos" ? (apto.regimesAtivos || ['ro']) : [regimeId];
+            let resultadosGerais = [];
+            let erroEncontrado = false;
+            let msgErroFinal = "";
 
-            while(dCorrente < dFinal) {
-                let dataIso = dCorrente.toISOString().split('T')[0];
-                let tarifaDia = apto.calendario ? apto.calendario.find(c => c.data === dataIso && c.regime === regimeId) : null;
+            for (let rId of regimesParaCalcular) {
+                let valorAcumuladoBase = 0; 
+                let valorAcumuladoExtras = 0;
+                let erroFaltaTarifa = false;
+                let noitesMinimasExigidasDoPeriodo = 0;
                 
-                if(!tarifaDia) { erroFaltaTarifa = true; break; }
+                let dCorrente = new Date(dInicioStr + "T12:00:00");
+                let dFinal = new Date(dFimStr + "T12:00:00");
 
-                if(tarifaDia.minNoites && tarifaDia.minNoites > noitesMinimasExigidasDoPeriodo) {
-                    noitesMinimasExigidasDoPeriodo = tarifaDia.minNoites;
+                while(dCorrente < dFinal) {
+                    let dataIso = dCorrente.toISOString().split('T')[0];
+                    let tarifaDia = apto.calendario ? apto.calendario.find(c => c.data === dataIso && c.regime === rId) : null;
+                    
+                    if(!tarifaDia) { erroFaltaTarifa = true; break; }
+
+                    if(tarifaDia.minNoites && tarifaDia.minNoites > noitesMinimasExigidasDoPeriodo) {
+                        noitesMinimasExigidasDoPeriodo = tarifaDia.minNoites;
+                    }
+
+                    let totalAdultosEfetivosNoDia = adultosEfetivos + pagantesAdicionais;
+                    let precoBaseQuarto = 0;
+
+                    if (totalAdultosEfetivosNoDia === 1) {
+                        precoBaseQuarto = tarifaDia.single;
+                    } else {
+                        precoBaseQuarto = tarifaDia.duplo;
+                        let extrasNoDia = (totalAdultosEfetivosNoDia - 2) > 0 ? (totalAdultosEfetivosNoDia - 2) : 0;
+                        valorAcumuladoExtras += (extrasNoDia * tarifaDia.extra);
+                    }
+                    valorAcumuladoBase += precoBaseQuarto;
+                    dCorrente.setDate(dCorrente.getDate() + 1);
                 }
 
-                let totalAdultosEfetivosNoDia = adultosEfetivos + pagantesAdicionais;
-                let precoBaseQuarto = 0;
-
-                if (totalAdultosEfetivosNoDia === 1) {
-                    precoBaseQuarto = tarifaDia.single;
-                } else {
-                    precoBaseQuarto = tarifaDia.duplo;
-                    let extrasNoDia = (totalAdultosEfetivosNoDia - 2) > 0 ? (totalAdultosEfetivosNoDia - 2) : 0;
-                    valorAcumuladoExtras += (extrasNoDia * tarifaDia.extra);
+                if(erroFaltaTarifa) {
+                    erroEncontrado = true;
+                    msgErroFinal = `Não há tarifas para o regime "${nomenclaturaRegimes[rId]}" cadastradas neste período.`;
+                    break;
                 }
-                valorAcumuladoBase += precoBaseQuarto;
-                dCorrente.setDate(dCorrente.getDate() + 1);
+
+                if(totalNoitesBusca < noitesMinimasExigidasDoPeriodo) {
+                    erroEncontrado = true;
+                    msgErroFinal = `O período de ${totalNoitesBusca} noites não é permitido para o plano ${nomenclaturaRegimes[rId]}. Exige mínimo de ${noitesMinimasExigidasDoPeriodo} noites.`;
+                    break;
+                }
+
+                let descontoPromocionalCalculado = 0;
+                let textoNomePromoAplicadaNoZap = "";
+
+                if(promoAplicada === "ativa" && apto.promoFique && apto.promoPague) {
+                    if(totalNoitesBusca < apto.promoFique) {
+                        erroEncontrado = true;
+                        msgErroFinal = `Para aplicar a oferta "${apto.promoNome}" o cliente precisa se hospedar por no mínimo ${apto.promoFique} noites.`;
+                        break;
+                    }
+                    let valorBrutoTotalSemDesconto = valorAcumuladoBase + valorAcumuladoExtras;
+                    let valorMedioPorDiaria = valorBrutoTotalSemDesconto / totalNoitesBusca;
+                    let quantidadeDiariasCortesia = apto.promoFique - apto.promoPague;
+                    
+                    descontoPromocionalCalculado = valorMedioPorDiaria * quantidadeDiariasCortesia;
+                    textoNomePromoAplicadaNoZap = apto.promoNome;
+                }
+
+                let valorTotalGeral = (valorAcumuladoBase + valorAcumuladoExtras) - descontoPromocionalCalculado;
+
+                resultadosGerais.push({
+                    regimeId: rId,
+                    regimeNome: nomenclaturaRegimes[rId],
+                    base: valorAcumuladoBase,
+                    extras: valorAcumuladoExtras,
+                    desconto: descontoPromocionalCalculado,
+                    promoTextoZap: textoNomePromoAplicadaNoZap,
+                    total: valorTotalGeral
+                });
             }
 
-            if(erroFaltaTarifa) {
+            if (erroEncontrado) {
                 alertaErro.classList.remove('hidden'); areaValores.classList.add('hidden');
-                document.getElementById('msgErro').innerText = `Não há tarifas para o regime "${nomenclaturaRegimes[regimeId]}" cadastradas neste período. Preencha na aba "Aptos".`;
-                showToast("Erro: Sem tarifa para este período.", "error"); return;
-            }
-
-            if(totalNoitesBusca < noitesMinimasExigidasDoPeriodo) {
-                alertaErro.classList.remove('hidden'); areaValores.classList.add('hidden');
-                document.getElementById('msgErro').innerText = `O período selecionado de ${totalNoitesBusca === 1 ? "01 noite" : totalNoitesBusca + " noites"} não é permitido. Esse apartamento exige o mínimo de ${noitesMinimasExigidasDoPeriodo} noites para o plano ${nomenclaturaRegimes[regimeId]}.`;
-                showToast(`Restrição: Mínimo de ${noitesMinimasExigidasDoPeriodo} noites obrigatório!`, "error"); return;
-            }
-
-            let descontoPromocionalCalculado = 0;
-            let textoNomePromoAplicadaNoZap = "";
-
-            if(promoAplicada === "ativa" && apto.promoFique && apto.promoPague) {
-                if(totalNoitesBusca < apto.promoFique) {
-                    alertaErro.classList.remove('hidden'); areaValores.classList.add('hidden');
-                    document.getElementById('msgErro').innerText = `Para aplicar a oferta "${apto.promoNome}" o cliente precisa se hospedar por no mínimo ${apto.promoFique} noites. Sua busca atual contém apenas ${totalNoitesBusca} noites.`;
-                    showToast(`Aviso: Altere o período para aplicar a oferta!`, "error"); return;
-                }
-                let valorBrutoTotalSemDesconto = valorAcumuladoBase + valorAcumuladoExtras;
-                let valorMedioPorDiaria = valorBrutoTotalSemDesconto / totalNoitesBusca;
-                let quantidadeDiariasCortesia = apto.promoFique - apto.promoPague;
-                
-                descontoPromocionalCalculado = valorMedioPorDiaria * quantidadeDiariasCortesia;
-                textoNomePromoAplicadaNoZap = apto.promoNome;
-                
-                document.getElementById('linhaVisualPromo').classList.remove('hidden');
-                document.getElementById('txtPromoAplicadaLabel').innerText = `Desconto: ${apto.promoNome}`;
-                document.getElementById('txtPromoDescontoVal').innerText = `- R$ ${descontoPromocionalCalculado.toFixed(2).replace('.', ',')}`;
-            } else {
-                document.getElementById('linhaVisualPromo').classList.add('hidden');
+                document.getElementById('msgErro').innerText = msgErroFinal;
+                showToast("Erro ao calcular: verifique as tarifas.", "error"); 
+                return;
             }
 
             alertaErro.classList.add('hidden'); areaValores.classList.remove('hidden');
 
-            let valorTotalGeral = (valorAcumuladoBase + valorAcumuladoExtras) - descontoPromocionalCalculado;
             let msgNoitesTexto = totalNoitesBusca === 1 ? "01 noite" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " noites";
+            let txtResumoRegime = regimeId === "todos" ? "Todos os Regimes" : nomenclaturaRegimes[regimeId];
+            
+            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${msgNoitesTexto} • ${txtResumoRegime}`;
+            document.getElementById('txtQtdFree').innerText = `${criancasFree} criança(s) free (Até ${idadeFreeMax} anos)`;
+
+            // ALTERAÇÃO DO PAINEL VISUAL CONFORME A OPÇÃO TODOS
+            if (regimeId === "todos") {
+                let htmlTotais = "";
+                resultadosGerais.forEach(r => {
+                    htmlTotais += `<div class="text-sm font-semibold text-gray-700 w-full flex justify-between gap-4 border-b border-gray-100 pb-1 last:border-0 last:pb-0"><span class="font-normal text-gray-500">${r.regimeNome}</span> <span>R$ ${r.total.toFixed(2).replace('.', ',')}</span></div>`;
+                });
+                document.getElementById('valorTotal').innerHTML = `<div class="flex flex-col gap-1.5 items-end mt-2 w-full">${htmlTotais}</div>`;
+                
+                document.getElementById('txtSomaBase').innerText = "Varia por regime";
+                document.getElementById('txtSomaExtras').innerText = "Varia por regime";
+                
+                if (resultadosGerais[0].desconto > 0) {
+                    document.getElementById('linhaVisualPromo').classList.remove('hidden');
+                    document.getElementById('txtPromoAplicadaLabel').innerText = `Desconto: ${resultadosGerais[0].promoTextoZap}`;
+                    document.getElementById('txtPromoDescontoVal').innerText = "Varia por regime";
+                } else {
+                    document.getElementById('linhaVisualPromo').classList.add('hidden');
+                }
+            } else {
+                let r = resultadosGerais[0];
+                document.getElementById('valorTotal').innerHTML = `R$ ${r.total.toFixed(2).replace('.', ',')}`;
+                document.getElementById('txtSomaBase').innerText = `R$ ${r.base.toFixed(2).replace('.', ',')}`;
+                document.getElementById('txtSomaExtras').innerText = `R$ ${r.extras.toFixed(2).replace('.', ',')}`;
+                if (r.desconto > 0) {
+                    document.getElementById('linhaVisualPromo').classList.remove('hidden');
+                    document.getElementById('txtPromoAplicadaLabel').innerText = `Desconto: ${r.promoTextoZap}`;
+                    document.getElementById('txtPromoDescontoVal').innerText = `- R$ ${r.desconto.toFixed(2).replace('.', ',')}`;
+                } else {
+                    document.getElementById('linhaVisualPromo').classList.add('hidden');
+                }
+            }
 
             let maiorIdAtual = 0;
             if (historicoOrcamentos && historicoOrcamentos.length > 0) {
@@ -521,8 +582,10 @@
                 idCodigo: idLabelFormatado,
                 hotelNome: apto.nome,
                 quartoNome: apto.unidade,
-                regimeNome: nomenclaturaRegimes[regimeId],
-                promoTextoZap: textoNomePromoAplicadaNoZap,
+                isTodosRegimes: regimeId === "todos",
+                regimeNome: regimeId === "todos" ? "Todos os Regimes" : resultadosGerais[0].regimeNome,
+                resultadosRegimes: resultadosGerais,
+                promoTextoZap: resultadosGerais[0].promoTextoZap,
                 checkin: strCheckinText,
                 checkout: strCheckoutText,
                 noitesTxt: msgNoitesTexto,
@@ -530,14 +593,8 @@
                 criQtd: criancas < 10 ? "0" + criancas : criancas,
                 freeQtd: criancasFree,
                 idadesTxt: idadesTxt,
-                total: valorTotalGeral.toFixed(2).replace('.', ',')
+                totalFormatado: regimeId === "todos" ? "Vários Regimes" : resultadosGerais[0].total.toFixed(2).replace('.', ',')
             };
-            
-            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${msgNoitesTexto} • ${nomenclaturaRegimes[regimeId]}`;
-            document.getElementById('valorTotal').innerText = `R$ ${valorTotalGeral.toFixed(2).replace('.', ',')}`;
-            document.getElementById('txtSomaBase').innerText = `R$ ${valorAcumuladoBase.toFixed(2).replace('.', ',')}`;
-            document.getElementById('txtSomaExtras').innerText = `R$ ${valorAcumuladoExtras.toFixed(2).replace('.', ',')}`;
-            document.getElementById('txtQtdFree').innerText = `${criancasFree} criança(s) free (Até ${idadeFreeMax} anos)`;
             
             showToast("Orçamento calculado com sucesso!", "success");
         }
@@ -558,7 +615,19 @@
 
             let linhaObs = obsTexto ? `\n*Informações Importantes:*\n${obsTexto}` : "";
 
-            // MODIFICAÇÃO DO TEMPLATE AQUI: O REGIME FOI PARA UMA LINHA SEPARADA
+            // LÓGICA CONDICIONAL DE REGIME
+            let linhaRegime = dadosLocaisUltimoCalculo.isTodosRegimes ? "" : `• Regime: ${dadosLocaisUltimoCalculo.regimeNome}\n`;
+            
+            let blocoValorTotal = "";
+            if (dadosLocaisUltimoCalculo.isTodosRegimes) {
+                blocoValorTotal = `\n*Valor total do Pacote:*\n`;
+                dadosLocaisUltimoCalculo.resultadosRegimes.forEach(r => {
+                    blocoValorTotal += `• ${r.regimeNome} = R$ ${r.total.toFixed(2).replace('.', ',')}\n`;
+                });
+            } else {
+                blocoValorTotal = `\n*Valor total do Pacote: R$ ${dadosLocaisUltimoCalculo.totalFormatado}*\n`;
+            }
+
             return `${cabecalho}*Segue orçamento de Hospedagem em Caldas Novas*\n` +
                    `• Orçamento: ID #${dadosLocaisUltimoCalculo.idCodigo}\n` +
                    `• *${dadosLocaisUltimoCalculo.hotelNome.toUpperCase()}*\n` +
@@ -566,12 +635,12 @@
                    `• Saída: ${dadosLocaisUltimoCalculo.checkout}\n` +
                    `• Total de noites: ${dadosLocaisUltimoCalculo.noitesTxt}\n` +
                    `• Acomodação: ${dadosLocaisUltimoCalculo.quartoNome}\n` +
-                   `• Regime: ${dadosLocaisUltimoCalculo.regimeNome}\n` +
+                   linhaRegime +
                    linhaOfertaZap + 
                    `\n*Configuração*\n` +
                    `• ${dadosLocaisUltimoCalculo.adQtd} Adulto(s)\n` +
                    linhaCriancas + 
-                   `\n*Valor total do Pacote: R$ ${dadosLocaisUltimoCalculo.total}*\n` +
+                   blocoValorTotal +
                    linhaObs;
         }
 
@@ -592,7 +661,7 @@
                 saida: dadosLocaisUltimoCalculo.checkout.split(' ')[0], 
                 adultos: dadosLocaisUltimoCalculo.adQtd,
                 criancas: dadosLocaisUltimoCalculo.criQtd,
-                valor: dadosLocaisUltimoCalculo.total,
+                valor: dadosLocaisUltimoCalculo.isTodosRegimes ? "Vários Regimes" : `R$ ${dadosLocaisUltimoCalculo.totalFormatado}`,
                 textoBruto: construirTextoFinalTemplate()
             };
             
@@ -702,6 +771,14 @@
             itensPaginaAtiva.forEach((item) => {
                 let idDisplay = item.idCodigo ? item.idCodigo.toString().padStart(2, '0') : "00";
                 let dataEmissaoTratada = item.dataEmissao ? item.dataEmissao : new Date(item.timestamp).toLocaleDateString('pt-BR') + ' às 09:00';
+                
+                // Formatação garantida para o campo de valores (retrocompatível com os salvos antigos)
+                let valorExibicao = item.valor;
+                if(valorExibicao === "Vários Regimes") {
+                    valorExibicao = "<span class='text-[10px] uppercase text-gray-400 font-bold'>Vários Regimes</span>";
+                } else if(!valorExibicao.startsWith("R$") && !valorExibicao.includes("<")) {
+                    valorExibicao = "R$ " + valorExibicao;
+                }
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100 font-medium text-gray-700">
@@ -712,7 +789,7 @@
                         <td class="py-3 px-4 font-semibold text-gray-700">${item.entrada}</td>
                         <td class="py-3 px-4 font-semibold text-gray-700">${item.saida}</td>
                         <td class="py-3 px-4 text-center text-gray-500">${parseInt(item.adultos)} Ad / ${parseInt(item.criancas)} Cr</td>
-                        <td class="py-3 px-4 text-blue-600 font-bold">R$ ${item.valor}</td>
+                        <td class="py-3 px-4 text-blue-600 font-bold">${valorExibicao}</td>
                         <td class="py-3 px-4 text-right space-x-3">
                             <button type="button" onclick="copiarTextoDiretoDoHistorico('${item.timestamp}')" class="text-gray-500 hover:text-blue-600 transition-colors" title="Copiar orçamento"><i data-lucide="clipboard" class="w-4 h-4 inline"></i></button>
                             <button type="button" onclick="reativarAtendimentoZap('${item.timestamp}')" class="text-green-500 hover:text-green-700 transition-colors" title="Enviar WhatsApp"><i data-lucide="message-circle" class="w-4 h-4 inline"></i></button>
