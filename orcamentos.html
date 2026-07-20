@@ -487,15 +487,11 @@
             let valorTotalGeral = (valorAcumuladoBase + valorAcumuladoExtras) - descontoPromocionalCalculado;
             let msgNoitesTexto = totalNoitesBusca === 1 ? "01 noite" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " noites";
 
-            // CORREÇÃO: MATEMÁTICA DO NOVO ID PARA NÃO DUPLICAR E NÃO QUEBRAR
-            let maiorIdAtual = historicoOrcamentos.length; // Base de segurança mínima
+            let maiorIdAtual = 0;
             if (historicoOrcamentos && historicoOrcamentos.length > 0) {
-                historicoOrcamentos.forEach((item, idx) => {
+                historicoOrcamentos.forEach(item => {
                     let idNum = parseInt(item.idCodigo, 10);
-                    if (isNaN(idNum)) {
-                        idNum = historicoOrcamentos.length - idx; 
-                    }
-                    if (idNum > maiorIdAtual) {
+                    if (!isNaN(idNum) && idNum > maiorIdAtual) {
                         maiorIdAtual = idNum;
                     }
                 });
