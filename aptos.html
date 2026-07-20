@@ -277,7 +277,6 @@
         function aplicarTravasDeData() {
             const hoje = new Date().toISOString().split('T')[0];
             
-            // Impede selecionar data antiga no calendário
             document.getElementById('tInicio').min = hoje;
             document.getElementById('tFim').min = hoje;
             document.getElementById('ajusteInicio').min = hoje;
@@ -290,11 +289,11 @@
             if (!inicio) return;
 
             let dataFim = new Date(inicio + "T12:00:00");
-            dataFim.setDate(dataFim.getDate() + 1); // Soma 1 dia
+            dataFim.setDate(dataFim.getDate() + 1);
 
             const dataFimString = dataFim.toISOString().split('T')[0];
             document.getElementById('tFim').value = dataFimString;
-            document.getElementById('tFim').min = dataFimString; // Bloqueia o fim de ser menor
+            document.getElementById('tFim').min = dataFimString;
         }
 
         function ajustarDataFimAjuste() {
@@ -407,14 +406,19 @@
 
         function gerarTarifasNoCalendario() {
             const nomeTarifa = document.getElementById('tNome').value.trim() || "Padrão";
-            const dInicioStr = document.getElementById('tInicio').value;
-            const dFimStr = document.getElementById('tFim').value;
+            let dInicioStr = document.getElementById('tInicio').value;
+            let dFimStr = document.getElementById('tFim').value;
             const sVal = parseFloat(document.getElementById('tSingle').value) || 0;
             const dVal = parseFloat(document.getElementById('tDuplo').value) || 0;
             const eVal = parseFloat(document.getElementById('tExtra').value) || 0;
             const minNoites = parseInt(document.getElementById('tMinNoites').value) || 1;
 
             if(!dInicioStr || !dFimStr) { alert("Preencha o período de datas!"); return; }
+            
+            if(new Date(dFimStr) < new Date(dInicioStr)) {
+                let temp = dInicioStr; dInicioStr = dFimStr; dFimStr = temp;
+                document.getElementById('tInicio').value = dInicioStr; document.getElementById('tFim').value = dFimStr;
+            }
 
             let apto = listaAptos.find(a => a.id === aptoAtualId);
             let dCorrente = new Date(dInicioStr + "T12:00:00");
@@ -436,7 +440,7 @@
             showToast("Diárias configuradas com sucesso!", "success");
         }
 
-        function ejecutarAjusteEmMassa() {
+        function executarAjusteEmMassa() {
             const dInicioStr = document.getElementById('ajusteInicio').value;
             const dFimStr = document.getElementById('ajusteFim').value;
             const acao = document.getElementById('ajusteAcao').value;
