@@ -110,10 +110,12 @@
                 </div>
 
                 <div id="resultadoCotacao" class="hidden bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+                    
+                    <!-- ALERTA ELEGANTE DE VALIDAÇÃO (ERROS E NOITES MÍNIMAS) -->
                     <div id="alertaErro" class="hidden bg-red-50 border-b border-red-200 p-4 flex items-start gap-3">
                         <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600 mt-0.5"></i>
                         <div>
-                            <h4 class="text-sm font-bold text-red-800">Aviso do Sistema</h4>
+                            <h4 class="text-sm font-bold text-red-800">Restrição de Reserva</h4>
                             <p id="msgErro" class="text-sm text-red-600 mt-1"></p>
                         </div>
                     </div>
@@ -162,10 +164,10 @@
 
                         <!-- Botões de Ação -->
                         <div class="mt-8 flex gap-3">
-                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 flex items-center justify-center gap-2 shadow-sm">
+                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-sm">
                                 <i data-lucide="copy" class="w-4 h-4"></i> Copiar Texto
                             </button>
-                            <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 shadow-sm flex items-center justify-center gap-2">
+                            <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2">
                                 <i data-lucide="message-circle" class="w-4 h-4"></i> Enviar WhatsApp
                             </button>
                         </div>
@@ -232,7 +234,6 @@
             setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
-        // TRAVAS DE DATA: BLOQUEIA RETROATIVAS E CONFIGURA CHECK-OUT AUTOMÁTICO
         function aplicarTravasDeDataOrcamento() {
             const hoje = new Date().toISOString().split('T')[0];
             document.getElementById('orcCheckin').min = hoje;
@@ -242,13 +243,11 @@
         function ajustarDataCheckoutAutomatica() {
             const checkin = document.getElementById('orcCheckin').value;
             if (!checkin) return;
-
             let dataCheckout = new Date(checkin + "T12:00:00");
-            dataCheckout.setDate(dataCheckout.getDate() + 1); // Soma exatamente 1 dia automaticamente
-
+            dataCheckout.setDate(dataCheckout.getDate() + 1);
             const checkoutString = dataCheckout.toISOString().split('T')[0];
             document.getElementById('orcCheckout').value = checkoutString;
-            document.getElementById('orcCheckout').min = checkoutString; // Trava o check-out mínimo
+            document.getElementById('orcCheckout').min = checkoutString;
         }
 
         function mascaraTelefoneCliente(input) {
@@ -276,11 +275,9 @@
             const aptoId = document.getElementById('orcAptoSelect').value;
             const selectRegime = document.getElementById('orcRegimeSelect');
             selectRegime.innerHTML = "";
-            
             if(!aptoId) return;
             const apto = listaAptos.find(a => a.id === aptoId);
             let regimes = apto.regimesAtivos || ['ro', 'bb'];
-
             regimes.forEach(regId => {
                 selectRegime.innerHTML += `<option value="${regId}">${nomenclaturaRegimes[regId]}</option>`;
             });
@@ -301,6 +298,7 @@
             }
         }
 
+        // MOTOR DE CÁLCULO ATUALIZADO COM VALIDAÇÃO DE NOITES MÍNIMAS DIA A DIA
         function calcularOrcamentoReal() {
             const aptoId = document.getElementById('orcAptoSelect').value;
             const regimeId = document.getElementById('orcRegimeSelect').value;
@@ -331,7 +329,14 @@
                 showToast("Capacidade máxima do quarto violada!", "error"); return;
             }
 
-            alertaErro.classList.add('hidden'); areaValores.classList.remove('hidden');
+            // Calcula o total de noites real da busca atual
+            let dCorrenteCalculoNoites = new Date(dInicioStr + "T12:00:00");
+            let dFinalCalculoNoites = new Date(dFimStr + "T12:00:00");
+            let totalNoitesBusca = 0;
+            while(dCorrenteCalculoNoites < dFinalCalculoNoites) {
+                totalNoitesBusca++;
+                dCorrenteCalculoNoites.setDate(dCorrenteCalculoNoites.getDate() + 1);
+            }
 
             let idades = [];
             document.querySelectorAll('.orc-idade-input').forEach(input => idades.push(parseInt(input.value) || 0));
@@ -345,19 +350,24 @@
             });
 
             let pagantesAdicionais = criancasPagantes;
-            let adultosEfetivos = adultos;
+            let adultosEfetivos = adults = adultos;
             let valorAcumuladoBase = 0; let valorAcumuladoExtras = 0;
 
             let dCorrente = new Date(dInicioStr + "T12:00:00");
             let dFinal = new Date(dFimStr + "T12:00:00");
-            let totalNoites = 0; let erroFaltaTarifa = false;
+            let erroFaltaTarifa = false;
+            let noitesMinimasExigidasDoPeriodo = 0; // Guarda a maior trava encontrada no período
 
             while(dCorrente < dFinal) {
-                totalNoites++;
                 let dataIso = dCorrente.toISOString().split('T')[0];
-                
                 let tarifaDia = apto.calendario ? apto.calendario.find(c => c.data === dataIso && c.regime === regimeId) : null;
+                
                 if(!tarifaDia) { erroFaltaTarifa = true; break; }
+
+                // Captura a maior regra de noites mínimas entre os dias selecionados
+                if(tarifaDia.minNoites && tarifaDia.minNoites > noitesMinimasExigidasDoPeriodo) {
+                    noitesMinimasExigidasDoPeriodo = tarifaDia.minNoites;
+                }
 
                 let totalAdultosEfetivosNoDia = adultosEfetivos + pagantesAdicionais;
                 let precoBaseQuarto = 0;
@@ -376,13 +386,26 @@
             if(erroFaltaTarifa) {
                 alertaErro.classList.remove('hidden'); areaValores.classList.add('hidden');
                 document.getElementById('msgErro').innerText = `Não há tarifas para o regime "${nomenclaturaRegimes[regimeId]}" cadastradas neste período. Preencha na aba "Aptos".`;
-                showToast("Erro: Sem tarifa para este regime.", "error"); return;
+                showToast("Erro: Sem tarifa para este período.", "error"); return;
             }
 
-            let valorTotalGeral = valorAcumuladoBase + valorAcumuladoExtras;
-            let msgNoitesTexto = totalNoites === 1 ? "01 noite" : (totalNoites < 10 ? "0" + totalNoites : totalNoites) + " noites";
+            // TRAVA INTELIGENTE E ELEGANTE DE NOITES MÍNIMAS
+            if(totalNoitesBusca < noitesMinimasExigidasDoPeriodo) {
+                alertaErro.classList.remove('hidden'); 
+                areaValores.classList.add('hidden'); // Oculta o bloco de resumo financeiro por segurança
+                document.getElementById('msgErro').innerText = `O período selecionado de ${totalNoitesBusca === 1 ? "01 noite" : totalNoitesBusca + " noites"} não é permitido. Esse apartamento exige o mínimo de ${noitesMinimasExigidasDoPeriodo} noites para o plano ${nomenclaturaRegimes[regimeId]}.`;
+                showToast(`Restrição: Mínimo de ${noitesMinimasExigidasDoPeriodo} noites obrigatório!`, "error");
+                return;
+            }
 
-            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${totalNoites === 1 ? "01 Noite(s)" : (totalNoites < 10 ? "0" + totalNoites : totalNoites) + " Noite(s)"} • ${nomenclaturaRegimes[regimeId]}`;
+            // Se passar por todas as travas, libera o layout normal
+            alertaErro.classList.add('hidden'); 
+            areaValores.classList.remove('hidden');
+
+            let valorTotalGeral = valorAcumuladoBase + valorAcumuladoExtras;
+            let msgNoitesTexto = totalNoitesBusca === 1 ? "01 noite" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " noites";
+
+            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${totalNoitesBusca === 1 ? "01 Noite(s)" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " Noite(s)"} • ${nomenclaturaRegimes[regimeId]}`;
             document.getElementById('valorTotal').innerText = `R$ ${valorTotalGeral.toFixed(2).replace('.', ',')}`;
             document.getElementById('txtSomaBase').innerText = `R$ ${valorAcumuladoBase.toFixed(2).replace('.', ',')}`;
             document.getElementById('txtSomaExtras').innerText = `R$ ${valorAcumuladoExtras.toFixed(2).replace('.', ',')}`;
@@ -484,6 +507,7 @@
                 historicoOrcamentos.splice(index, 1);
                 localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
                 renderizarTabelaHistorico();
+                showToast("Cotação removida do histórico.", "success");
             }
         }
 
