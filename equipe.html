@@ -83,11 +83,11 @@
                 <form id="membroForm" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Nome</label>
-                        <input type="text" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
+                        <input type="text" id="membroNome" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">E-mail</label>
-                        <input type="email" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
+                        <input type="email" id="membroEmail" class="mt-1 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none">
                     </div>
                 </form>
             </div>
@@ -99,10 +99,9 @@
     </div>
 
     <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8"><p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos. Todos os direitos reservados.</p></div>
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8"><p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos.</p></div>
     </footer>
 
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
@@ -117,41 +116,30 @@
             const toast = document.createElement('div');
             const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
             const icon = type === 'success' ? 'check-circle' : 'alert-circle';
-            
             toast.className = `${bgColor} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
             toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i><span class="font-medium text-sm">${message}</span>`;
-            
             container.appendChild(toast);
             lucide.createIcons();
-            
             setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
-            setTimeout(() => {
-                toast.classList.add('translate-y-10', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
         function salvarMembro() {
             showToast("Integrante salvo na equipe!", "success");
             toggleModal(false);
         }
-    </script>
-<!-- INÍCIO DA REGRA GERAL DE SALVAMENTO -->
-    <script>
+
+        // REGRA GERAL DE SALVAMENTO (localStorage)
         document.addEventListener("DOMContentLoaded", () => {
-            // Seleciona todos os campos de digitação e seleção da página
             const campos = document.querySelectorAll("input, select, textarea");
-            
-            // 1. Quando a página carrega, ele puxa o que estava salvo na memória
             campos.forEach(campo => {
-                if (campo.id) { // Só funciona em campos que tem um ID definido
+                if (campo.id) {
                     const valorSalvo = localStorage.getItem(campo.id);
                     if (valorSalvo !== null) {
                         campo.value = valorSalvo;
+                        campo.dispatchEvent(new Event('change'));
                     }
                 }
-                
-                // 2. Toda vez que você digitar ou mudar algo, ele salva na hora
                 campo.addEventListener("input", () => {
                     if (campo.id) {
                         localStorage.setItem(campo.id, campo.value);
@@ -160,6 +148,5 @@
             });
         });
     </script>
-    <!-- FIM DA REGRA GERAL -->
 </body>
 </html>
