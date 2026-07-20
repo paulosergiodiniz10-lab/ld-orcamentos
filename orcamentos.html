@@ -7,7 +7,7 @@
     <!-- Tailwind CSS e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Flatpickr (Calendário Customizado para PC) -->
+    <!-- Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
@@ -66,6 +66,14 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Regime de Alimentação</label>
                         <select id="orcRegimeSelect" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
                             <!-- Atualizado dinamicamente -->
+                        </select>
+                    </div>
+
+                    <!-- NOVO: CAMPO SELETOR DE PROMOÇÕES ATIVAS DO HOTEL -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Promoção / Oferta Aplicada</label>
+                        <select id="orcPromoSelect" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white font-medium text-green-700 bg-green-50/50">
+                            <!-- Atualizado dinamicamente via JS -->
                         </select>
                     </div>
 
@@ -146,6 +154,10 @@
                             <div class="flex justify-between text-green-600 font-medium pt-2 border-t border-gray-200 border-dashed">
                                 <span>Crianças Free na Cortesia</span><span id="txtQtdFree">0 free</span>
                             </div>
+                            <!-- NOVO: VISUALIZAÇÃO DO DESCONTO DE OFERTA SE HOUVER -->
+                            <div id="linhaVisualPromo" class="hidden flex justify-between text-green-600 font-bold bg-green-50 p-2 rounded border border-green-100">
+                                <span id="txtPromoAplicadaLabel">Desconto Cortesia (Fique/Pague)</span><span id="txtPromoDescontoVal">- R$ 0,00</span>
+                            </div>
                         </div>
 
                         <!-- CAMPOS: DADOS DO CLIENTE PARA ENVIO -->
@@ -167,7 +179,7 @@
 
                         <!-- Botões de Ação -->
                         <div class="mt-8 flex gap-3">
-                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 flex items-center justify-center gap-2 shadow-sm">
+                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-sm">
                                 <i data-lucide="copy" class="w-4 h-4"></i> Copiar Texto
                             </button>
                             <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 shadow-sm flex items-center justify-center gap-2">
@@ -185,17 +197,14 @@
                 <h3 class="font-bold text-gray-900 flex items-center gap-2 shrink-0">
                     <i data-lucide="history" class="w-5 h-5 text-gray-500"></i> Histórico de Orçamentos Gerados
                 </h3>
-                
                 <div class="relative w-full sm:max-w-xs">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <i data-lucide="search" class="w-4 h-4"></i>
                     </span>
                     <input type="text" id="inputBuscaHistorico" oninput="mudarPaginaHistorico(1)" class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Buscar por Nome, ID ou Zap...">
                 </div>
-                
                 <span id="badgeContadorHistorico" class="bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1 rounded-full shrink-0">0 registros</span>
             </div>
-            
             <div class="overflow-x-auto">
                 <table class="min-w-full text-left text-xs text-gray-700 whitespace-nowrap">
                     <thead class="bg-gray-50 text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b">
@@ -213,7 +222,6 @@
                     <tbody id="tbodyHistorico" class="divide-y divide-gray-100"></tbody>
                 </table>
             </div>
-
             <div id="containerPaginacao" class="bg-gray-50 px-6 py-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 font-medium">
                 <span id="txtInfoPaginacao">Mostrando 0-0 de 0 cotações</span>
                 <div id="botoesPaginacaoGrid" class="flex items-center gap-1"></div>
@@ -256,7 +264,6 @@
         let funcaoCallbackConfirmacao = null;
         
         let fpCheckin, fpCheckout;
-
         const limitePorPagina = 50;
         let paginaAtualAtiva = 1;
 
@@ -284,39 +291,22 @@
             modal.classList.remove('hidden');
             funcaoCallbackConfirmacao = callbackSucesso;
             document.getElementById('modalBtnCancelar').onclick = () => modal.classList.add('hidden');
-            document.getElementById('modalBtnConfirmar').onclick = () => {
-                modal.classList.add('hidden');
-                if(funcaoCallbackConfirmacao) funcaoCallbackConfirmacao();
-            };
+            document.getElementById('modalBtnConfirmar').onclick = () => { modal.classList.add('hidden'); if(funcaoCallbackConfirmacao) funcaoCallbackConfirmacao(); };
         }
 
-        // INICIALIZADOR DO CALENDÁRIO FLATPICKR DA TELA DE COTAÇÃO
         function inicializarCalendarioOrcamentoFlatpickr() {
             fpCheckin = flatpickr("#orcCheckin", {
-                locale: "pt",
-                dateFormat: "Y-m-d",
-                altInput: true,
-                altFormat: "d/m/Y",
-                minDate: "today",
-                disableMobile: true,
+                locale: "pt", dateFormat: "Y-m-d", altInput: true, altFormat: "d/m/Y", minDate: "today", disableMobile: true,
                 onChange: function(selectedDates, dateStr) {
                     if (dateStr) {
-                        let dataMinCheckout = new Date(dateStr + "T12:00:00");
-                        dataMinCheckout.setDate(dataMinCheckout.getDate() + 1);
-                        fpCheckout.set("minDate", dataMinCheckout);
-                        fpCheckout.setDate(dataMinCheckout);
+                        let d = new Date(dateStr + "T12:00:00");
+                        d.setDate(d.getDate() + 1);
+                        fpCheckout.set("minDate", d);
+                        fpCheckout.setDate(d);
                     }
                 }
             });
-
-            fpCheckout = flatpickr("#orcCheckout", {
-                locale: "pt",
-                dateFormat: "Y-m-d",
-                altInput: true,
-                altFormat: "d/m/Y",
-                minDate: "today",
-                disableMobile: true
-            });
+            fpCheckout = flatpickr("#orcCheckout", { locale: "pt", dateFormat: "Y-m-d", altInput: true, altFormat: "d/m/Y", minDate: "today", disableMobile: true });
         }
 
         function mascaraTelefoneCliente(input) {
@@ -343,13 +333,23 @@
         function atualizarRegimesDisponiveisNoForm() {
             const aptoId = document.getElementById('orcAptoSelect').value;
             const selectRegime = document.getElementById('orcRegimeSelect');
+            const selectPromo = document.getElementById('orcPromoSelect');
             selectRegime.innerHTML = "";
+            selectPromo.innerHTML = `<option value="nenhuma">Nenhuma promoção ativa</option>`;
+            
             if(!aptoId) return;
             const apto = listaAptos.find(a => a.id === aptoId);
+            
+            // Regimes
             let regimes = apto.regimesAtivos || ['ro', 'bb'];
             regimes.forEach(regId => {
                 selectRegime.innerHTML += `<option value="${regId}">${nomenclaturaRegimes[regId]}</option>`;
             });
+
+            // NOVO: Alimenta o campo de promoção se o imóvel tiver alguma configurada
+            if (apto.promoNome && apto.promoFique && apto.promoPague) {
+                selectPromo.innerHTML += `<option value="ativa">${apto.promoNome} (Fique ${apto.promoFique} Pague ${apto.promoPague})</option>`;
+            }
         }
 
         function gerarCamposIdade() {
@@ -370,6 +370,7 @@
         function calcularOrcamentoReal() {
             const aptoId = document.getElementById('orcAptoSelect').value;
             const regimeId = document.getElementById('orcRegimeSelect').value;
+            const promoAplicada = document.getElementById('orcPromoSelect').value;
             const dInicioStr = document.getElementById('orcCheckin').value;
             const dFimStr = document.getElementById('orcCheckout').value;
             const adultos = parseInt(document.getElementById('orcAdultos').value) || 0;
@@ -461,10 +462,43 @@
                 showToast(`Restrição: Mínimo de ${noitesMinimasExigidasDoPeriodo} noites obrigatório!`, "error"); return;
             }
 
+            // NOVO: VALIDAÇÃO SE O HOSPEDE ALCANÇOU AS NOITES DA PROMOÇÃO (Ex: buscou 4 noites para ativar o Fique 4 pague 3)
+            let descontoPromocionalCalculado = 0;
+            let textoNomePromoAplicadaNoZap = "";
+
+            if(promoAplicada === "ativa" && apto.promoFique && apto.promoPague) {
+                if(totalNoitesBusca < apto.promoFique) {
+                    alertaErro.classList.remove('hidden'); areaValores.classList.add('hidden');
+                    document.getElementById('msgErro').innerText = `Para aplicar a oferta "${apto.promoNome}" o cliente precisa se hospedar por no mínimo ${apto.promoFique} noites. Sua busca atual contém apenas ${totalNoitesBusca} noites.`;
+                    showToast(`Aviso: Altere o período para aplicar a oferta!`, "error"); return;
+                }
+                
+                // CÁLCULO MATEMÁTICO: Descobre o valor médio de 1 diária (quarto + adicionais) e abate as diárias cortesia
+                let valorBrutoTotalSemDesconto = valorAcumuladoBase + valorAcumuladoExtras;
+                let valorMedioPorDiaria = valorBrutoTotalSemDesconto / totalNoitesBusca;
+                let quantidadeDiariasCortesia = apto.promoFique - apto.promoPague;
+                
+                descontoPromocionalCalculado = valorMedioPorDiaria * quantidadeDiariasCortesia;
+                textoNomePromoAplicadaNoZap = `${apto.promoNome} (Bônus de ${quantidadeDiariasCortesia} diária(s) inclusa(s))`;
+                
+                // Exibe a linha do desconto no layout visual
+                document.getElementById('linhaVisualPromo').classList.remove('hidden');
+                document.getElementById('txtPromoAplicadaLabel').innerText = `Desconto: ${apto.promoNome}`;
+                document.getElementById('txtPromoDescontoVal').innerText = `- R$ ${descontoPromocionalCalculado.toFixed(2).replace('.', ',')}`;
+            } else {
+                document.getElementById('linhaVisualPromo').classList.add('hidden');
+            }
+
             alertaErro.classList.add('hidden'); areaValores.classList.remove('hidden');
 
-            let valorTotalGeral = valorAcumuladoBase + valorAcumuladoExtras;
+            let valorTotalGeral = (valorAcumuladoBase + valorAcumuladoExtras) - descontoPromocionalCalculado;
             let msgNoitesTexto = totalNoitesBusca === 1 ? "01 noite" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " noites";
+
+            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${totalNoitesBusca === 1 ? "01 Noite(s)" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " Noite(s)"} • ${nomenclaturaRegimes[regimeId]}`;
+            document.getElementById('valorTotal').innerText = `R$ ${valorTotalGeral.toFixed(2).replace('.', ',')}`;
+            document.getElementById('txtSomaBase').innerText = `R$ ${valorAcumuladoBase.toFixed(2).replace('.', ',')}`;
+            document.getElementById('txtSomaExtras').innerText = `R$ ${valorAcumuladoExtras.toFixed(2).replace('.', ',')}`;
+            document.getElementById('txtQtdFree').innerText = `${criancasFree} criança(s) free (Até ${apto.idadeFree || 12} anos)`;
 
             let proximoIdNumero = historicoOrcamentos.length + 1;
             let idLabelFormatado = proximoIdNumero < 10 ? "0" + proximoIdNumero : proximoIdNumero;
@@ -474,6 +508,7 @@
                 hotelNome: apto.nome,
                 quartoNome: apto.unidade,
                 regimeNome: nomenclaturaRegimes[regimeId],
+                promoTextoZap: textoNomePromoAplicadaNoZap, // Injetado no template do cliente
                 checkin: dInicioStr.split('-').reverse().join('/'),
                 checkout: dFimStr.split('-').reverse().join('/'),
                 noitesTxt: msgNoitesTexto,
@@ -485,10 +520,16 @@
             showToast("Orçamento calculado com sucesso!", "success");
         }
 
+        // NOVO: INJETA O CAMPO DA PROMOÇÃO NO TEXTO DO WHATSAPP SE ESTIVER ATIVA
         function construirTextoFinalTemplate() {
             if(!dadosLocaisUltimoCalculo) return "";
             const nomeCliente = document.getElementById('clienteNome').value.trim();
             let cabecalho = nomeCliente ? `${nomeCliente}\n\n` : "";
+            
+            let linhaOfertaZap = "";
+            if(dadosLocaisUltimoCalculo.promoTextoZap) {
+                linhaOfertaZap = `• Oferta Aplicada: ${dadosLocaisUltimoCalculo.promoTextoZap}\n`;
+            }
 
             return `${cabecalho}*Segue orçamento de Hospedagem - ${dadosLocaisUltimoCalculo.hotelNome}*\n` +
                    `• Orçamento: ID ${dadosLocaisUltimoCalculo.idCodigo}\n` +
@@ -496,6 +537,7 @@
                    `• Saída: ${dadosLocaisUltimoCalculo.checkout}\n` +
                    `• Total de noites: ${dadosLocaisUltimoCalculo.noitesTxt}\n` +
                    `• Acomodação: ${dadosLocaisUltimoCalculo.quartoNome} (${dadosLocaisUltimoCalculo.regimeNome})\n` +
+                   linhaOfertaZap + 
                    `*Configuração*\n` +
                    `• ${dadosLocaisUltimoCalculo.adQtd} Adulto(s)\n` +
                    `• ${dadosLocaisUltimoCalculo.criQtd} criança (s)\n` +
@@ -510,7 +552,7 @@
                 timestamp: Date.now(),
                 nome: document.getElementById('clienteNome').value.trim() || "Não informado",
                 zap: document.getElementById('clienteWhatsapp').value.trim() || "Não informado",
-                hotel: `${dadosLocaisUltimoCalculo.hotelNome} (${dadosLocaisUltimoCalculo.quartoNome}) - ${dadosLocaisUltimoCalculo.regimeNome}`,
+                hotel: `${dadosLocaisUltimoCalculo.hotelNome} (${dadosLocaisUltimoCalculo.quartoNome}) - ${dadosLocaisUltimoCalculo.regimeNome}${dadosLocaisUltimoCalculo.promoTextoZap ? ' ('+document.getElementById('orcPromoSelect').options[document.getElementById('orcPromoSelect').selectedIndex].text+')' : ''}`,
                 entrada: dadosLocaisUltimoCalculo.checkin,
                 saida: dadosLocaisUltimoCalculo.checkout,
                 adultos: dadosLocaisUltimoCalculo.adQtd,
@@ -529,6 +571,7 @@
             if(fpCheckin) { fpCheckin.clear(); fpCheckout.clear(); }
             document.getElementById('orcIdadesContainer').classList.add('hidden');
             document.getElementById('orcIdadesGrid').innerHTML = "";
+            document.getElementById('linhaVisualPromo').classList.add('hidden');
             document.getElementById('resultadoCotacao').classList.add('hidden');
             document.getElementById('estadoVazio').classList.remove('hidden');
             dadosLocaisUltimoCalculo = null;
@@ -555,10 +598,7 @@
 
         function copiarTextoDiretoDoHistorico(idCodigoAlvo) {
             const item = historicoOrcamentos.find(h => h.idCodigo === idCodigoAlvo);
-            if(item) {
-                navigator.clipboard.writeText(item.textoBruto);
-                showToast(`Orçamento ID ${item.idCodigo} copiado novamente!`, "success");
-            }
+            if(item) { navigator.clipboard.writeText(item.textoBruto); showToast(`Orçamento ID ${item.idCodigo} copiado novamente!`, "success"); }
         }
 
         function reativarAtendimentoZap(idCodigoAlvo) {
@@ -578,10 +618,7 @@
             });
         }
 
-        function mudarPaginaHistorico(numeroPaginaalvo) {
-            paginaAtualAtiva = numeroPaginaalvo;
-            renderizarTabelaHistorico();
-        }
+        function mudarPaginaHistorico(numeroPaginaalvo) { paginaAtualAtiva = numeroPaginaalvo; renderizarTabelaHistorico(); }
 
         function renderizarTabelaHistorico() {
             const tbody = document.getElementById('tbodyHistorico');
