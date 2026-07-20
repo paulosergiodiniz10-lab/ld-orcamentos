@@ -123,7 +123,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Data Início</label>
-                                <input type="date" id="tInicio" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none">
+                                <input type="date" id="tInicio" onchange="ajustarDataFimAutomatica()" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Data Fim</label>
@@ -169,7 +169,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Data Início</label>
-                                <input type="date" id="ajusteInicio" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none">
+                                <input type="date" id="ajusteInicio" onchange="ajustarDataFimAjuste()" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Data Fim</label>
@@ -202,8 +202,6 @@
                         <span id="contadorDias" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">0 dias configurados</span>
                     </div>
                     <div class="p-6">
-                        
-                        <!-- Filtros Avançados do Print -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 pb-4 border-b border-gray-100">
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wide">Filtrar por Mês</label>
@@ -275,6 +273,42 @@
             setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
+        // REGRA DE BLOQUEIO DE DATAS RETROATIVAS
+        function aplicarTravasDeData() {
+            const hoje = new Date().toISOString().split('T')[0];
+            
+            // Impede selecionar data antiga no calendário
+            document.getElementById('tInicio').min = hoje;
+            document.getElementById('tFim').min = hoje;
+            document.getElementById('ajusteInicio').min = hoje;
+            document.getElementById('ajusteFim').min = hoje;
+        }
+
+        // REGRA DE AJUSTE AUTOMÁTICO DE DATA (FIM = INÍCIO + 1 DIA)
+        function ajustarDataFimAutomatica() {
+            const inicio = document.getElementById('tInicio').value;
+            if (!inicio) return;
+
+            let dataFim = new Date(inicio + "T12:00:00");
+            dataFim.setDate(dataFim.getDate() + 1); // Soma 1 dia
+
+            const dataFimString = dataFim.toISOString().split('T')[0];
+            document.getElementById('tFim').value = dataFimString;
+            document.getElementById('tFim').min = dataFimString; // Bloqueia o fim de ser menor
+        }
+
+        function ajustarDataFimAjuste() {
+            const inicio = document.getElementById('ajusteInicio').value;
+            if (!inicio) return;
+
+            let dataFim = new Date(inicio + "T12:00:00");
+            dataFim.setDate(dataFim.getDate() + 1);
+
+            const dataFimString = dataFim.toISOString().split('T')[0];
+            document.getElementById('ajusteFim').value = dataFimString;
+            document.getElementById('ajusteFim').min = dataFimString;
+        }
+
         function carregarListaAptos() {
             const memoria = localStorage.getItem('ld_lista_aptos');
             listaAptos = memoria ? JSON.parse(memoria) : [];
@@ -323,6 +357,7 @@
             document.getElementById('blocoTarifasAdicionais').classList.add('hidden');
             document.getElementById('secaoListagem').classList.add('hidden');
             document.getElementById('secaoFormulario').classList.remove('hidden');
+            aplicarTravasDeData();
         }
 
         function abrirFormularioEdicao(id) {
@@ -337,6 +372,7 @@
             document.getElementById('blocoTarifasAdicionais').classList.remove('hidden');
             document.getElementById('secaoListagem').classList.add('hidden');
             document.getElementById('secaoFormulario').classList.remove('hidden');
+            aplicarTravasDeData();
             atualizarDropdownFiltroTarifas(apto);
             renderizarLinhasCalendario();
         }
@@ -349,16 +385,16 @@
 
         function salvarDadosBaseApto() {
             const nome = document.getElementById('aptoNome').value.trim();
-            const unidade = document.getElementById('aptoUnidade').value.trim();
+            const unidad = document.getElementById('aptoUnidade').value.trim();
             const capMax = document.getElementById('aptoCapMax').value;
-            if(!nome || !unidade || !capMax) { alert("Preencha os dados obrigatórios!"); return; }
+            if(!nome || !unidad || !capMax) { alert("Preencha os dados obrigatórios!"); return; }
             let index = listaAptos.findIndex(a => a.id === aptoAtualId);
             if(index > -1) {
-                listaAptos[index].nome = nome; listaAptos[index].unidade = unidade; listaAptos[index].capMax = parseInt(capMax);
+                listaAptos[index].nome = nome; listaAptos[index].unidade = unidad; listaAptos[index].capMax = parseInt(capMax);
                 listaAptos[index].idadeFree = parseInt(document.getElementById('aptoIdadeFree').value) || 12;
                 listaAptos[index].qtdFree = parseInt(document.getElementById('aptoQtdFree').value) || 2;
             } else {
-                listaAptos.push({ id: aptoAtualId, nome, unidade, capMax: parseInt(capMax), idadeFree: 12, qtdFree: 2, calendario: [] });
+                listaAptos.push({ id: aptoAtualId, nome, unidade: unidad, capMax: parseInt(capMax), idadeFree: 12, qtdFree: 2, calendario: [] });
             }
             salvarListaAptos();
             document.getElementById('blocoTarifasAdicionais').classList.remove('hidden');
@@ -371,20 +407,14 @@
 
         function gerarTarifasNoCalendario() {
             const nomeTarifa = document.getElementById('tNome').value.trim() || "Padrão";
-            let dInicioStr = document.getElementById('tInicio').value;
-            let dFimStr = document.getElementById('tFim').value;
+            const dInicioStr = document.getElementById('tInicio').value;
+            const dFimStr = document.getElementById('tFim').value;
             const sVal = parseFloat(document.getElementById('tSingle').value) || 0;
             const dVal = parseFloat(document.getElementById('tDuplo').value) || 0;
             const eVal = parseFloat(document.getElementById('tExtra').value) || 0;
             const minNoites = parseInt(document.getElementById('tMinNoites').value) || 1;
 
             if(!dInicioStr || !dFimStr) { alert("Preencha o período de datas!"); return; }
-            
-            // Trava inteligente caso o usuário digite o fim menor que o início (como no print)
-            if(new Date(dFimStr) < new Date(dInicioStr)) {
-                let temp = dInicioStr; dInicioStr = dFimStr; dFimStr = temp;
-                document.getElementById('tInicio').value = dInicioStr; document.getElementById('tFim').value = dFimStr;
-            }
 
             let apto = listaAptos.find(a => a.id === aptoAtualId);
             let dCorrente = new Date(dInicioStr + "T12:00:00");
@@ -406,7 +436,7 @@
             showToast("Diárias configuradas com sucesso!", "success");
         }
 
-        function executarAjusteEmMassa() {
+        function ejecutarAjusteEmMassa() {
             const dInicioStr = document.getElementById('ajusteInicio').value;
             const dFimStr = document.getElementById('ajusteFim').value;
             const acao = document.getElementById('ajusteAcao').value;
@@ -451,7 +481,6 @@
             salvarListaAptos(); renderizarLinhasCalendario();
         }
 
-        // MOTOR DE RENDERIZAÇÃO COM FILTRO DE MÊS E TARIFA (Exatamente igual ao print)
         function renderizarLinhasCalendario() {
             const tbody = document.getElementById('tbodyCalendario');
             const contador = document.getElementById('contadorDias');
@@ -467,7 +496,7 @@
             const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
             
             let itensFiltrados = apto.calendario.filter(dia => {
-                let partes = dia.data.split('-'); // [Ano, Mês, Dia]
+                let partes = dia.data.split('-');
                 let bateMes = fMes === "todos" || partes[1] === fMes;
                 let bateTarifa = fTarifa === "todas" || dia.nome === fTarifa;
                 return bateMes && bateTarifa;
