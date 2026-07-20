@@ -4,17 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LD Orçamentos - Gerador de Cotação</title>
-    <!-- Tailwind CSS e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Menu Superior Padrão -->
     <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -40,7 +37,6 @@
         </div>
     </nav>
 
-    <!-- Conteúdo Principal -->
     <main class="flex-grow max-w-7xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900">Gerador de Orçamentos</h1>
@@ -48,7 +44,6 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Formulário de Parâmetros -->
             <div class="lg:col-span-5 bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit">
                 <h3 class="text-base font-bold text-gray-900 mb-5 flex items-center gap-2 border-b pb-3">
                     <i data-lucide="search" class="w-5 h-5 text-blue-600"></i> Dados da Reserva
@@ -65,7 +60,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Regime de Alimentação</label>
                         <select id="orcRegimeSelect" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
-                            <!-- Baseado nas regras do Apto -->
+                            <!-- Atualizado dinamicamente -->
                         </select>
                     </div>
 
@@ -94,11 +89,11 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Crianças</label>
+                            <!-- AQUI ESTAVA O BUG: generarCamposIdade X gerarCamposIdade -->
                             <input type="number" id="orcCriancas" min="0" onchange="gerarCamposIdade()" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none" placeholder="Ex: 0">
                         </div>
                     </div>
 
-                    <!-- Bloco das Idades -->
                     <div id="orcIdadesContainer" class="hidden bg-blue-50 p-4 rounded-lg border border-blue-100 mt-3 space-y-3">
                         <p class="text-xs font-semibold text-blue-800 uppercase">Idade das Crianças</p>
                         <div id="orcIdadesGrid" class="grid grid-cols-3 gap-3"></div>
@@ -112,7 +107,6 @@
                 </form>
             </div>
 
-            <!-- Painel de Resultados -->
             <div class="lg:col-span-7">
                 <div id="estadoVazio" class="h-full min-h-[400px] bg-white rounded-xl shadow-sm border border-gray-200 border-dashed flex flex-col items-center justify-center text-center p-8">
                     <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4"><i data-lucide="receipt" class="w-8 h-8 text-blue-300"></i></div>
@@ -158,7 +152,6 @@
                             </div>
                         </div>
 
-                        <!-- CAMPOS: DADOS DO CLIENTE PARA ENVIO -->
                         <div class="border-t pt-4 mt-4 space-y-4">
                             <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
                                 <i data-lucide="user" class="w-3.5 h-3.5"></i> Identificação de Envio (Opcional)
@@ -175,9 +168,8 @@
                             </div>
                         </div>
 
-                        <!-- Botões de Ação -->
                         <div class="mt-8 flex gap-3">
-                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 flex items-center justify-center gap-2 shadow-sm">
+                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-sm">
                                 <i data-lucide="copy" class="w-4 h-4"></i> Copiar Texto
                             </button>
                             <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 shadow-sm flex items-center justify-center gap-2">
@@ -189,7 +181,6 @@
             </div>
         </div>
 
-        <!-- SEÇÃO: HISTÓRICO DE COTAÇÕES -->
         <div class="mt-12 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h3 class="font-bold text-gray-900 flex items-center gap-2 shrink-0">
@@ -211,7 +202,6 @@
                     <thead class="bg-gray-50 text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b">
                         <tr>
                             <th class="py-3 px-4">ID</th>
-                            <!-- NOVA COLUNA: DATA DE EMISSÃO DA COTAÇÃO -->
                             <th class="py-3 px-4">Emissão</th>
                             <th class="py-3 px-4">Cliente / WhatsApp</th>
                             <th class="py-3 px-4">Imóvel</th>
@@ -233,7 +223,6 @@
         </div>
     </main>
 
-    <!-- MODAL CUSTOMIZADO DE CONFIRMAÇÃO (MEIO DA TELA) -->
     <div id="modalConfirmacao" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl max-w-sm w-full shadow-xl border border-gray-100 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
             <div class="p-6 text-center">
@@ -258,7 +247,6 @@
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8"><p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos.</p></div>
     </footer>
 
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
@@ -275,7 +263,7 @@
         const nomenclaturaRegimes = {
             ro: "Sem refeição",
             bb: "Café da Manhã",
-            map: "Café + Almoço ou Jantar (Meia Pensão)",
+            map: "Café + Almoço ou Jantar",
             fap: "Pensão Completa"
         };
 
@@ -532,8 +520,6 @@
 
         function registrarNoHistorico() {
             if(!dadosLocaisUltimoCalculo) return;
-
-            // CAPTURA A DATA + HORÁRIO REAL DE EMISSÃO DA COTAÇÃO
             const agora = new Date();
             const dataEmissaoFormatada = agora.toLocaleDateString('pt-BR');
             const horaEmissaoFormatada = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -541,7 +527,7 @@
             const novoRegistro = {
                 idCodigo: dadosLocaisUltimoCalculo.idCodigo,
                 timestamp: Date.now(),
-                dataEmissao: `${dataEmissaoFormatada} às ${horaEmissaoFormatada}`, // Injetado estruturado
+                dataEmissao: `${dataEmissaoFormatada} às ${horaEmissaoFormatada}`,
                 nome: document.getElementById('clienteNome').value.trim() || "Não informado",
                 zap: document.getElementById('clienteWhatsapp').value.trim() || "Não informado",
                 hotel: `${dadosLocaisUltimoCalculo.hotelNome} (${dadosLocaisUltimoCalculo.quartoNome}) - ${dadosLocaisUltimoCalculo.regimeNome}${dadosLocaisUltimoCalculo.promoTextoZap ? ' ('+document.getElementById('orcPromoSelect').options[document.getElementById('orcPromoSelect').selectedIndex].text+')' : ''}`,
@@ -552,7 +538,6 @@
                 valor: dadosLocaisUltimoCalculo.total,
                 textoBruto: construirTextoFinalTemplate()
             };
-            
             historicoOrcamentos.push(novoRegistro);
             localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
             paginaAtualAtiva = 1;
@@ -648,19 +633,15 @@
             const itensPaginaAtiva = listaOrdenadaParaExibicao.slice(indexInicial, indexFinal);
             txtInfo.innerText = `Mostrando ${indexInicial + 1}-${indexFinal} de ${totalRegistrosFiltrados} cotações`;
 
-            // Renderiza incluindo a coluna de ID blindada e data de Emissão real
             itensPaginaAtiva.forEach((item, indexNoLoop) => {
-                // CORREÇÃO: Evita que IDs corrompidos mostrem 'undefined' indexando sequencial dinâmico se falhar
                 let idRealTratado = (item.idCodigo && item.idCodigo !== 'undefined') ? item.idCodigo : (totalRegistrosFiltrados - indexInicial - indexNoLoop);
                 if (typeof idRealTratado === 'number' && idRealTratado < 10) idRealTratado = "0" + idRealTratado;
 
-                // CORREÇÃO: Trata retroativos sem data injetando a data de hoje para manter a integridade visual
                 let dataEmissaoTratada = item.dataEmissao ? item.dataEmissao : new Date().toLocaleDateString('pt-BR') + ' às 09:00';
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100 font-medium text-gray-700">
                         <td class="py-3 px-4 font-black text-blue-600">#${idRealTratado}</td>
-                        <!-- NOVO: VISUALIZAÇÃO DA DATA DE CRIAÇÃO -->
                         <td class="py-3 px-4 text-gray-400 text-[11px] font-normal shrink-0"><i data-lucide="clock" class="w-3 h-3 inline mr-1 -mt-0.5"></i>${dataEmissaoTratada}</td>
                         <td class="py-3 px-4 font-bold text-gray-900">${item.nome}<br><span class="text-gray-400 text-[11px] font-normal">${item.zap}</span></td>
                         <td class="py-3 px-4 text-gray-600 text-xs truncate max-w-[180px]">${item.hotel}</td>
