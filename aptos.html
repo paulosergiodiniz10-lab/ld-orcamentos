@@ -4,17 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LD Orçamentos - Meus Aptos e Tarifas</title>
-    <!-- Tailwind CSS e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Menu Superior Padrão -->
     <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -40,10 +37,8 @@
         </div>
     </nav>
 
-    <!-- Conteúdo Principal -->
     <main class="flex-grow max-w-6xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
         
-        <!-- SEÇÃO DE LISTAGEM DE CARDS -->
         <div id="secaoListagem">
             <div class="flex justify-between items-center mb-6">
                 <div>
@@ -57,7 +52,6 @@
             <div id="gridCardsAptos" class="space-y-4"></div>
         </div>
 
-        <!-- SEÇÃO DO FORMULÁRIO COMPLETO -->
         <div id="secaoFormulario" class="hidden">
             <div class="flex justify-between items-end mb-6">
                 <div>
@@ -69,7 +63,6 @@
                 </button>
             </div>
 
-            <!-- Dados do Quarto -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                 <div class="p-6 sm:p-8 space-y-8">
                     <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-4">
@@ -88,7 +81,6 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Cortesia Infantil -->
                         <div class="bg-blue-50 rounded-lg p-5 border border-blue-100">
                             <h3 class="text-sm font-semibold text-blue-900 tracking-wide uppercase mb-4 border-b border-blue-200 pb-2 flex items-center gap-2">
                                 <i data-lucide="baby" class="w-4 h-4 text-blue-600"></i> Limites de Crianças
@@ -105,29 +97,28 @@
                             </div>
                         </div>
 
-                        <!-- Configuração de Alimentação Ativa -->
+                        <!-- TÍTULO E RÓTULOS ATUALIZADOS AQUI -->
                         <div class="bg-orange-50 rounded-lg p-5 border border-orange-100">
                             <h3 class="text-sm font-semibold text-orange-900 tracking-wide uppercase mb-4 border-b border-orange-200 pb-2 flex items-center gap-2">
-                                <i data-lucide="utensils" class="w-4 h-4 text-orange-600"></i> Regimes Oferecidos pelo Imóvel
+                                <i data-lucide="utensils" class="w-4 h-4 text-orange-600"></i> REGIMES DE PENSÃO
                             </h3>
                             <div class="grid grid-cols-2 gap-3 text-sm font-medium text-orange-950">
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="regime_ro" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Sem refeição (RO)
+                                    <input type="checkbox" id="regime_ro" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Sem refeição
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="regime_bb" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Café da Manhã (BB)
+                                    <input type="checkbox" id="regime_bb" checked class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Café da Manhã
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="regime_map" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Café + Almoço ou Jantar (MAP)
+                                    <input type="checkbox" id="regime_map" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Café + Almoço ou Jantar
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="regime_fap" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Pensão Completa (FAP)
+                                    <input type="checkbox" id="regime_fap" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Pensão Completa
                                 </label>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Promoções e Ofertas (Fique/Pague) -->
                     <div class="bg-green-50 rounded-lg p-5 border border-green-100">
                         <h3 class="text-sm font-semibold text-green-900 tracking-wide uppercase mb-4 border-b border-green-200 pb-2 flex items-center gap-2">
                             <i data-lucide="tag" class="w-4 h-4 text-green-600"></i> Promoções e Ofertas Disponíveis (Fique / Pague)
@@ -155,7 +146,6 @@
                 </div>
             </div>
 
-            <!-- GESTÃO DE TARIFAS -->
             <div id="blocoTarifasAdicionais" class="hidden space-y-6 scroll-mt-20">
                 <div id="formularioAncoragemTarifas" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="bg-yellow-100/50 border-b border-yellow-200 px-6 py-4 flex items-center gap-2">
@@ -178,12 +168,10 @@
                             </div>
                         </div>
 
-                        <!-- ABAS DINÂMICAS DE REFEIÇÃO -->
                         <div class="border-b border-gray-200">
                             <nav id="abasRegimesContainer" class="-mb-px flex space-x-6 text-sm font-semibold"></nav>
                         </div>
 
-                        <!-- BLOCO DOS VALORES DA DIÁRIA -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
                             <h4 class="text-sm font-bold text-gray-700 uppercase mb-4 border-b pb-2 flex items-center gap-2">
                                 <i data-lucide="utensils" class="w-4 h-4 text-gray-500"></i> Preços para o Regime Ativo: <span id="txtRegimeAtivoLabel" class="text-blue-600 text-sm font-bold">Sem Refeição</span>
@@ -214,7 +202,6 @@
                     </div>
                 </div>
 
-                <!-- Ajuste Rápido em Massa -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="bg-green-100/50 border-b border-green-200 px-6 py-4 flex items-center gap-2">
                         <i data-lucide="percent" class="w-5 h-5 text-green-700"></i>
@@ -241,10 +228,10 @@
                                 <label class="block text-sm font-medium text-gray-700">Regime de Pensão</label>
                                 <select id="ajusteRegime" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none bg-white">
                                     <option value="todos">Todos os regimes</option>
-                                    <option value="ro">Sem refeição (RO)</option>
-                                    <option value="bb">Café da Manhã (BB)</option>
-                                    <option value="map">Café + Almoço ou Jantar (MAP)</option>
-                                    <option value="fap">Pensão Completa (FAP)</option>
+                                    <option value="ro">Sem refeição</option>
+                                    <option value="bb">Café da Manhã</option>
+                                    <option value="map">Café + Almoço ou Jantar</option>
+                                    <option value="fap">Pensão Completa</option>
                                 </select>
                             </div>
                             <div>
@@ -258,7 +245,6 @@
                     </div>
                 </div>
 
-                <!-- Gestão do Calendário -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                         <h3 class="font-bold text-gray-900 flex items-center gap-2">
@@ -297,10 +283,10 @@
                                 <div class="flex items-center gap-3">
                                     <select id="filtroRegime" onchange="renderizarLinhasCalendario()" class="block w-full text-sm border-gray-300 rounded-md py-2 px-3 border bg-white outline-none">
                                         <option value="todos">Todos os regimes</option>
-                                        <option value="ro">Sem refeição (RO)</option>
-                                        <option value="bb">Café da Manhã (BB)</option>
-                                        <option value="map">Café + Almoço ou Jantar (MAP)</option>
-                                        <option value="fap">Pensão Completa (FAP)</option>
+                                        <option value="ro">Sem refeição</option>
+                                        <option value="bb">Café da Manhã</option>
+                                        <option value="map">Café + Almoço ou Jantar</option>
+                                        <option value="fap">Pensão Completa</option>
                                     </select>
                                     <div class="flex items-center gap-2 shrink-0">
                                         <button onclick="limparFiltrosCalendario()" class="text-blue-600 text-xs font-bold hover:underline">Limpar</button>
@@ -336,7 +322,6 @@
         </div>
     </main>
 
-    <!-- MODAL CUSTOMIZADO DE CONFIRMAÇÃO -->
     <div id="modalConfirmacao" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl max-w-sm w-full shadow-xl border border-gray-100 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
             <div class="p-6 text-center">
@@ -357,7 +342,6 @@
         </div>
     </div>
 
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
@@ -368,10 +352,10 @@
         let fpInicio, fpFim, fpAjusteInicio, fpAjusteFim;
         
         const nomenclaturaRegimes = {
-            ro: "Sem refeição (RO)",
-            bb: "Café da Manhã (BB)",
-            map: "Café + Almoço ou Jantar (MAP)",
-            fap: "Pensão Completa (FAP)"
+            ro: "Sem refeição",
+            bb: "Café da Manhã",
+            map: "Café + Almoço ou Jantar",
+            fap: "Pensão Completa"
         };
         
         let regimeAtivoAba = "ro";
@@ -575,7 +559,6 @@
                 calendario: (index > -1) ? listaAptos[index].calendario : []
             };
 
-            // CORREÇÃO: Bloco de salvamento restaurado corretamente e verificado
             if(index > -1) {
                 listaAptos[index] = aptoObjeto;
             } else {
