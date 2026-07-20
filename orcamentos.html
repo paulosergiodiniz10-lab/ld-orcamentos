@@ -111,7 +111,7 @@
 
                 <div id="resultadoCotacao" class="hidden bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
                     
-                    <!-- ALERTA ELEGANTE DE VALIDAÇÃO (ERROS E NOITES MÍNIMAS) -->
+                    <!-- ALERTA ELEGANTE DE VALIDAÇÃO -->
                     <div id="alertaErro" class="hidden bg-red-50 border-b border-red-200 p-4 flex items-start gap-3">
                         <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600 mt-0.5"></i>
                         <div>
@@ -164,10 +164,10 @@
 
                         <!-- Botões de Ação -->
                         <div class="mt-8 flex gap-3">
-                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 flex items-center justify-center gap-2 shadow-sm">
                                 <i data-lucide="copy" class="w-4 h-4"></i> Copiar Texto
                             </button>
-                            <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2">
+                            <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 shadow-sm flex items-center justify-center gap-2">
                                 <i data-lucide="message-circle" class="w-4 h-4"></i> Enviar WhatsApp
                             </button>
                         </div>
@@ -298,7 +298,6 @@
             }
         }
 
-        // MOTOR DE CÁLCULO ATUALIZADO COM VALIDAÇÃO DE NOITES MÍNIMAS DIA A DIA
         function calcularOrcamentoReal() {
             const aptoId = document.getElementById('orcAptoSelect').value;
             const regimeId = document.getElementById('orcRegimeSelect').value;
@@ -329,7 +328,6 @@
                 showToast("Capacidade máxima do quarto violada!", "error"); return;
             }
 
-            // Calcula o total de noites real da busca atual
             let dCorrenteCalculoNoites = new Date(dInicioStr + "T12:00:00");
             let dFinalCalculoNoites = new Date(dFimStr + "T12:00:00");
             let totalNoitesBusca = 0;
@@ -350,13 +348,13 @@
             });
 
             let pagantesAdicionais = criancasPagantes;
-            let adultosEfetivos = adults = adultos;
+            let adultosEfetivos = adultos;
             let valorAcumuladoBase = 0; let valorAcumuladoExtras = 0;
 
             let dCorrente = new Date(dInicioStr + "T12:00:00");
             let dFinal = new Date(dFimStr + "T12:00:00");
             let erroFaltaTarifa = false;
-            let noitesMinimasExigidasDoPeriodo = 0; // Guarda a maior trava encontrada no período
+            let noitesMinimasExigidasDoPeriodo = 0;
 
             while(dCorrente < dFinal) {
                 let dataIso = dCorrente.toISOString().split('T')[0];
@@ -364,7 +362,6 @@
                 
                 if(!tarifaDia) { erroFaltaTarifa = true; break; }
 
-                // Captura a maior regra de noites mínimas entre os dias selecionados
                 if(tarifaDia.minNoites && tarifaDia.minNoites > noitesMinimasExigidasDoPeriodo) {
                     noitesMinimasExigidasDoPeriodo = tarifaDia.minNoites;
                 }
@@ -389,16 +386,14 @@
                 showToast("Erro: Sem tarifa para este período.", "error"); return;
             }
 
-            // TRAVA INTELIGENTE E ELEGANTE DE NOITES MÍNIMAS
             if(totalNoitesBusca < noitesMinimasExigidasDoPeriodo) {
                 alertaErro.classList.remove('hidden'); 
-                areaValores.classList.add('hidden'); // Oculta o bloco de resumo financeiro por segurança
+                areaValores.classList.add('hidden');
                 document.getElementById('msgErro').innerText = `O período selecionado de ${totalNoitesBusca === 1 ? "01 noite" : totalNoitesBusca + " noites"} não é permitido. Esse apartamento exige o mínimo de ${noitesMinimasExigidasDoPeriodo} noites para o plano ${nomenclaturaRegimes[regimeId]}.`;
                 showToast(`Restrição: Mínimo de ${noitesMinimasExigidasDoPeriodo} noites obrigatório!`, "error");
                 return;
             }
 
-            // Se passar por todas as travas, libera o layout normal
             alertaErro.classList.add('hidden'); 
             areaValores.classList.remove('hidden');
 
@@ -414,7 +409,7 @@
             dadosLocaisUltimoCalculo = {
                 hotelNome: apto.nome,
                 quartoNome: apto.unidade,
-                regimeNome: nomenclatureRegimes[regimeId],
+                regimeNome: nomenclaturaRegimes[regimeId],
                 checkin: dInicioStr.split('-').reverse().join('/'),
                 checkout: dFimStr.split('-').reverse().join('/'),
                 noitesTxt: msgNoitesTexto,
@@ -478,7 +473,10 @@
 
         function copiarTextoOrcamento() {
             const texto = construirTextoFinalTemplate();
-            if(!texto) return;
+            if(!texto) {
+                showToast("Por favor, calcule uma cotação antes!", "error");
+                return;
+            }
             navigator.clipboard.writeText(texto);
             registrarNoHistorico();
             resetarFormularioReserva();
@@ -487,7 +485,10 @@
 
         function enviarWhatsAppOrcamento() {
             const texto = construirTextoFinalTemplate();
-            if(!texto) return;
+            if(!texto) {
+                showToast("Por favor, calcule uma cotação antes!", "error");
+                return;
+            }
             const zap = document.getElementById('clienteWhatsapp').value.replace(/\D/g, "");
             registrarNoHistorico();
             resetarFormularioReserva();
@@ -507,7 +508,6 @@
                 historicoOrcamentos.splice(index, 1);
                 localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
                 renderizarTabelaHistorico();
-                showToast("Cotação removida do histórico.", "success");
             }
         }
 
