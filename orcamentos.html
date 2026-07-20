@@ -40,7 +40,7 @@
     <main class="flex-grow max-w-7xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900">Gerador de Orçamentos</h1>
-            <p class="text-sm text-gray-500 mt-1">Busque a disponibilidade e calcule os valores reais salvos no calendário.</p>
+            <p class="text-sm text-gray-500 mt-1">Busque a availability e calcule os valores reais salvos no calendário.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -83,7 +83,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Crianças</label>
-                            <input type="number" id="orcCriancas" min="0" onchange="generarCamposIdade()" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none" placeholder="Ex: 0">
+                            <input type="number" id="orcCriancas" min="0" onchange="gerarCamposIdade()" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none" placeholder="Ex: 0">
                         </div>
                     </div>
 
@@ -110,6 +110,7 @@
                 </div>
 
                 <div id="resultadoCotacao" class="hidden bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+                    
                     <div id="alertaErro" class="hidden bg-red-50 border-b border-red-200 p-4 flex items-start gap-3">
                         <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600 mt-0.5"></i>
                         <div>
@@ -162,7 +163,7 @@
 
                         <!-- Botões de Ação -->
                         <div class="mt-8 flex gap-3">
-                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 flex items-center justify-center gap-2 shadow-sm">
+                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-sm">
                                 <i data-lucide="copy" class="w-4 h-4"></i> Copiar Texto
                             </button>
                             <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 shadow-sm flex items-center justify-center gap-2">
@@ -174,14 +175,24 @@
             </div>
         </div>
 
-        <!-- SEÇÃO: HISTÓRICO DE COTAÇÕES -->
+        <!-- SEÇÃO: HISTÓRICO DE COTAÇÕES COM COMPONENTES DE INFALIBILIDADE EM ESCALA -->
         <div class="mt-12 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                <h3 class="font-bold text-gray-900 flex items-center gap-2">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h3 class="font-bold text-gray-900 flex items-center gap-2 shrink-0">
                     <i data-lucide="history" class="w-5 h-5 text-gray-500"></i> Histórico de Orçamentos Gerados
                 </h3>
-                <span id="badgeContadorHistorico" class="bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1 rounded-full">0 registros</span>
+                
+                <!-- NOVO: CAMPO DE BUSCA RÁPIDA (NOME, ID OU ZAP) EXATAMENTE NO CAMPO DISPONÍVEL -->
+                <div class="relative w-full sm:max-w-xs">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                    </span>
+                    <input type="text" id="inputBuscaHistorico" oninput="mudarPaginaHistorico(1)" class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Buscar por Nome, ID ou Zap...">
+                </div>
+                
+                <span id="badgeContadorHistorico" class="bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1 rounded-full shrink-0">0 registros</span>
             </div>
+            
             <div class="overflow-x-auto">
                 <table class="min-w-full text-left text-xs text-gray-700 whitespace-nowrap">
                     <thead class="bg-gray-50 text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b">
@@ -199,10 +210,16 @@
                     <tbody id="tbodyHistorico" class="divide-y divide-gray-100"></tbody>
                 </table>
             </div>
+
+            <!-- NOVO: CONTROLE DE PAGINAÇÃO CONFORME A REGRA DE 50 CADASTROS POR PÁGINA -->
+            <div id="containerPaginacao" class="bg-gray-50 px-6 py-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 font-medium">
+                <span id="txtInfoPaginacao">Mostrando 0-0 de 0 cotações</span>
+                <div id="botoesPaginacaoGrid" class="flex items-center gap-1"></div>
+            </div>
         </div>
     </main>
 
-    <!-- NOVO MODAL CUSTOMIZADO E ELEGANTE DE CONFIRMAÇÃO (MEIO DA TELA) -->
+    <!-- MODAL CUSTOMIZADO DE CONFIRMAÇÃO (MEIO DA TELA) -->
     <div id="modalConfirmacao" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl max-w-sm w-full shadow-xl border border-gray-100 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
             <div class="p-6 text-center">
@@ -235,7 +252,11 @@
         let listaAptos = [];
         let historicoOrcamentos = [];
         let dadosLocaisUltimoCalculo = null;
-        let funcaoCallbackConfirmacao = null; // Callback do modal customizado
+        let funcaoCallbackConfirmacao = null;
+
+        // PAGINAÇÃO CONFIGURADA PARA 50 CADASTROS POR PÁGINA
+        const limitePorPagina = 50;
+        let paginaAtualAtiva = 1;
 
         const nomenclaturaRegimes = {
             ro: "Sem refeição",
@@ -255,14 +276,11 @@
             setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
-        // DISPARADOR DO MODAL CUSTOMIZADO
         function chamarModalConfirmacaoExclusao(textoContexto, callbackSucesso) {
             const modal = document.getElementById('modalConfirmacao');
             document.getElementById('modalConfirmacaoTexto').innerText = textoContexto;
             modal.classList.remove('hidden');
-            
             funcaoCallbackConfirmacao = callbackSucesso;
-            
             document.getElementById('modalBtnCancelar').onclick = () => modal.classList.add('hidden');
             document.getElementById('modalBtnConfirmar').onclick = () => {
                 modal.classList.add('hidden');
@@ -423,25 +441,17 @@
             }
 
             if(totalNoitesBusca < noitesMinimasExigidasDoPeriodo) {
-                alertaErro.classList.remove('hidden'); 
-                areaValores.classList.add('hidden');
+                alertaErro.classList.remove('hidden'); areaValores.classList.add('hidden');
                 document.getElementById('msgErro').innerText = `O período selecionado de ${totalNoitesBusca === 1 ? "01 noite" : totalNoitesBusca + " noites"} não é permitido. Esse apartamento exige o mínimo de ${noitesMinimasExigidasDoPeriodo} noites para o plano ${nomenclaturaRegimes[regimeId]}.`;
-                showToast(`Restrição: Mínimo de ${noitesMinimasExigidasDoPeriodo} noites obrigatório!`, "error");
-                return;
+                showToast(`Restrição: Mínimo de ${noitesMinimasExigidasDoPeriodo} noites obrigatório!`, "error"); return;
             }
 
-            alertaErro.classList.add('hidden'); 
-            areaValores.classList.remove('hidden');
+            alertaErro.classList.add('hidden'); areaValores.classList.remove('hidden');
 
             let valorTotalGeral = valorAcumuladoBase + valorAcumuladoExtras;
             let msgNoitesTexto = totalNoitesBusca === 1 ? "01 noite" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " noites";
 
-            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${totalNoitesBusca === 1 ? "01 Noite(s)" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " Noite(s)"} • ${nomenclaturaRegimes[regimeId]}`;
-            document.getElementById('valorTotal').innerText = `R$ ${valorTotalGeral.toFixed(2).replace('.', ',')}`;
-            document.getElementById('txtSomaBase').innerText = `R$ ${valorAcumuladoBase.toFixed(2).replace('.', ',')}`;
-            document.getElementById('txtSomaExtras').innerText = `R$ ${valorAcumuladoExtras.toFixed(2).replace('.', ',')}`;
-            document.getElementById('txtQtdFree').innerText = `${criancasFree} criança(s) free (Até ${idadeFreeMax} anos)`;
-
+            // PEGA O TOTAL ABSOLUTO HISTÓRICO ATUAL PARA TRAVAR O ID DO CLIENTE COMPATÍVEL
             let proximoIdNumero = historicoOrcamentos.length + 1;
             let idLabelFormatado = proximoIdNumero < 10 ? "0" + proximoIdNumero : proximoIdNumero;
 
@@ -481,8 +491,10 @@
 
         function registrarNoHistorico() {
             if(!dadosLocaisUltimoCalculo) return;
+            
             const novoRegistro = {
                 idCodigo: dadosLocaisUltimoCalculo.idCodigo,
+                timestamp: Date.now(), // Usado para ordenação decrescente perfeita e estável
                 nome: document.getElementById('clienteNome').value.trim() || "Não informado",
                 zap: document.getElementById('clienteWhatsapp').value.trim() || "Não informado",
                 hotel: `${dadosLocaisUltimoCalculo.hotelNome} (${dadosLocaisUltimoCalculo.quartoNome}) - ${dadosLocaisUltimoCalculo.regimeNome}`,
@@ -493,8 +505,11 @@
                 valor: dadosLocaisUltimoCalculo.total,
                 textoBruto: construirTextoFinalTemplate()
             };
-            historicoOrcamentos.unshift(novoRegistro);
+            
+            historicoOrcamentos.push(novoRegistro); // Salva no banco de dados local bruto
             localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
+            
+            paginaAtualAtiva = 1; // Reseta para a primeira página para o atendente ver o card nascer no topo
             renderizarTabelaHistorico();
         }
 
@@ -531,44 +546,84 @@
             else window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
         }
 
-        function copiarTextoDiretoDoHistorico(index) {
-            const item = historicoOrcamentos[index];
-            navigator.clipboard.writeText(item.textoBruto);
-            showToast(`Orçamento ID ${item.idCodigo} copiado novamente!`, "success");
+        function copiarTextoDiretoDoHistorico(idCodigoAlvo) {
+            const item = historicoOrcamentos.find(h => h.idCodigo === idCodigoAlvo);
+            if(item) {
+                navigator.clipboard.writeText(item.textoBruto);
+                showToast(`Orçamento ID ${item.idCodigo} copiado novamente!`, "success");
+            }
         }
 
-        function reativarAtendimentoZap(index) {
-            const item = historicoOrcamentos[index];
+        function reativarAtendimentoZap(idCodigoAlvo) {
+            const item = historicoOrcamentos.find(h => h.idCodigo === idCodigoAlvo);
+            if(!item) return;
             const foneLimpo = item.zap.replace(/\D/g, "");
             if(foneLimpo && item.zap !== "Não informado") window.open(`https://api.whatsapp.com/send?phone=55${foneLimpo}&text=${encodeURIComponent(item.textoBruto)}`, '_blank');
             else window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(item.textoBruto)}`, '_blank');
         }
 
-        // POP-UP CUSTOMIZADO DE EXCLUSÃO DO HISTÓRICO
-        function removerItemHistorico(index) {
+        function removerItemHistorico(idCodigoAlvo) {
             chamarModalConfirmacaoExclusao("Tem certeza que deseja deletar este orçamento permanentemente do seu histórico?", () => {
-                historicoOrcamentos.splice(index, 1);
+                historicoOrcamentos = historicoOrcamentos.filter(h => h.idCodigo !== idCodigoAlvo);
                 localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
                 renderizarTabelaHistorico();
                 showToast("Orçamento removido do histórico.", "success");
             });
         }
 
+        function mudarPaginaHistorico(numeroPaginaalvo) {
+            paginaAtualAtiva = numeroPaginaalvo;
+            renderizarTabelaHistorico();
+        }
+
+        // MOTOR DE INFALIBILIDADE EM LARGA ESCALA (ORDENAÇÃO MAIOR -> MENOR, BUSCA COMPLETA E PAGINAÇÃO DE 50)
         function renderizarTabelaHistorico() {
             const tbody = document.getElementById('tbodyHistorico');
             const badge = document.getElementById('badgeContadorHistorico');
+            const txtInfo = document.getElementById('txtInfoPaginacao');
+            const gridBotoes = document.getElementById('botoesPaginacaoGrid');
+            
             tbody.innerHTML = "";
-            badge.innerText = `${historicoOrcamentos.length} registros`;
+            gridBotoes.innerHTML = "";
 
-            if(historicoOrcamentos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-gray-400">Nenhum orçamento arquivado.</td></tr>`;
+            // REGRA: Ordenar sempre do ID maior para o menor (mais recentes primeiro)
+            let listaOrdenadaParaExibicao = [...historicoOrcamentos].sort((a, b) => b.timestamp - a.timestamp);
+
+            // REGRA: Captura da busca por Nome, ID ou WhatsApp
+            const termoBusca = document.getElementById('inputBuscaHistorico').value.trim().toLowerCase();
+            if(termoBusca) {
+                listaOrdenadaParaExibicao = listaOrdenadaParaExibicao.filter(item => {
+                    return item.nome.toLowerCase().includes(termoBusca) || 
+                           item.idCodigo.includes(termoBusca) || 
+                           item.zap.replace(/\D/g, "").includes(termoBusca);
+                });
+            }
+
+            const totalRegistrosFiltrados = listaOrdenadaParaExibicao.length;
+            badge.innerText = `${totalRegistrosFiltrados} cotações`;
+
+            if(totalRegistrosFiltrados === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-gray-400">Nenhum orçamento correspondente encontrado.</td></tr>`;
+                txtInfo.innerText = "Mostrando 0 de 0 cotações";
                 return;
             }
 
-            historicoOrcamentos.forEach((item, idx) => {
+            // REGRA CÁLCULO DE PAGINAÇÃO MATEMÁTICA (50 por página)
+            const totalPaginasCalculadas = Math.ceil(totalRegistrosFiltrados / limitePorPagina);
+            if(paginaAtualAtiva > totalPaginasCalculadas) paginaAtualAtiva = totalPaginasCalculadas || 1;
+
+            const indexInicial = (paginaAtualAtiva - 1) * limitePorPagina;
+            const indexFinal = Math.min(indexInicial + limitePorPagina, totalRegistrosFiltrados);
+
+            // Corta o array para exibir somente os 50 da página atual ativa
+            const itensPaginaAtiva = listaOrdenadaParaExibicao.slice(indexInicial, indexFinal);
+            txtInfo.innerText = `Mostrando ${indexInicial + 1}-${indexFinal} de ${totalRegistrosFiltrados} cotações`;
+
+            // Renderiza as linhas
+            itensPaginaAtiva.forEach((item) => {
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100 font-medium text-gray-700">
-                        <td class="py-3 px-4 font-bold text-blue-600">#${item.idCodigo || '00'}</td>
+                        <td class="py-3 px-4 font-bold text-blue-600">#${item.idCodigo}</td>
                         <td class="py-3 px-4 font-bold text-gray-900">${item.nome}<br><span class="text-gray-400 text-[11px] font-normal">${item.zap}</span></td>
                         <td class="py-3 px-4 text-gray-600 text-xs truncate max-w-[180px]">${item.hotel}</td>
                         <td class="py-3 px-4 font-semibold text-gray-700">${item.entrada}</td>
@@ -576,12 +631,21 @@
                         <td class="py-3 px-4 text-center text-gray-500">${parseInt(item.adultos)} Ad / ${parseInt(item.criancas)} Cr</td>
                         <td class="py-3 px-4 text-blue-600 font-bold">R$ ${item.valor}</td>
                         <td class="py-3 px-4 text-right space-x-3">
-                            <button onclick="copiarTextoDiretoDoHistorico(${idx})" class="text-gray-500 hover:text-blue-600 transition-colors" title="Copiar este orçamento de novo"><i data-lucide="clipboard" class="w-4 h-4 inline"></i></button>
-                            <button onclick="reativarAtendimentoZap(${idx})" class="text-green-500 hover:text-green-700 transition-colors" title="Enviar pelo WhatsApp"><i data-lucide="message-circle" class="w-4 h-4 inline"></i></button>
-                            <button onclick="removerItemHistorico(${idx})" class="text-gray-400 hover:text-red-600 transition-colors" title="Remover"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
+                            <button onclick="copiarTextoDiretoDoHistorico('${item.idCodigo}')" class="text-gray-500 hover:text-blue-600 transition-colors" title="Copiar orçamento"><i data-lucide="clipboard" class="w-4 h-4 inline"></i></button>
+                            <button onclick="reativarAtendimentoZap('${item.idCodigo}')" class="text-green-500 hover:text-green-700 transition-colors" title="Enviar WhatsApp"><i data-lucide="message-circle" class="w-4 h-4 inline"></i></button>
+                            <button onclick="removerItemHistorico('${item.idCodigo}')" class="text-gray-400 hover:text-red-600 transition-colors" title="Remover"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
                         </td>
                     </tr>`;
             });
+
+            // Criação dos botões numéricos da paginação (Ex: 1, 2, 3...)
+            if(totalPaginasCalculadas > 1) {
+                for(let i = 1; i <= totalPaginasCalculadas; i++) {
+                    const ativo = i === paginaAtualAtiva;
+                    const classeBotao = ativo ? "bg-blue-600 text-white font-bold" : "bg-white hover:bg-gray-100 border text-gray-700";
+                    gridBotoes.innerHTML += `<button onclick="mudarPaginaHistorico(${i})" class="px-3 py-1.5 rounded text-xs transition-colors shadow-sm ${classeBotao}">${i}</button>`;
+                }
+            }
             lucide.createIcons();
         }
 
