@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LD Orçamentos - Meus Aptos e Tarifas</title>
+    <!-- Tailwind CSS e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
@@ -97,7 +99,6 @@
                             </div>
                         </div>
 
-                        <!-- TÍTULO E RÓTULOS ATUALIZADOS AQUI -->
                         <div class="bg-orange-50 rounded-lg p-5 border border-orange-100">
                             <h3 class="text-sm font-semibold text-orange-900 tracking-wide uppercase mb-4 border-b border-orange-200 pb-2 flex items-center gap-2">
                                 <i data-lucide="utensils" class="w-4 h-4 text-orange-600"></i> REGIMES DE PENSÃO
@@ -345,7 +346,6 @@
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
-        lucide.createIcons();
         let listaAptos = [];
         let aptoAtualId = null;
         let funcaoCallbackConfirmacao = null;
@@ -360,6 +360,15 @@
         
         let regimeAtivoAba = "ro";
         let cacheValoresTemporariosForm = {};
+
+        function normalizarDataIn(val) {
+            if(!val) return "";
+            if(val.includes('/')) {
+                let p = val.split('/');
+                if(p.length === 3 && p[2].length === 4) return `${p[2]}-${p[1]}-${p[0]}`;
+            }
+            return val;
+        }
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -581,8 +590,8 @@
 
         function gerarTarifasNoCalendario() {
             const nomeTarifa = document.getElementById('tNome').value.trim() || "Padrão";
-            let dInicioStr = document.getElementById('tInicio').value;
-            let dFimStr = document.getElementById('tFim').value;
+            let dInicioStr = normalizarDataIn(document.getElementById('tInicio').value);
+            let dFimStr = normalizarDataIn(document.getElementById('tFim').value);
             const sVal = parseFloat(document.getElementById('tSingle').value) || 0;
             const dVal = parseFloat(document.getElementById('tDuplo').value) || 0;
             const eVal = parseFloat(document.getElementById('tExtra').value) || 0;
@@ -610,8 +619,8 @@
         }
 
         function executarAjusteEmMassa() {
-            const dInicioStr = document.getElementById('ajusteInicio').value;
-            const dFimStr = document.getElementById('ajusteFim').value;
+            const dInicioStr = normalizarDataIn(document.getElementById('ajusteInicio').value);
+            const dFimStr = normalizarDataIn(document.getElementById('ajusteFim').value);
             const acao = document.getElementById('ajusteAcao').value;
             const regimeFiltro = document.getElementById('ajusteRegime').value;
             const porcentagem = parseFloat(document.getElementById('ajustePorcentagem').value) || 0;
