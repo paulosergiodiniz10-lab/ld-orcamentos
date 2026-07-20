@@ -58,7 +58,7 @@
             <div class="flex justify-between items-end mb-6">
                 <div>
                     <h1 id="tituloFormApto" class="text-2xl font-bold text-gray-900">Configurar Apartamento</h1>
-                    <p class="text-sm text-gray-500 mt-1">Defina as regras gerais, capacidades máximas e diárias.</p>
+                    <p class="text-sm text-gray-500 mt-1">Defina as regras gerais, capacidades máximas e alimentação.</p>
                 </div>
                 <button onclick="voltarParaListagem()" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar para a lista
@@ -83,27 +83,50 @@
                         </div>
                     </div>
 
-                    <div class="bg-blue-50 rounded-lg p-5 border border-blue-100">
-                        <h3 class="text-sm font-semibold text-blue-900 tracking-wide uppercase mb-4 border-b border-blue-200 pb-2 flex items-center gap-2">
-                            <i data-lucide="baby" class="w-4 h-4 text-blue-600"></i> Limite de Idade e Cortesia para Crianças
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div class="bg-white p-4 rounded-md shadow-sm border border-gray-100 grid grid-cols-2 gap-4">
+                    <!-- REGRAS DE REGIME NO CADASTRO DO APTO -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Cortesia Infantil -->
+                        <div class="bg-blue-50 rounded-lg p-5 border border-blue-100">
+                            <h3 class="text-sm font-semibold text-blue-900 tracking-wide uppercase mb-4 border-b border-blue-200 pb-2 flex items-center gap-2">
+                                <i data-lucide="baby" class="w-4 h-4 text-blue-600"></i> Limites de Crianças
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Idade Máxima Cortesia</label>
-                                    <input type="number" id="aptoIdadeFree" class="mt-1 border block w-full rounded-md py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="12">
+                                    <label class="block text-xs font-medium text-gray-700">Idade Máx Cortesia</label>
+                                    <input type="number" id="aptoIdadeFree" class="mt-1 border block w-full rounded-md py-2 px-3 bg-white border-gray-300 outline-none focus:ring-2 focus:ring-blue-500" placeholder="12">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Qtd. Máxima Free</label>
-                                    <input type="number" id="aptoQtdFree" class="mt-1 border block w-full rounded-md py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="2">
+                                    <label class="block text-xs font-medium text-gray-700">Qtd. Máxima Free</label>
+                                    <input type="number" id="aptoQtdFree" class="mt-1 border block w-full rounded-md py-2 px-3 bg-white border-gray-300 outline-none focus:ring-2 focus:ring-blue-500" placeholder="2">
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Configuração de Alimentação Ativa -->
+                        <div class="bg-orange-50 rounded-lg p-5 border border-orange-100">
+                            <h3 class="text-sm font-semibold text-orange-900 tracking-wide uppercase mb-4 border-b border-orange-200 pb-2 flex items-center gap-2">
+                                <i data-lucide="utensils" class="w-4 h-4 text-orange-600"></i> Regimes Oferecidos pelo Imóvel
+                            </h3>
+                            <div class="grid grid-cols-2 gap-3 text-sm font-medium text-orange-950">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="regime_ro" checked class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Sem refeição (RO)
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="regime_bb" checked class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Café da Manhã (BB)
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="regime_map" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Café + Almoço ou Jantar (MAP)
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="regime_fap" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Pensão Completa (FAP)
+                                </label>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="bg-gray-50 px-6 py-4 flex justify-end border-t border-gray-200">
                     <button type="button" onclick="salvarDadosBaseApto()" class="bg-blue-600 text-white rounded-md py-2.5 px-6 text-sm font-bold hover:bg-blue-700 flex items-center gap-2 shadow-sm">
-                        <i data-lucide="save" class="w-4 h-4"></i> Salvar Imóvel
+                        <i data-lucide="save" class="w-4 h-4"></i> Salvar Imóvel e Atualizar Regimes
                     </button>
                 </div>
             </div>
@@ -131,24 +154,32 @@
                             </div>
                         </div>
 
+                        <!-- ABAS DINÂMICAS DE REFEIÇÃO CONFORME SELEÇÃO DO PROPRIETÁRIO -->
+                        <div class="border-b border-gray-200">
+                            <nav id="abasRegimesContainer" class="-mb-px flex space-x-6 text-sm font-semibold"></nav>
+                        </div>
+
+                        <!-- BLOCO DOS VALORES DA DIÁRIA -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
-                            <h4 class="text-sm font-bold text-gray-700 uppercase mb-4 border-b pb-2">Preços da Diária para este período</h4>
+                            <h4 class="text-sm font-bold text-gray-700 uppercase mb-4 border-b pb-2 flex items-center gap-2">
+                                <i data-lucide="utensils-crossopened" class="w-4 h-4 text-gray-500"></i> Preços para o Regime Ativo: <span id="txtRegimeAtivoLabel" class="text-blue-600 text-sm font-bold">Sem Refeição</span>
+                            </h4>
                             <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Single (1 pessoa)</label>
-                                    <input type="number" id="tSingle" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none" placeholder="100">
+                                    <input type="number" id="tSingle" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Duplo (Total p/ 2 pessoas)</label>
-                                    <input type="number" id="tDuplo" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-green-500 outline-none shadow-sm" placeholder="150">
+                                    <input type="number" id="tDuplo" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-green-500 outline-none focus:ring-2 focus:ring-green-500" placeholder="0.00">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Adicional Adulto / Criança (3º+)</label>
-                                    <input type="number" id="tExtra" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none" placeholder="50">
+                                    <input type="number" id="tExtra" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Mín. Noites</label>
-                                    <input type="number" id="tMinNoites" value="2" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none">
+                                    <input type="number" id="tMinNoites" value="2" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                             </div>
                         </div>
@@ -193,13 +224,13 @@
                     </div>
                 </div>
 
-                <!-- Gestão do Calendário (Com Filtros) -->
+                <!-- Gestão do Calendário -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                         <h3 class="font-bold text-gray-900 flex items-center gap-2">
                             <i data-lucide="calendar-days" class="w-5 h-5 text-gray-600"></i> Gestão do Calendário
                         </h3>
-                        <span id="contadorDias" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">0 dias configurados</span>
+                        <span id="contadorDias" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">0 dias</span>
                     </div>
                     <div class="p-6">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 pb-4 border-b border-gray-100">
@@ -239,6 +270,7 @@
                                         <th class="pb-3 px-2">DATA</th>
                                         <th class="pb-3 px-2">DIA</th>
                                         <th class="pb-3 px-2">TARIFA</th>
+                                        <th class="pb-3 px-2">ALIMENTAÇÃO</th>
                                         <th class="pb-3 px-2">SINGLE (1 PAX)</th>
                                         <th class="pb-3 px-2">DUPLO (2 PAX)</th>
                                         <th class="pb-3 px-2">AD. EXTRA</th>
@@ -261,6 +293,17 @@
         lucide.createIcons();
         let listaAptos = [];
         let aptoAtualId = null;
+        
+        // Mapeamento global de códigos de regimes e nomes comerciais
+        const nomenclaturaRegimes = {
+            ro: "Sem refeição (RO)",
+            bb: "Café da Manhã (BB)",
+            map: "Café + Almoço ou Jantar (MAP)",
+            fap: "Pensão Completa (FAP)"
+        };
+        
+        let regimeAtivoAba = "ro"; // Aba default ativa ao abrir
+        let cacheValoresTemporariosForm = {}; // Guarda o que digita em uma aba ao trocar para outra
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -329,7 +372,7 @@
                                 <h3 class="text-lg font-bold text-gray-900">${apto.nome} (${apto.unidade})</h3>
                                 <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 mt-1">
                                     <span class="flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5"></i> Até ${apto.capMax || 0} pessoas</span>
-                                    <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">${totalDias} Dias Tarifados</span>
+                                    <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">${totalDias} Linhas de Diária</span>
                                 </div>
                             </div>
                         </div>
@@ -346,6 +389,9 @@
             aptoAtualId = 'apto_' + Date.now();
             document.getElementById('tituloFormApto').innerText = "Cadastrar Novo Apartamento";
             document.getElementById('aptoNome').value = ""; document.getElementById('aptoUnidade').value = ""; document.getElementById('aptoCapMax').value = "";
+            document.getElementById('regime_ro').checked = true; document.getElementById('regime_bb').checked = true;
+            document.getElementById('regime_map').checked = false; document.getElementById('regime_fap').checked = false;
+            
             document.getElementById('blocoTarifasAdicionais').classList.add('hidden');
             document.getElementById('secaoListagem').classList.add('hidden');
             document.getElementById('secaoFormulario').classList.remove('hidden');
@@ -361,18 +407,74 @@
             document.getElementById('aptoCapMax').value = apto.capMax || "";
             document.getElementById('aptoIdadeFree').value = apto.idadeFree || "12";
             document.getElementById('aptoQtdFree').value = apto.qtdFree || "2";
+
+            // Restaura as marcações de regime salvas
+            document.getElementById('regime_ro').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('ro') : true;
+            document.getElementById('regime_bb').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('bb') : true;
+            document.getElementById('regime_map').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('map') : false;
+            document.getElementById('regime_fap').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('fap') : false;
+
             document.getElementById('blocoTarifasAdicionais').classList.remove('hidden');
             document.getElementById('secaoListagem').classList.add('hidden');
             document.getElementById('secaoFormulario').classList.remove('hidden');
+            
             aplicarTravasDeData();
+            montarAbasDeRegimeFormulario(apto);
             atualizarDropdownFiltroTarifas(apto);
             renderizarLinhasCalendario();
+        }
+
+        // 4. CRIA AS ABAS DE TARIFA BASEADO NO QUE O ATENDENTE MARCOU NO HOTEL
+        function montarAbasDeRegimeFormulario(apto) {
+            const container = document.getElementById('abasRegimesContainer');
+            container.innerHTML = "";
+
+            let regimes = apto.regimesAtivos || ['ro', 'bb'];
+            regimeAtivoAba = regimes[0]; // Força ativar a primeira aba disponível
+            
+            regimes.forEach(regId => {
+                const ativo = regId === regimeAtivoAba;
+                const classeCor = ativo ? "border-blue-600 text-blue-600 border-b-2" : "border-transparent text-gray-500 hover:text-gray-700";
+                container.innerHTML += `<button type="button" onclick="mudarAbaRegimePreco('${regId}')" class="py-3 px-1 font-bold tracking-wide transition-all outline-none ${classeCor}" id="aba_btn_${regId}">${nomenclaturaRegimes[regId]}</button>`;
+            });
+
+            mudarAbaRegimePreco(regimeAtivoAba);
+        }
+
+        function mudarAbaRegimePreco(regId) {
+            // Salva o valor antigo da aba anterior no cache temporário para não apagar ao clicar
+            if (regimeAtivoAba) {
+                cacheValoresTemporariosForm[regimeAtivoAba] = {
+                    single: document.getElementById('tSingle').value,
+                    duplo: document.getElementById('tDuplo').value,
+                    extra: document.getElementById('tExtra').value
+                };
+                document.getElementById(`aba_btn_${regimeAtivoAba}`)?.classList.remove('border-blue-600', 'text-blue-600', 'border-b-2');
+                document.getElementById(`aba_btn_${regimeAtivoAba}`)?.classList.add('border-transparent', 'text-gray-500');
+            }
+
+            regimeAtivoAba = regId;
+            document.getElementById(`aba_btn_${regId}`)?.classList.remove('border-transparent', 'text-gray-500');
+            document.getElementById(`aba_btn_${regId}`)?.classList.add('border-blue-600', 'text-blue-600', 'border-b-2');
+            document.getElementById('txtRegimeAtivoLabel').innerText = nomenclatureRegimes[regId];
+
+            // Puxa do cache ou limpa os inputs para preenchimento do novo regime
+            if (cacheValoresTemporariosForm[regId]) {
+                document.getElementById('tSingle').value = cacheValoresTemporariosForm[regId].single;
+                document.getElementById('tDuplo').value = cacheValoresTemporariosForm[regId].duplo;
+                document.getElementById('tExtra').value = cacheValoresTemporariosForm[regId].extra;
+            } else {
+                document.getElementById('tSingle').value = "";
+                document.getElementById('tDuplo').value = "";
+                document.getElementById('tExtra').value = "";
+            }
         }
 
         function voltarParaListagem() {
             document.getElementById('secaoFormulario').classList.add('hidden');
             document.getElementById('secaoListagem').classList.remove('hidden');
             aptoAtualId = null;
+            cacheValoresTemporariosForm = {};
         }
 
         function salvarDadosBaseApto() {
@@ -380,23 +482,39 @@
             const unidad = document.getElementById('aptoUnidade').value.trim();
             const capMax = document.getElementById('aptoCapMax').value;
             if(!nome || !unidad || !capMax) { alert("Preencha os dados obrigatórios!"); return; }
+
+            // Junta os regimes que foram ticados nas caixinhas
+            let regimesMarcados = [];
+            if(document.getElementById('regime_ro').checked) regimesMarcados.push('ro');
+            if(document.getElementById('regime_bb').checked) regimesMarcados.push('bb');
+            if(document.getElementById('regime_map').checked) regimesMarcados.push('map');
+            if(document.getElementById('regime_fap').checked) regimesMarcados.push('fap');
+
+            if(regimesMarcados.length === 0) { alert("Selecione pelo menos um regime de alimentação para o imóvel!"); return; }
+
             let index = listaAptos.findIndex(a => a.id === aptoAtualId);
-            if(index > -1) {
-                listaAptos[index].nome = nome; listaAptos[index].unidade = unidad; listaAptos[index].capMax = parseInt(capMax);
-                listaAptos[index].idadeFree = parseInt(document.getElementById('aptoIdadeFree').value) || 12;
-                listaAptos[index].qtdFree = parseInt(document.getElementById('aptoQtdFree').value) || 2;
-            } else {
-                listaAptos.push({ id: aptoAtualId, nome, unidade: unidad, capMax: parseInt(capMax), idadeFree: 12, qtdFree: 2, calendario: [] });
-            }
+            let aptoObjeto = {
+                id: aptoAtualId, nome, unidade: unidad, capMax: parseInt(capMax),
+                idadeFree: parseInt(document.getElementById('aptoIdadeFree').value) || 12,
+                qtdFree: parseInt(document.getElementById('aptoQtdFree').value) || 2,
+                regimesAtivos: regimesMarcados,
+                calendario: (index > -1) ? listaAptos[index].calendario : []
+            };
+
+            if(index > -1) listaAptos[index] = aptoObjeto;
+            else listaAptos.push(aptoObjeto);
+
             salvarListaAptos();
+            montarAbasDeRegimeFormulario(aptoObjeto);
             document.getElementById('blocoTarifasAdicionais').classList.remove('hidden');
-            showToast("Dados do imóvel salvos!", "success");
+            showToast("Dados base salvos. Abas de tarifas atualizadas!", "success");
         }
 
         function deletarApto(id) {
             if(confirm("Excluir este apartamento?")) { listaAptos = listaAptos.filter(a => a.id !== id); salvarListaAptos(); }
         }
 
+        // 5. INJETA NO CALENDÁRIO AMARRANDO O REGIME QUE ESTAVA ATIVO NA ABA
         function gerarTarifasNoCalendario() {
             const nomeTarifa = document.getElementById('tNome').value.trim() || "Padrão";
             let dInicioStr = document.getElementById('tInicio').value;
@@ -419,10 +537,23 @@
 
             while(dCorrente <= dFinal) {
                 let dataIso = dCorrente.toISOString().split('T')[0];
-                let itemIdx = apto.calendario.findIndex(c => c.data === dataIso);
-                let novoItem = { data: dataIso, nome: nomeTarifa, single: sVal, duplo: dVal, extra: eVal, minNoites };
+                
+                // A chave primária única agora leva em conta a DATA + REGIME ALIMENTAR
+                let itemIdx = apto.calendario.findIndex(c => c.data === dataIso && c.regime === regimeAtivoAba);
+                
+                let novoItem = { 
+                    data: dataIso, 
+                    nome: nomeTarifa, 
+                    regime: regimeAtivoAba, // Guarda o código da aba (ro, bb, etc)
+                    single: sVal, 
+                    duplo: dVal, 
+                    extra: eVal, 
+                    minNoites 
+                };
+
                 if(itemIdx > -1) apto.calendario[itemIdx] = novoItem;
                 else apto.calendario.push(novoItem);
+                
                 dCorrente.setDate(dCorrente.getDate() + 1);
             }
 
@@ -430,7 +561,7 @@
             salvarListaAptos();
             atualizarDropdownFiltroTarifas(apto);
             renderizarLinhasCalendario();
-            showToast("Diárias configuradas com sucesso!", "success");
+            showToast(`Diárias com ${nomenclaturaRegimes[regimeAtivoAba]} aplicadas!`, "success");
         }
 
         function executarAjusteEmMassa() {
@@ -446,17 +577,17 @@
             apto.calendario.forEach(dia => {
                 let diaData = new Date(dia.data + "T12:00:00");
                 if(diaData >= dStart && diaData <= dEnd) {
-                    let fator = (porcentagem / 100);
-                    let mult = acao === "acrescentar" ? (1 + fator) : (1 - fator);
+                    let f = (porcentagem / 100);
+                    let mult = acao === "acrescentar" ? (1 + f) : (1 - f);
                     dia.single *= mult; dia.duplo *= mult; dia.extra *= mult;
                 }
             });
             salvarListaAptos();
             renderizarLinhasCalendario();
-            showToast("Ajuste percentual aplicado!", "success");
+            showToast("Ajuste percentual realizado!", "success");
         }
 
-        function atualizarDropdownFiltroTarifas(apto) {
+        function actualizarDropdownFiltroTarifas(apto) {
             const select = document.getElementById('filtroTarifa');
             select.innerHTML = `<option value="todas">Todas as tarifas</option>`;
             if(!apto.calendario) return;
@@ -472,9 +603,9 @@
             renderizarLinhasCalendario();
         }
 
-        function deletarDiaCalendario(dataStr) {
+        function deletarDiaCalendario(dataStr, regId) {
             let apto = listaAptos.find(a => a.id === aptoAtualId);
-            apto.calendario = apto.calendario.filter(c => c.data !== dataStr);
+            apto.calendario = apto.calendario.filter(c => !(c.data === dataStr && c.regime === regId));
             salvarListaAptos(); renderizarLinhasCalendario();
         }
 
@@ -484,7 +615,7 @@
             tbody.innerHTML = "";
             const apto = listaAptos.find(a => a.id === aptoAtualId);
             if(!apto || !apto.calendario || apto.calendario.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-gray-400">Nenhum dia configurado neste calendário.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="py-4 text-center text-gray-400">Nenhum dia configurado neste calendário.</td></tr>`;
                 contador.innerText = "0 resultados"; return;
             }
 
@@ -502,7 +633,7 @@
             contador.innerText = `${itensFiltrados.length} resultados`;
 
             if(itensFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-gray-400">Nenhuma diária corresponde aos filtros selecionados.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="py-4 text-center text-gray-400">Nenhuma diária corresponde aos filtros selecionados.</td></tr>`;
                 return;
             }
 
@@ -513,16 +644,17 @@
                 let dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 border-b border-gray-100 font-medium">
+                    <tr class="hover:bg-gray-50 border-b border-gray-100 font-medium text-gray-700">
                         <td class="py-3 px-2 font-bold text-gray-900">${dataFormatada}</td>
-                        <td class="py-3 px-2 text-gray-500">${diaNome}</td>
-                        <td class="py-3 px-2"><span class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded text-xs font-bold border border-blue-100">${dia.nome}</span></td>
-                        <td class="py-3 px-2 text-gray-600">R$ ${dia.single.toFixed(2).replace('.', ',')}</td>
+                        <td class="py-3 px-2 text-gray-400 text-xs">${diaNome}</td>
+                        <td class="py-3 px-2"><span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-xs font-bold border border-blue-100">${dia.nome}</span></td>
+                        <td class="py-3 px-2 font-semibold text-orange-700">${nomenclaturaRegimes[dia.regime]}</td>
+                        <td class="py-3 px-2 text-gray-500">R$ ${dia.single.toFixed(2).replace('.', ',')}</td>
                         <td class="py-3 px-2 text-gray-900 font-bold">R$ ${dia.duplo.toFixed(2).replace('.', ',')}</td>
-                        <td class="py-3 px-2 text-gray-600">R$ ${dia.extra.toFixed(2).replace('.', ',')}</td>
-                        <td class="py-3 px-2 text-center text-gray-700">${dia.minNoites}</td>
-                        <td class="py-3 px-2 text-right space-x-2">
-                            <button onclick="deletarDiaCalendario('${dia.data}')" class="text-gray-400 hover:text-red-600 transition-colors"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
+                        <td class="py-3 px-2 text-gray-500">R$ ${dia.extra.toFixed(2).replace('.', ',')}</td>
+                        <td class="py-3 px-2 text-center text-gray-600">${dia.minNoites}</td>
+                        <td class="py-3 px-2 text-right">
+                            <button onclick="deletarDiaCalendario('${dia.data}', '${dia.regime}')" class="text-gray-400 hover:text-red-600 transition-colors"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
                         </td>
                     </tr>`;
             });
