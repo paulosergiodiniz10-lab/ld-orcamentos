@@ -112,10 +112,10 @@
                             </h3>
                             <div class="grid grid-cols-2 gap-3 text-sm font-medium text-orange-950">
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="regime_ro" checked class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Sem refeição (RO)
+                                    <input type="checkbox" id="regime_ro" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Sem refeição (RO)
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="regime_bb" checked class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Café da Manhã (BB)
+                                    <input type="checkbox" id="regime_bb" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Café da Manhã (BB)
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" id="regime_map" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-gray-300"> Café + Almoço ou Jantar (MAP)
@@ -361,6 +361,7 @@
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
+        lucide.createIcons();
         let listaAptos = [];
         let aptoAtualId = null;
         let funcaoCallbackConfirmacao = null;
@@ -488,9 +489,64 @@
             zerarCamposPrecoFormulario();
             cacheValoresTemporariosForm = {};
             if(fpInicio) { fpInicio.clear(); fpFim.clear(); fpAjusteInicio.clear(); fpAjusteFim.clear(); }
+            
             montarAbasDeRegimeFormulario(apto);
             atualizarDropdownFiltroTarifas(apto);
-            renderizarLinesCalendario();
+            renderizarLinhasCalendario();
+        }
+
+        function zerarCamposPrecoFormulario() {
+            document.getElementById('tSingle').value = "";
+            document.getElementById('tDuplo').value = "";
+            document.getElementById('tExtra').value = "";
+            document.getElementById('tMinNoites').value = "2";
+        }
+
+        function montarAbasDeRegimeFormulario(apto) {
+            const container = document.getElementById('abasRegimesContainer');
+            if(!container) return;
+            container.innerHTML = "";
+            let regimes = apto.regimesAtivos || ['ro', 'bb'];
+            if(regimes.length === 0) regimes = ['ro'];
+            regimeAtivoAba = regimes[0];
+            regimes.forEach(regId => {
+                const ativo = regId === regimeAtivoAba;
+                const classeCor = ativo ? "border-blue-600 text-blue-600 border-b-2" : "border-transparent text-gray-500 hover:text-gray-700";
+                container.innerHTML += `<button type="button" onclick="mudarAbaRegimePreco('${regId}')" class="py-3 px-1 font-bold tracking-wide transition-all outline-none whitespace-nowrap ${classeCor}" id="aba_btn_${regId}">${nomenclaturaRegimes[regId]}</button>`;
+            });
+            mudarAbaRegimePreco(regimeAtivoAba);
+        }
+
+        function mudarAbaRegimePreco(regId) {
+            document.getElementById('txtRegimeAtivoLabel').innerText = nomenclaturaRegimes[regId];
+            if (regimeAtivoAba && regimeAtivoAba !== regId) {
+                cacheValoresTemporariosForm[regimeAtivoAba] = {
+                    single: document.getElementById('tSingle').value,
+                    duplo: document.getElementById('tDuplo').value,
+                    extra: document.getElementById('tExtra').value,
+                    minNoites: document.getElementById('tMinNoites').value
+                };
+                document.getElementById(`aba_btn_${regimeAtivoAba}`)?.classList.remove('border-blue-600', 'text-blue-600', 'border-b-2');
+                document.getElementById(`aba_btn_${regimeAtivoAba}`)?.classList.add('border-transparent', 'text-gray-500');
+            }
+            regimeAtivoAba = regId;
+            document.getElementById(`aba_btn_${regId}`)?.classList.remove('border-transparent', 'text-gray-500');
+            document.getElementById(`aba_btn_${regId}`)?.classList.add('border-blue-600', 'text-blue-600', 'border-b-2');
+            if (cacheValoresTemporariosForm[regId]) {
+                document.getElementById('tSingle').value = cacheValoresTemporariosForm[regId].single;
+                document.getElementById('tDuplo').value = cacheValoresTemporariosForm[regId].duplo;
+                document.getElementById('tExtra').value = cacheValoresTemporariosForm[regId].extra;
+                document.getElementById('tMinNoites').value = cacheValoresTemporariosForm[regId].minNoites || "2";
+            } else {
+                zerarCamposPrecoFormulario();
+            }
+        }
+
+        function voltarParaListagem() {
+            document.getElementById('secaoFormulario').classList.add('hidden');
+            document.getElementById('secaoListagem').classList.remove('hidden');
+            aptoAtualId = null;
+            cacheValoresTemporariosForm = {};
         }
 
         function salvarDadosBaseApto() {
@@ -519,13 +575,17 @@
                 calendario: (index > -1) ? listaAptos[index].calendario : []
             };
 
-            if(index > -1) listaAptos[index] = aptoObjeto;
-            else listaAptos.push(aptoObjeto);
+            // CORREÇÃO: Bloco de salvamento restaurado corretamente e verificado
+            if(index > -1) {
+                listaAptos[index] = aptoObjeto;
+            } else {
+                listaAptos.push(aptoObjeto);
+            }
 
             salvarListaAptos();
             montarAbasDeRegimeFormulario(aptoObjeto);
             document.getElementById('blocoTarifasAdicionais').classList.remove('hidden');
-            showToast("Imóvel e regras promocionais salvos com sucesso!", "success");
+            showToast("Imóvel e regras salvos com sucesso!", "success");
         }
 
         function deletarApto(id) {
@@ -562,7 +622,7 @@
             apto.calendario.sort((a,b) => new Date(a.data) - new Date(b.data));
             salvarListaAptos();
             atualizarDropdownFiltroTarifas(apto);
-            renderizarLinesCalendario();
+            renderizarLinhasCalendario();
             showToast(`Tarifas aplicadas em ${contadorDiasInjetados} dias de ${nomenclaturaRegimes[regimeAtivoAba]}!`, "success");
         }
 
@@ -590,7 +650,7 @@
                 }
             });
             salvarListaAptos();
-            renderizarLinesCalendario();
+            renderizarLinhasCalendario();
             if(alterados > 0) {
                 let regimeLabel = regimeFiltro === "todos" ? "todos os regimes" : nomenclaturaRegimes[regimeFiltro];
                 showToast(`Reajuste de ${porcentagem}% aplicado em ${alterados} diárias de ${regimeLabel}!`, "success");
@@ -613,7 +673,7 @@
             document.getElementById('filtroMes').value = "todos";
             document.getElementById('filtroTarifa').value = "todas";
             document.getElementById('filtroRegime').value = "todos";
-            renderizarLinesCalendario();
+            renderizarLinhasCalendario();
         }
 
         function deletarDiaCalendario(dataStr, regId) {
@@ -624,7 +684,7 @@
                     return !eAlvo;
                 });
                 salvarListaAptos(); 
-                renderizarLinesCalendario();
+                renderizarLinhasCalendario();
                 showToast("Diária removida com sucesso!", "success");
             });
         }
@@ -668,7 +728,7 @@
 
                 salvarListaAptos();
                 atualizarDropdownFiltroTarifas(apto);
-                renderizarLinesCalendario();
+                renderizarLinhasCalendario();
                 showToast(`${totalParaApagar} diárias excluídas com sucesso!`, "success");
             });
         }
@@ -689,7 +749,7 @@
             showToast("Valores carregados no painel de edição acima!", "success");
         }
 
-        function renderizarLinesCalendario() {
+        function renderizarLinhasCalendario() {
             const tbody = document.getElementById('tbodyCalendario');
             const contador = document.getElementById('contadorDias');
             tbody.innerHTML = "";
@@ -741,20 +801,6 @@
                     </tr>`;
             });
             lucide.createIcons();
-        }
-
-        function montarAbasDeRegimeFormulario(apto) {
-            const container = document.getElementById('abasRegimesContainer');
-            if(!container) return;
-            container.innerHTML = "";
-            let regimes = apto.regimesAtivos || ['ro', 'bb'];
-            regimeAtivoAba = regimes[0];
-            regimes.forEach(regId => {
-                const ativo = regId === regimeAtivoAba;
-                const classeCor = ativo ? "border-blue-600 text-blue-600 border-b-2" : "border-transparent text-gray-500 hover:text-gray-700";
-                container.innerHTML += `<button type="button" onclick="mudarAbaRegimePreco('${regId}')" class="py-3 px-1 font-bold tracking-wide transition-all outline-none ${classeCor}" id="aba_btn_${regId}">${nomenclaturaRegimes[regId]}</button>`;
-            });
-            mudarAbaRegimePreco(regimeAtivoAba);
         }
 
         document.addEventListener("DOMContentLoaded", () => {
