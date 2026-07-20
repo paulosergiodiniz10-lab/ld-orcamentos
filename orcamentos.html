@@ -191,7 +191,8 @@
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <i data-lucide="search" class="w-4 h-4"></i>
                     </span>
-                    <input type="text" id="inputBuscaHistorico" oninput="mudarPaginaHistorico(1)" class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Buscar por Nome, ID ou WhatsApp...">
+                    <!-- PLACEHOLDER MODIFICADO PARA INSTRUIR O USUÁRIO SOBRE A BUSCA POR # -->
+                    <input type="text" id="inputBuscaHistorico" oninput="mudarPaginaHistorico(1)" class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Buscar por Nome, Zap ou digite #ID (Ex: #08)">
                 </div>
                 
                 <span id="badgeContadorHistorico" class="bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1 rounded-full shrink-0">0 registros</span>
@@ -483,7 +484,6 @@
                 let quantidadeDiariasCortesia = apto.promoFique - apto.promoPague;
                 
                 descontoPromocionalCalculado = valorMedioPorDiaria * quantidadeDiariasCortesia;
-                
                 textoNomePromoAplicadaNoZap = apto.promoNome;
                 
                 document.getElementById('linhaVisualPromo').classList.remove('hidden');
@@ -498,7 +498,6 @@
             let valorTotalGeral = (valorAcumuladoBase + valorAcumuladoExtras) - descontoPromocionalCalculado;
             let msgNoitesTexto = totalNoitesBusca === 1 ? "01 noite" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " noites";
 
-            // MATEMÁTICA DO ID BLINDADA: Pega o maior número real do histórico e soma +1
             let maiorIdAtual = 0;
             if (historicoOrcamentos && historicoOrcamentos.length > 0) {
                 historicoOrcamentos.forEach(item => {
@@ -509,7 +508,7 @@
                 });
             }
             let proximoIdNumero = maiorIdAtual + 1;
-            let idLabelFormatado = proximoIdNumero.toString().padStart(2, '0');
+            let idLabelFormatado = proximoIdNumero < 10 ? "0" + proximoIdNumero : proximoIdNumero.toString();
 
             const diasSemana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
             let dataCheckinObj = new Date(dInicioStr + "T12:00:00");
@@ -668,14 +667,22 @@
             let listaOrdenadaParaExibicao = [...historicoOrcamentos].sort((a, b) => b.timestamp - a.timestamp);
             const termoBusca = document.getElementById('inputBuscaHistorico').value.trim().toLowerCase();
             
-            // CORREÇÃO: IGNORA DATAS NA BUSCA PARA NÃO CONFUNDIR MÊS COM ID
             if(termoBusca) {
-                listaOrdenadaParaExibicao = listaOrdenadaParaExibicao.filter(item => {
-                    let idString = String(item.idCodigo || "").padStart(2, '0');
-                    return item.nome.toLowerCase().includes(termoBusca) || 
-                           idString.includes(termoBusca) || 
-                           item.zap.replace(/\D/g, "").includes(termoBusca);
-                });
+                // REGRA INTELIGENTE DE BUSCA: Se começar com #, busca SOMENTE no ID e ignora nomes, telefones e datas.
+                if(termoBusca.startsWith('#')) {
+                    let idBuscado = termoBusca.replace('#', '').trim();
+                    listaOrdenadaParaExibicao = listaOrdenadaParaExibicao.filter(item => {
+                        let idString = String(item.idCodigo || "").padStart(2, '0');
+                        return idString.includes(idBuscado);
+                    });
+                } else {
+                    listaOrdenadaParaExibicao = listaOrdenadaParaExibicao.filter(item => {
+                        let idString = String(item.idCodigo || "").toLowerCase();
+                        return item.nome.toLowerCase().includes(termoBusca) || 
+                               idString.includes(termoBusca) || 
+                               item.zap.replace(/\D/g, "").includes(termoBusca);
+                    });
+                }
             }
 
             const totalRegistrosFiltrados = listaOrdenadaParaExibicao.length;
@@ -730,7 +737,6 @@
             const histMemoria = localStorage.getItem('ld_historico_orcamentos');
             let tempHist = histMemoria ? JSON.parse(histMemoria) : [];
             
-            // NOVO: AUTO-CORRETOR INVISÍVEL (Arruma todos os registros velhos do banco com IDs falhos)
             let precisaSalvar = false;
             tempHist.forEach((item, idx) => {
                 if (!item.idCodigo || item.idCodigo === "undefined" || item.idCodigo === "NaN") {
@@ -738,7 +744,7 @@
                     precisaSalvar = true;
                 }
                 if (!item.timestamp) {
-                    item.timestamp = Date.now() - (idx * 60000); // Cria a linha do tempo retroativa segura
+                    item.timestamp = Date.now() - (idx * 60000);
                     precisaSalvar = true;
                 }
             });
