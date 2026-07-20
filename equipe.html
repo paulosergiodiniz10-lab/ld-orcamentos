@@ -37,7 +37,7 @@
     </nav>
 
     <!-- Conteúdo da Página -->
-    <main class="flex-grow max-w-5xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
+    <main class="flex-grow max-w-6xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
         
         <!-- Cabeçalho com Botão de Criar -->
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
@@ -45,7 +45,7 @@
                 <h1 class="text-2xl font-bold text-gray-900">Minha Equipe</h1>
                 <p class="text-sm text-gray-500 mt-1">Gerencie os atendentes e vendedores do sistema.</p>
             </div>
-            <button onclick="abrirModal(true)" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md text-sm font-bold shadow transition-colors flex items-center gap-2">
+            <button onclick="abrirModalParaCriar()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md text-sm font-bold shadow transition-colors flex items-center gap-2">
                 <i data-lucide="user-plus" class="w-4 h-4"></i> Novo Integrante
             </button>
         </div>
@@ -70,14 +70,14 @@
         </div>
     </main>
 
-    <!-- Modal Form de Cadastro (Oculto por padrão) -->
+    <!-- Modal Form de Cadastro e Edição -->
     <div id="membroModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-xl border border-gray-200 max-w-md w-full overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                <h3 id="modalTitulo" class="text-base font-bold text-gray-900 flex items-center gap-2">
                     <i data-lucide="user-plus" class="w-5 h-5 text-blue-600"></i> Cadastrar Integrante
                 </h3>
-                <button onclick="abrirModal(false)" class="text-gray-400 hover:text-gray-600">
+                <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -101,8 +101,8 @@
                 </form>
             </div>
             <div class="bg-gray-50 px-6 py-4 border-t flex justify-end gap-3">
-                <button onclick="abrirModal(false)" class="bg-white border rounded-md py-2 px-4 text-sm font-medium text-gray-700">Cancelar</button>
-                <button onclick="adicionarMembroLista()" class="bg-blue-600 text-white rounded-md py-2 px-4 text-sm font-bold hover:bg-blue-700 shadow-sm">Salvar Integrante</button>
+                <button onclick="fecharModal()" class="bg-white border rounded-md py-2 px-4 text-sm font-medium text-gray-700">Cancelar</button>
+                <button onclick="salvarMembro()" class="bg-blue-600 text-white rounded-md py-2 px-4 text-sm font-bold hover:bg-blue-700 shadow-sm">Salvar Integrante</button>
             </div>
         </div>
     </div>
@@ -116,20 +116,42 @@
     <script>
         lucide.createIcons();
         let listaEquipe = [];
+        let indexSendoEditado = null; // Guarda se estamos editando alguém
 
         function dispararToast(mensagem) {
-            document.getElementById('toastTexto').innerText = mensagem;
+            document.getElementById('toastTexto').innerText = mensaje;
             const toast = document.getElementById('toast');
             toast.classList.remove('translate-y-10', 'opacity-0');
             setTimeout(() => toast.classList.add('translate-y-10', 'opacity-0'), 3000);
         }
 
-        function abrirModal(abrir) {
-            document.getElementById('membroModal').style.display = abrir ? 'flex' : 'none';
-            if(!abrir) document.getElementById('membroForm').reset();
+        function abrirModalParaCriar() {
+            indexSendoEditado = null;
+            document.getElementById('modalTitulo').innerHTML = `<i data-lucide="user-plus" class="w-5 h-5 text-blue-600"></i> Cadastrar Integrante`;
+            document.getElementById('membroForm').reset();
+            document.getElementById('membroModal').style.display = 'flex';
+            lucide.createIcons();
         }
 
-        // Desenha a tabela de funcionários com base no que está salvo
+        function abrirModalParaEditar(index) {
+            indexSendoEditado = index;
+            const membro = listaEquipe[index];
+            
+            document.getElementById('modalTitulo').innerHTML = `<i data-lucide="edit" class="w-5 h-5 text-blue-600"></i> Editar Integrante`;
+            document.getElementById('nomeMembro').value = membro.nome;
+            document.getElementById('emailMembro').value = membro.email;
+            document.getElementById('acessoMembro').value = membro.acesso;
+            
+            document.getElementById('membroModal').style.display = 'flex';
+            lucide.createIcons();
+        }
+
+        function fecharModal() {
+            document.getElementById('membroModal').style.display = 'none';
+            document.getElementById('membroForm').reset();
+            indexSendoEditado = null;
+        }
+
         function renderizarTabelaMembros() {
             const tbody = document.getElementById('tabelaEquipeBody');
             tbody.innerHTML = "";
@@ -138,23 +160,23 @@
                 const badgeCor = membro.acesso === 'Administrador' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800';
                 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50/70 transition-colors">
+                    <tr class="hover:bg-gray-50/70 transition-colors border-b border-gray-100">
                         <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-3">
                             <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">EQ</div>
                             ${membro.nome}
                         </td>
                         <td class="px-6 py-4 text-gray-500">${membro.email}</td>
                         <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${badgeCor}">${membro.acesso}</span></td>
-                        <td class="px-6 py-4 text-right">
-                            <button onclick="removerMembroLista(${index})" class="text-gray-400 hover:text-red-600 transition-colors"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
+                        <td class="px-6 py-4 text-right space-x-3">
+                            <button onclick="abrirModalParaEditar(${index})" class="text-gray-400 hover:text-blue-600 transition-colors" title="Editar"><i data-lucide="edit" class="w-4 h-4 inline"></i></button>
+                            <button onclick="removerMembroLista(${index})" class="text-gray-400 hover:text-red-600 transition-colors" title="Excluir"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
                         </td>
                     </tr>`;
             });
             lucide.createIcons();
         }
 
-        // Pega os dados digitados, joga no array e salva permanente
-        function adicionarMembroLista() {
+        function salvarMembro() {
             const nome = document.getElementById('nomeMembro').value.trim();
             const email = document.getElementById('emailMembro').value.trim();
             const acesso = document.getElementById('acessoMembro').value;
@@ -164,12 +186,19 @@
                 return;
             }
 
-            listaEquipe.push({ nome, email, acesso });
+            if(indexSendoEditado !== null) {
+                // Atualiza integrante existente
+                listaEquipe[indexSendoEditado] = { nome, email, acesso };
+                dispararToast("Integrante atualizado com sucesso!");
+            } else {
+                // Cria um novo integrante
+                listaEquipe.push({ nome, email, acesso });
+                dispararToast("Integrante cadastrado com sucesso!");
+            }
+
             localStorage.setItem('ld_lista_equipe', JSON.stringify(listaEquipe));
-            
             renderizarTabelaMembros();
-            abrirModal(false);
-            dispararToast("Funcionário cadastrado com sucesso!");
+            fecharModal();
         }
 
         function removerMembroLista(index) {
@@ -181,13 +210,11 @@
             }
         }
 
-        // AO DAR F5: Carrega os funcionários já existentes
         document.addEventListener("DOMContentLoaded", () => {
             const memoria = localStorage.getItem('ld_lista_equipe');
             if (memoria) {
                 listaEquipe = JSON.parse(memoria);
             } else {
-                // Se o sistema estiver zerado, cria você como padrão
                 listaEquipe = [{ nome: "Paulo Sérgio (Você)", email: "paulo.diniz@agencia.com", acesso: "Administrador" }];
                 localStorage.setItem('ld_lista_equipe', JSON.stringify(listaEquipe));
             }
