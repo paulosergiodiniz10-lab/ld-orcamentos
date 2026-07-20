@@ -4,17 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LD Orçamentos - Meus Aptos e Tarifas</title>
-    <!-- Tailwind CSS e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Menu Superior Padrão -->
     <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -40,10 +37,8 @@
         </div>
     </nav>
 
-    <!-- Conteúdo Principal -->
     <main class="flex-grow max-w-6xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
         
-        <!-- SEÇÃO DE LISTAGEM DE CARDS -->
         <div id="secaoListagem">
             <div class="flex justify-between items-center mb-6">
                 <div>
@@ -57,7 +52,6 @@
             <div id="gridCardsAptos" class="space-y-4"></div>
         </div>
 
-        <!-- SEÇÃO DO FORMULÁRIO COMPLETO -->
         <div id="secaoFormulario" class="hidden">
             <div class="flex justify-between items-end mb-6">
                 <div>
@@ -69,10 +63,26 @@
                 </button>
             </div>
 
-            <!-- Dados do Quarto -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                 <div class="p-6 sm:p-8 space-y-8">
+                    
                     <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-4">
+                        <!-- NOVO: COMPONENTE DE IMAGEM OTIMIZADA -->
+                        <div class="sm:col-span-4 flex items-center gap-4 border-b border-gray-100 pb-6 mb-2">
+                            <div id="previewAptoImagem" class="w-16 h-16 bg-blue-50 rounded-lg border border-blue-100 flex items-center justify-center text-blue-400 overflow-hidden shrink-0">
+                                <i data-lucide="image" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Foto da Capa (Miniatura)</label>
+                                <input type="file" id="aptoImagemInput" accept="image/jpeg, image/png, image/jpg" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 outline-none cursor-pointer" onchange="processarImagemThumb(event)">
+                                <p class="text-xs text-gray-400 mt-1">Apenas para ilustrar a lista. O sistema corta e comprime automaticamente para não pesar.</p>
+                                <input type="hidden" id="aptoImagemBase64" value="">
+                            </div>
+                            <button type="button" onclick="removerImagemThumb()" class="ml-auto text-red-500 hover:bg-red-50 p-2 rounded-md transition text-xs font-bold flex items-center gap-1 hidden" id="btnRemoverImagem">
+                                <i data-lucide="trash" class="w-4 h-4"></i> Remover Foto
+                            </button>
+                        </div>
+
                         <div class="sm:col-span-2">
                             <label class="block text-sm font-medium text-gray-700">Nome do Imóvel / Hotel</label>
                             <input type="text" id="aptoNome" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="Ex: Lacqua diRoma">
@@ -88,7 +98,6 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Cortesia Infantil -->
                         <div class="bg-blue-50 rounded-lg p-5 border border-blue-100">
                             <h3 class="text-sm font-semibold text-blue-900 tracking-wide uppercase mb-4 border-b border-blue-200 pb-2 flex items-center gap-2">
                                 <i data-lucide="baby" class="w-4 h-4 text-blue-600"></i> Limites de Crianças
@@ -105,7 +114,6 @@
                             </div>
                         </div>
 
-                        <!-- Configuração de Alimentação Ativa -->
                         <div class="bg-orange-50 rounded-lg p-5 border border-orange-100">
                             <h3 class="text-sm font-semibold text-orange-900 tracking-wide uppercase mb-4 border-b border-orange-200 pb-2 flex items-center gap-2">
                                 <i data-lucide="utensils" class="w-4 h-4 text-orange-600"></i> REGIMES DE PENSÃO
@@ -127,7 +135,6 @@
                         </div>
                     </div>
 
-                    <!-- Promoções e Ofertas (Fique/Pague) -->
                     <div class="bg-green-50 rounded-lg p-5 border border-green-100">
                         <h3 class="text-sm font-semibold text-green-900 tracking-wide uppercase mb-4 border-b border-green-200 pb-2 flex items-center gap-2">
                             <i data-lucide="tag" class="w-4 h-4 text-green-600"></i> Promoções e Ofertas Disponíveis (Fique / Pague)
@@ -148,7 +155,6 @@
                         </div>
                     </div>
 
-                    <!-- Informações Importantes Padrão do Imóvel -->
                     <div class="bg-gray-50 rounded-lg p-5 border border-gray-200">
                         <h3 class="text-sm font-semibold text-gray-700 tracking-wide uppercase mb-4 border-b border-gray-200 pb-2 flex items-center gap-2">
                             <i data-lucide="info" class="w-4 h-4 text-gray-500"></i> Informações Importantes (Padrão do Imóvel)
@@ -167,7 +173,6 @@
                 </div>
             </div>
 
-            <!-- GESTÃO DE TARIFAS -->
             <div id="blocoTarifasAdicionais" class="hidden space-y-6 scroll-mt-20">
                 <div id="formularioAncoragemTarifas" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="bg-yellow-100/50 border-b border-yellow-200 px-6 py-4 flex items-center gap-2">
@@ -190,7 +195,6 @@
                             </div>
                         </div>
 
-                        <!-- NOVO: DIAS DA SEMANA ATIVOS -->
                         <div class="mt-2 mb-2">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Aplicar nestes dias da semana:</label>
                             <div class="flex flex-wrap gap-2">
@@ -225,12 +229,10 @@
                             </div>
                         </div>
 
-                        <!-- ABAS DINÂMICAS DE REFEIÇÃO -->
                         <div class="border-b border-gray-200">
                             <nav id="abasRegimesContainer" class="-mb-px flex space-x-6 text-sm font-semibold"></nav>
                         </div>
 
-                        <!-- BLOCO DOS VALORES DA DIÁRIA -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
                             <h4 class="text-sm font-bold text-gray-700 uppercase mb-4 border-b pb-2 flex items-center gap-2">
                                 <i data-lucide="utensils" class="w-4 h-4 text-gray-500"></i> Preços para o Regime Ativo: <span id="txtRegimeAtivoLabel" class="text-blue-600 text-sm font-bold">Sem Refeição</span>
@@ -261,7 +263,6 @@
                     </div>
                 </div>
 
-                <!-- Ajuste Rápido em Massa -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="bg-green-100/50 border-b border-green-200 px-6 py-4 flex items-center gap-2">
                         <i data-lucide="percent" class="w-5 h-5 text-green-700"></i>
@@ -305,7 +306,6 @@
                     </div>
                 </div>
 
-                <!-- Gestão do Calendário -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                         <h3 class="font-bold text-gray-900 flex items-center gap-2">
@@ -383,7 +383,6 @@
         </div>
     </main>
 
-    <!-- MODAL CUSTOMIZADO DE CONFIRMAÇÃO -->
     <div id="modalConfirmacao" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl max-w-sm w-full shadow-xl border border-gray-100 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
             <div class="p-6 text-center">
@@ -404,7 +403,6 @@
         </div>
     </div>
 
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
@@ -423,6 +421,60 @@
         
         let regimeAtivoAba = "ro";
         let cacheValoresTemporariosForm = {};
+
+        // NOVO: COMPRESSOR DE IMAGEM INVISÍVEL
+        function processarImagemThumb(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.match('image.*')) {
+                showToast('Por favor, selecione uma imagem válida (JPEG/PNG).', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 150; 
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        }
+                    } else {
+                        if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8); 
+                    document.getElementById('aptoImagemBase64').value = dataUrl;
+                    document.getElementById('previewAptoImagem').innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
+                    document.getElementById('btnRemoverImagem').classList.remove('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removerImagemThumb() {
+            document.getElementById('aptoImagemInput').value = '';
+            document.getElementById('aptoImagemBase64').value = '';
+            document.getElementById('previewAptoImagem').innerHTML = '<i data-lucide="image" class="w-6 h-6"></i>';
+            document.getElementById('btnRemoverImagem').classList.add('hidden');
+            lucide.createIcons();
+        }
 
         function normalizarDataIn(val) {
             if(!val) return "";
@@ -486,10 +538,16 @@
             }
             listaAptos.forEach(apto => {
                 const totalDias = apto.calendario ? apto.calendario.length : 0;
+                
+                // NOVO: Renderização dinâmica da imagem ou ícone
+                let iconeOuImagem = apto.imagem
+                    ? `<img src="${apto.imagem}" class="w-12 h-12 rounded-lg object-cover shrink-0 border border-gray-200 shadow-sm">`
+                    : `<div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 shrink-0"><i data-lucide="hotel" class="w-6 h-6"></i></div>`;
+
                 grid.innerHTML += `
                     <div class="bg-white rounded-xl border border-gray-200 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 shrink-0"><i data-lucide="hotel" class="w-6 h-6"></i></div>
+                            ${iconeOuImagem}
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900">${apto.nome} (${apto.unidade})</h3>
                                 <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 mt-1">
@@ -516,7 +574,7 @@
             document.getElementById('promoNome').value = ""; document.getElementById('promoFique').value = ""; document.getElementById('promoPague').value = "";
             document.getElementById('aptoObs').value = "";
             
-            // Força todas as caixinhas de dias da semana ficarem ativas para o novo
+            removerImagemThumb();
             document.querySelectorAll('.dia-semana-cb').forEach(cb => cb.checked = true);
 
             zerarCamposPrecoFormulario();
@@ -545,7 +603,15 @@
             document.getElementById('regime_map').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('map') : false;
             document.getElementById('regime_fap').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('fap') : false;
 
-            // Restaura as caixinhas para o padrão ao abrir a edição
+            // NOVO: Carrega a imagem se existir
+            if (apto.imagem) {
+                document.getElementById('aptoImagemBase64').value = apto.imagem;
+                document.getElementById('previewAptoImagem').innerHTML = `<img src="${apto.imagem}" class="w-full h-full object-cover">`;
+                document.getElementById('btnRemoverImagem').classList.remove('hidden');
+            } else {
+                removerImagemThumb();
+            }
+
             document.querySelectorAll('.dia-semana-cb').forEach(cb => cb.checked = true);
 
             document.getElementById('blocoTarifasAdicionais').classList.remove('hidden');
@@ -631,6 +697,9 @@
             const promoFique = parseInt(document.getElementById('promoFique').value) || "";
             const promoPague = parseInt(document.getElementById('promoPague').value) || "";
             const aptoObs = document.getElementById('aptoObs').value.trim();
+            
+            // NOVO: Captura a imagem miniatura gerada
+            const imagemThumb = document.getElementById('aptoImagemBase64').value;
 
             let index = listaAptos.findIndex(a => a.id === aptoAtualId);
             let aptoObjeto = {
@@ -638,6 +707,7 @@
                 idadeFree: parseInt(document.getElementById('aptoIdadeFree').value) || 12,
                 qtdFree: parseInt(document.getElementById('aptoQtdFree').value) || 2,
                 regimesAtivos: regimesMarcados, promoNome, promoFique, promoPague, aptoObs,
+                imagem: imagemThumb,
                 calendario: (index > -1) ? listaAptos[index].calendario : []
             };
 
@@ -672,7 +742,6 @@
 
             if(!dInicioStr || !dFimStr) { alert("Preencha o período de datas!"); return; }
 
-            // NOVO: Captura os dias da semana selecionados
             const diasSelecionados = Array.from(document.querySelectorAll('.dia-semana-cb:checked')).map(cb => parseInt(cb.value));
             if(diasSelecionados.length === 0) {
                 showToast("Selecione pelo menos um dia da semana!", "error");
@@ -685,7 +754,6 @@
             let contadorDiasInjetados = 0;
 
             while(dCorrente <= dFinal) {
-                // NOVO: Verifica se o dia atual está na lista de dias permitidos
                 if(diasSelecionados.includes(dCorrente.getDay())) {
                     let dataIso = dCorrente.toISOString().split('T')[0];
                     let itemIdx = apto.calendario.findIndex(c => c.data === dataIso && c.regime === regimeAtivoAba);
