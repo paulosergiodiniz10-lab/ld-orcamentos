@@ -44,7 +44,7 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Formulário de Parâmetros (Esquerda) -->
+            <!-- Formulário de Parâmetros -->
             <div class="lg:col-span-5 bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit">
                 <h3 class="text-base font-bold text-gray-900 mb-5 flex items-center gap-2 border-b pb-3">
                     <i data-lucide="search" class="w-5 h-5 text-blue-600"></i> Dados da Reserva
@@ -94,7 +94,7 @@
                 </form>
             </div>
 
-            <!-- Painel de Resultados (Direita) -->
+            <!-- Painel de Resultados -->
             <div class="lg:col-span-7">
                 <div id="estadoVazio" class="h-full min-h-[400px] bg-white rounded-xl shadow-sm border border-gray-200 border-dashed flex flex-col items-center justify-center text-center p-8">
                     <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4"><i data-lucide="receipt" class="w-8 h-8 text-blue-300"></i></div>
@@ -103,7 +103,6 @@
                 </div>
 
                 <div id="resultadoCotacao" class="hidden bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
-                    <!-- Tarjeta de Alerta de Erro -->
                     <div id="alertaErro" class="hidden bg-red-50 border-b border-red-200 p-4 flex items-start gap-3">
                         <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600 mt-0.5"></i>
                         <div>
@@ -151,11 +150,6 @@
         </div>
     </main>
 
-    <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8"><p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos.</p></div>
-    </footer>
-
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
@@ -174,7 +168,6 @@
             setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
-        // Carrega os apartamentos salvos da memória para o dropdown
         function carregarAptosNoSelect() {
             const memoria = localStorage.getItem('ld_lista_aptos');
             listaAptos = memoria ? JSON.parse(memoria) : [];
@@ -186,7 +179,7 @@
                 return;
             }
             listaAptos.forEach(apto => {
-                select.innerHTML += `<option value="${apto.id}">${apto.nome} - Unidade ${apto.unidade} (Até ${apto.capMax} pessoas)</option>`;
+                select.innerHTML += `<option value="${apto.id}">${apto.nome} - ${apto.unidade} (Até ${apto.capMax} pessoas)</option>`;
             });
         }
 
@@ -210,7 +203,6 @@
             }
         }
 
-        // MOTOR DE CÁLCULO INTELIGENTE DIA A DIA
         function calcularOrcamentoReal() {
             const aptoId = document.getElementById('orcAptoSelect').value;
             const dInicioStr = document.getElementById('orcCheckin').value;
@@ -234,7 +226,6 @@
             divVazia.classList.add('hidden');
             divResult.classList.remove('hidden');
 
-            // Validação de Capacidade Absoluta
             if(totalPessoas > apto.capMax) {
                 alertaErro.classList.remove('hidden');
                 areaValores.classList.add('hidden');
@@ -249,14 +240,13 @@
             let idades = [];
             document.querySelectorAll('.orc-idade-input').forEach(input => idades.push(parseInt(input.value) || 0));
 
-            // Filtragem da Regra de Crianças
             let criancasFree = 0;
             let criancasPagantes = 0;
             let limiteFreeMax = apto.qtdFree || 2;
             let idadeFreeMax = apto.idadeFree || 12;
 
-            // Prioriza dar cortesia para as crianças mais velhas primeiro (vantagem comercial)
-            残酷 = idades.sort((a,b) => b - a).forEach(idade => {
+            // Ordena e separa as cortesias
+            idades.sort((a,b) => b - a).forEach(idade => {
                 if (idade <= idadeFreeMax && criancasFree < limiteFreeMax) {
                     criancasFree++;
                 } else {
@@ -274,7 +264,6 @@
             let totalNoites = 0;
             let erroFaltaTarifa = false;
 
-            // Percorre o calendário dia por dia pegando o preço dinâmico da data
             while(dCorrente < dFinal) {
                 totalNoites++;
                 let dataIso = dCorrente.toISOString().split('T')[0];
@@ -292,13 +281,12 @@
                 if (totalAdultosEfetivosNoDia === 1) {
                     precoBaseQuarto = tarifaDia.single;
                 } else {
-                    precoBaseQuarto = tarifaDia.duplo; // Pega o Valor Duplo cheio cadastrado
+                    precoBaseQuarto = tarifaDia.duplo;
                     extrasNoDia = (totalAdultosEfetivosNoDia - 2) > 0 ? (totalAdultosEfetivosNoDia - 2) : 0;
                 }
 
                 valorAcumuladoBase += precoBaseQuarto;
                 valorAcumuladoExtras += (extrasNoDia * tarifaDia.extra);
-
                 dCorrente.setDate(dCorrente.getDate() + 1);
             }
 
@@ -312,21 +300,34 @@
 
             let valorTotalGeral = valorAcumuladoBase + valorAcumuladoExtras;
 
-            document.getElementById('resumoReserva').innerText = `${apto.nome} (Unidade ${apto.unidade}) • ${totalNoites} Noite(s) • ${adultos} Ad, ${criancas} Criança(s)`;
+            // Formatação do Singular/Plural das Noites
+            let noitesLabel = totalNoites === 1 ? "01 Noite(s)" : (totalNoites < 10 ? "0" + totalNoites : totalNoites) + " Noite(s)";
+            let msgNoitesTexto = totalNoites === 1 ? "01 noite" : (totalNoites < 10 ? "0" + totalNoites : totalNoites) + " noites";
+
+            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${noitesLabel} • ${adultos} Ad, ${criancas} Criança(s)`;
             document.getElementById('valorTotal').innerText = `R$ ${valorTotalGeral.toFixed(2).replace('.', ',')}`;
             document.getElementById('txtSomaBase').innerText = `R$ ${valorAcumuladoBase.toFixed(2).replace('.', ',')}`;
             document.getElementById('txtSomaExtras').innerText = `R$ ${valorAcumuladoExtras.toFixed(2).replace('.', ',')}`;
             document.getElementById('txtQtdFree').innerText = `${criancasFree} criança(s) free (Até ${idadeFreeMax} anos)`;
 
-            // Gera o texto profissional limpo pronto para colar no WhatsApp
-            textoCotaçãoGlobal = `*Orçamento de Hospedagem - ${apto.nome}*\n` +
-                                 `• Período: ${dInicioStr.split('-').reverse().join('/')} a ${dFimStr.split('-').reverse().join('/')} (${totalNoites} noites)\n` +
-                                 `• Acomodação: Unidade ${apto.unidade}\n` +
-                                 `• Configuração: ${adultos} Adulto(s) e ${criancas} Criança(s)\n` +
+            // FORMATAÇÃO DO TEXTO DO WHATSAPP IDÊNTICO AO SOLICITADO
+            let checkinFormatado = dInicioStr.split('-').reverse().join('/');
+            let checkoutFormatado = dFimStr.split('-').reverse().join('/');
+            let adultosFormatado = adultos < 10 ? "0" + adultos : adultos;
+            let criancasFormatado = criancas < 10 ? "0" + criancas : criancas;
+
+            textoCotaçãoGlobal = `*Segue orçamento de Hospedagem - ${apto.nome}*\n` +
+                                 `• Entrada: ${checkinFormatado}\n` +
+                                 `• Saída: ${checkoutFormatado}\n` +
+                                 `• Total de noites: ${msgNoitesTexto}\n` +
+                                 `• Acomodação: ${apto.unidade}\n` +
+                                 `*Configuração*\n` +
+                                 `• ${adultosFormatado} Adulto(s)\n` +
+                                 `• ${criancasFormatado} criança (s)\n` +
                                  `• Cortesias aplicadas: ${criancasFree} criança(s) grátis\n` +
-                                 `*Valor Total da Estadia: R$ ${valorTotalGeral.toFixed(2).replace('.', ',')}*`;
+                                 `*Valor total do Pacote: R$ ${valorTotalGeral.toFixed(2).replace('.', ',')}*`;
             
-            showToast("Cotação processada com sucesso!", "success");
+            showToast("Orçamento calculado com sucesso!", "success");
         }
 
         function copiarTextoOrcamento() {
@@ -342,8 +343,6 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             carregarAptosNoSelect();
-            
-            // Regra de gravação nos inputs
             const campos = document.querySelectorAll("input, select");
             campos.forEach(campo => {
                 if (campo.id) {
