@@ -336,16 +336,27 @@
             const aptoId = document.getElementById('orcAptoSelect').value;
             const selectRegime = document.getElementById('orcRegimeSelect');
             const selectPromo = document.getElementById('orcPromoSelect');
+            const obsTextarea = document.getElementById('orcObs');
+            
             selectRegime.innerHTML = "";
             selectPromo.innerHTML = `<option value="nenhuma">Nenhuma promoção ativa</option>`;
+            obsTextarea.value = ""; 
+
             if(!aptoId) return;
             const apto = listaAptos.find(a => a.id === aptoId);
+            
             let regimes = apto.regimesAtivos || ['ro', 'bb'];
             regimes.forEach(regId => {
                 selectRegime.innerHTML += `<option value="${regId}">${nomenclaturaRegimes[regId]}</option>`;
             });
+            
             if (apto.promoNome && apto.promoFique && apto.promoPague) {
                 selectPromo.innerHTML += `<option value="ativa">${apto.promoNome} (Fique ${apto.promoFique} Pague ${apto.promoPague})</option>`;
+            }
+
+            // AUTO PREENCHIMENTO DA OBSERVAÇÃO
+            if (apto.aptoObs) {
+                obsTextarea.value = apto.aptoObs;
             }
         }
 
@@ -598,10 +609,10 @@
             document.getElementById('orcIdadesContainer').classList.add('hidden');
             document.getElementById('orcIdadesGrid').innerHTML = "";
             document.getElementById('linhaVisualPromo').classList.add('hidden');
-            document.getElementById('orcObs').value = ""; 
             document.getElementById('resultadoCotacao').classList.add('hidden');
             document.getElementById('estadoVazio').classList.remove('hidden');
             dadosLocaisUltimoCalculo = null;
+            atualizarRegimesDisponiveisNoForm(); // Sincroniza o apto resetado para trazer a Obs correta
         }
 
         function copiarTextoOrcamento() {
