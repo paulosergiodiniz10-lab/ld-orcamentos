@@ -53,21 +53,18 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Selecione o Apartamento</label>
                         <select id="orcAptoSelect" onchange="atualizarRegimesDisponiveisNoForm()" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
-                            <!-- Inserido via JS -->
                         </select>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Regime de Alimentação</label>
                         <select id="orcRegimeSelect" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
-                            <!-- Atualizado dinamicamente -->
                         </select>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Promoção / Oferta Aplicada</label>
                         <select id="orcPromoSelect" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white font-medium text-green-700 bg-green-50/50">
-                            <!-- Atualizado dinamicamente -->
                         </select>
                     </div>
 
@@ -89,7 +86,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Crianças</label>
-                            <!-- AQUI ESTAVA O BUG: generarCamposIdade X gerarCamposIdade -->
+                            <!-- CORRIGIDO: generar => gerar -->
                             <input type="number" id="orcCriancas" min="0" onchange="gerarCamposIdade()" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none" placeholder="Ex: 0">
                         </div>
                     </div>
@@ -267,6 +264,16 @@
             fap: "Pensão Completa"
         };
 
+        // BLINDAGEM DE DATAS CASO FLATPICKR ENVIE FORMATO ERRADO
+        function normalizarDataIn(val) {
+            if(!val) return "";
+            if(val.includes('/')) {
+                let p = val.split('/');
+                if(p.length === 3 && p[2].length === 4) return `${p[2]}-${p[1]}-${p[0]}`;
+            }
+            return val;
+        }
+
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -359,8 +366,8 @@
             const aptoId = document.getElementById('orcAptoSelect').value;
             const regimeId = document.getElementById('orcRegimeSelect').value;
             const promoAplicada = document.getElementById('orcPromoSelect').value;
-            const dInicioStr = document.getElementById('orcCheckin').value;
-            const dFimStr = document.getElementById('orcCheckout').value;
+            const dInicioStr = normalizarDataIn(document.getElementById('orcCheckin').value);
+            const dFimStr = normalizarDataIn(document.getElementById('orcCheckout').value);
             const adultos = parseInt(document.getElementById('orcAdultos').value) || 0;
             const criancas = parseInt(document.getElementById('orcCriancas').value) || 0;
 
@@ -477,6 +484,13 @@
 
             let valorTotalGeral = (valorAcumuladoBase + valorAcumuladoExtras) - descontoPromocionalCalculado;
             let msgNoitesTexto = totalNoitesBusca === 1 ? "01 noite" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " noites";
+
+            // AQUI ESTAVA O SEU BUG: as linhas que atualizam a tela não estavam aqui antes
+            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${msgNoitesTexto} • ${nomenclaturaRegimes[regimeId]}`;
+            document.getElementById('valorTotal').innerText = `R$ ${valorTotalGeral.toFixed(2).replace('.', ',')}`;
+            document.getElementById('txtSomaBase').innerText = `R$ ${valorAcumuladoBase.toFixed(2).replace('.', ',')}`;
+            document.getElementById('txtSomaExtras').innerText = `R$ ${valorAcumuladoExtras.toFixed(2).replace('.', ',')}`;
+            document.getElementById('txtQtdFree').innerText = `${criancasFree} criança(s) free (Até ${idadeFreeMax} anos)`;
 
             let proximoIdNumero = historicoOrcamentos.length + 1;
             let idLabelFormatado = proximoIdNumero < 10 ? "0" + proximoIdNumero : proximoIdNumero;
