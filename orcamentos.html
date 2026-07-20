@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LD Orçamentos - Gerador de Cotação</title>
-    <!-- Tailwind CSS e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Menu Superior Padrão -->
     <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -36,7 +34,6 @@
         </div>
     </nav>
 
-    <!-- Conteúdo Principal -->
     <main class="flex-grow max-w-7xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900">Gerador de Orçamentos</h1>
@@ -44,7 +41,6 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Formulário de Parâmetros -->
             <div class="lg:col-span-5 bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit">
                 <h3 class="text-base font-bold text-gray-900 mb-5 flex items-center gap-2 border-b pb-3">
                     <i data-lucide="search" class="w-5 h-5 text-blue-600"></i> Dados da Reserva
@@ -54,8 +50,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Selecione o Apartamento</label>
                         <select id="orcAptoSelect" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
-                            <!-- Inserido via JS -->
-                        </select>
+                            </select>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -80,7 +75,6 @@
                         </div>
                     </div>
 
-                    <!-- Bloco das Idades -->
                     <div id="orcIdadesContainer" class="hidden bg-blue-50 p-4 rounded-lg border border-blue-100 mt-3 space-y-3">
                         <p class="text-xs font-semibold text-blue-800 uppercase">Idade das Crianças</p>
                         <div id="orcIdadesGrid" class="grid grid-cols-3 gap-3"></div>
@@ -94,8 +88,7 @@
                 </form>
             </div>
 
-            <!-- Painel de Resultados -->
-            <div class="lg:col-span-7">
+            <div class="lg:col-span-7 prose-none">
                 <div id="estadoVazio" class="h-full min-h-[400px] bg-white rounded-xl shadow-sm border border-gray-200 border-dashed flex flex-col items-center justify-center text-center p-8">
                     <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4"><i data-lucide="receipt" class="w-8 h-8 text-blue-300"></i></div>
                     <h3 class="text-lg font-bold text-gray-700">Nenhum orçamento calculado</h3>
@@ -136,7 +129,6 @@
                             </div>
                         </div>
 
-                        <!-- NOVOS CAMPOS: DADOS DO CLIENTE PARA ENVIO -->
                         <div class="border-t pt-4 mt-4 space-y-4">
                             <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
                                 <i data-lucide="user" class="w-3.5 h-3.5"></i> Identificação de Envio (Opcional)
@@ -153,17 +145,43 @@
                             </div>
                         </div>
 
-                        <!-- Botões de Ação -->
                         <div class="mt-8 flex gap-3">
                             <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-sm">
                                 <i data-lucide="copy" class="w-4 h-4"></i> Copiar Texto
                             </button>
-                            <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2">
+                            <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 shadow-sm flex items-center justify-center gap-2">
                                 <i data-lucide="message-circle" class="w-4 h-4"></i> Enviar WhatsApp
                             </button>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="mt-12 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                <h3 class="font-bold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="history" class="w-5 h-5 text-gray-500"></i> Histórico de Orçamentos Gerados
+                </h3>
+                <span id="badgeContadorHistorico" class="bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1 rounded-full">0 registros</span>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-left text-xs text-gray-700 whitespace-nowrap">
+                    <thead class="bg-gray-50 text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b">
+                        <tr>
+                            <th class="py-3 px-4">Cliente / WhatsApp</th>
+                            <th class="py-3 px-4">Imóvel</th>
+                            <th class="py-3 px-4">Entrada</th>
+                            <th class="py-3 px-4">Saída</th>
+                            <th class="py-3 px-4 text-center">Pax (Ad / Criança)</th>
+                            <th class="py-3 px-4">Valor Total</th>
+                            <th class="py-3 px-4 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyHistorico" class="divide-y divide-gray-100">
+                        </tbody>
+                </table>
             </div>
         </div>
     </main>
@@ -172,14 +190,12 @@
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8"><p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos.</p></div>
     </footer>
 
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
         lucide.createIcons();
         let listaAptos = [];
-        
-        // Estrutura base de dados para cálculo de string externa
+        let historicoOrcamentos = [];
         let dadosLocaisUltimoCalculo = null;
 
         function showToast(message, type = 'success') {
@@ -193,7 +209,6 @@
             setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
-        // MÁSCARA AUTOMÁTICA DO WHATSAPP CLIENTE
         function mascaraTelefoneCliente(input) {
             let value = input.value.replace(/\D/g, "");
             value = value.replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d)(\d{4})$/, "$1-$2");
@@ -205,7 +220,6 @@
             listaAptos = memoria ? JSON.parse(memoria) : [];
             const select = document.getElementById('orcAptoSelect');
             select.innerHTML = "";
-            
             if(listaAptos.length === 0) {
                 select.innerHTML = `<option value="">Nenhum apartamento cadastrado</option>`;
                 return;
@@ -219,11 +233,9 @@
             const qtd = parseInt(document.getElementById('orcCriancas').value) || 0;
             const container = document.getElementById('orcIdadesContainer');
             const grid = document.getElementById('orcIdadesGrid');
-            
             let idadesSalvas = [];
             document.querySelectorAll('.orc-idade-input').forEach(input => idadesSalvas.push(input.value));
             grid.innerHTML = '';
-            
             if (qtd > 0) {
                 container.classList.remove('hidden');
                 for (let i = 1; i <= qtd; i++) {
@@ -272,38 +284,27 @@
             let idades = [];
             document.querySelectorAll('.orc-idade-input').forEach(input => idades.push(parseInt(input.value) || 0));
 
-            let criancasFree = 0;
-            let criancasPagantes = 0;
-            let limiteFreeMax = apto.qtdFree || 2;
-            let idadeFreeMax = apto.idadeFree || 12;
+            let criancasFree = 0; let criancasPagantes = 0;
+            let limiteFreeMax = apto.qtdFree || 2; let idadeFreeMax = apto.idadeFree || 12;
 
             idades.sort((a,b) => b - a).forEach(idade => {
-                if (idade <= idadeFreeMax && criancasFree < limiteFreeMax) {
-                    criancasFree++;
-                } else {
-                    criancasPagantes++;
-                }
+                if (idade <= idadeFreeMax && criancasFree < limiteFreeMax) criancasFree++;
+                else criancasPagantes++;
             });
 
             let pagantesAdicionais = criancasPagantes;
             let adultosEfetivos = adultos;
-            let valorAcumuladoBase = 0;
-            let valorAcumuladoExtras = 0;
+            let valorAcumuladoBase = 0; let valorAcumuladoExtras = 0;
 
             let dCorrente = new Date(dInicioStr + "T12:00:00");
             let dFinal = new Date(dFimStr + "T12:00:00");
-            let totalNoites = 0;
-            let erroFaltaTarifa = false;
+            let totalNoites = 0; let erroFaltaTarifa = false;
 
             while(dCorrente < dFinal) {
                 totalNoites++;
                 let dataIso = dCorrente.toISOString().split('T')[0];
                 let tarifaDia = apto.calendario ? apto.calendario.find(c => c.data === dataIso) : null;
-
-                if(!tarifaDia) {
-                    erroFaltaTarifa = true;
-                    break;
-                }
+                if(!tarifaDia) { erroFaltaTarifa = true; break; }
 
                 let totalAdultosEfetivosNoDia = adultosEfetivos + pagantesAdicionais;
                 let precoBaseQuarto = 0;
@@ -315,17 +316,14 @@
                     let extrasNoDia = (totalAdultosEfetivosNoDia - 2) > 0 ? (totalAdultosEfetivosNoDia - 2) : 0;
                     valorAcumuladoExtras += (extrasNoDia * tarifaDia.extra);
                 }
-
                 valorAcumuladoBase += precoBaseQuarto;
                 dCorrente.setDate(dCorrente.getDate() + 1);
             }
 
             if(erroFaltaTarifa) {
-                alertaErro.classList.remove('hidden');
-                areaValores.classList.add('hidden');
+                alertaErro.classList.remove('hidden'); areaValores.classList.add('hidden');
                 document.getElementById('msgErro').innerText = `O calendário está sem tarifas configuradas para este período. Configure os preços na aba "Aptos" primeiro.`;
-                showToast("Erro: Data sem tarifa.", "error");
-                return;
+                showToast("Erro: Data sem tarifa.", "error"); return;
             }
 
             let valorTotalGeral = valorAcumuladoBase + valorAcumuladoExtras;
@@ -337,7 +335,6 @@
             document.getElementById('txtSomaExtras').innerText = `R$ ${valorAcumuladoExtras.toFixed(2).replace('.', ',')}`;
             document.getElementById('txtQtdFree').innerText = `${criancasFree} criança(s) free (Até ${idadeFreeMax} anos)`;
 
-            // Salva dados estruturados para compor a string dinamicamente no clique dos botões
             dadosLocaisUltimoCalculo = {
                 hotelNome: apto.nome,
                 quartoNome: apto.unidade,
@@ -349,22 +346,15 @@
                 freeQtd: criancasFree,
                 total: valorTotalGeral.toFixed(2).replace('.', ',')
             };
-
             showToast("Orçamento calculado com sucesso!", "success");
         }
 
-        // MONTA O TEXTO FINAL DA COTAÇÃO CONSIDERANDO O NOME SE HOUVER
-        function construirTextoFinalTemplate() {
+        function construirTextoFinalTemplate(nomeManual = null) {
             if(!dadosLocaisUltimoCalculo) return "";
-            
-            const nomeDigitado = document.getElementById('clienteNome').value.trim();
-            let cabecalhoNome = "";
-            
-            if(nomeDigitado) {
-                cabecalhoNome = `${nomeDigitado}\n\n`;
-            }
+            const nomeCliente = nomeManual !== null ? nomeManual : document.getElementById('clienteNome').value.trim();
+            let cabecalho = nomeCliente ? `${nomeCliente}\n\n` : "";
 
-            return `${cabecalhoNome}*Segue orçamento de Hospedagem - ${dadosLocaisUltimoCalculo.hotelNome}*\n` +
+            return `${cabecalho}*Segue orçamento de Hospedagem - ${dadosLocaisUltimoCalculo.hotelNome}*\n` +
                    `• Entrada: ${dadosLocaisUltimoCalculo.checkin}\n` +
                    `• Saída: ${dadosLocaisUltimoCalculo.checkout}\n` +
                    `• Total de noites: ${dadosLocaisUltimoCalculo.noitesTxt}\n` +
@@ -376,30 +366,105 @@
                    `*Valor total do Pacote: R$ ${dadosLocaisUltimoCalculo.total}*`;
         }
 
+        // SALVA AUTOMÁTICO NO HISTÓRICO NO CLIQUE DOS BOTÕES
+        function registrarNoHistorico() {
+            if(!dadosLocaisUltimoCalculo) return;
+            
+            const novoRegistro = {
+                id: 'hist_' + Date.now(),
+                nome: document.getElementById('clienteNome').value.trim() || "Não informado",
+                zap: document.getElementById('clienteWhatsapp').value.trim() || "Não informado",
+                hotel: `${dadosLocaisUltimoCalculo.hotelNome} (${dadosLocaisUltimoCalculo.quartoNome})`,
+                entrada: dadosLocaisUltimoCalculo.checkin,
+                saida: dadosLocaisUltimoCalculo.checkout,
+                adultos: dadosLocaisUltimoCalculo.adQtd,
+                criancas: dadosLocaisUltimoCalculo.criQtd,
+                valor: dadosLocaisUltimoCalculo.total,
+                textoBruto: construirTextoFinalTemplate() // Salva o texto completo para reenvio
+            };
+
+            historicoOrcamentos.unshift(novoRegistro); // Adiciona no início da lista
+            localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
+            renderizarTabelaHistorico();
+        }
+
         function copiarTextoOrcamento() {
-            const textoPronto = construirTextoFinalTemplate();
-            if(!textoPronto) return;
-            navigator.clipboard.writeText(textoPronto);
-            showToast("Texto copiado para a área de transferência!", "success");
+            const texto = construirTextoFinalTemplate();
+            if(!texto) return;
+            navigator.clipboard.writeText(texto);
+            registrarNoHistorico(); // DISPARA A REGRA DO HISTÓRICO
+            showToast("Orçamento copiado e salvo no histórico!", "success");
         }
 
         function enviarWhatsAppOrcamento() {
-            const textoPronto = construirTextoFinalTemplate();
-            if(!textoPronto) return;
+            const texto = construirTextoFinalTemplate();
+            if(!texto) return;
+            const zap = document.getElementById('clienteWhatsapp').value.replace(/\D/g, "");
+            registrarNoHistorico(); // DISPARA A REGRA DO HISTÓRICO
             
-            const whatsappDigitado = document.getElementById('clienteWhatsapp').value.replace(/\D/g, ""); // Remove parênteses e traços
-            
-            if(whatsappDigitado) {
-                // Abre o chat do número específico direto
-                window.open(`https://api.whatsapp.com/send?phone=55${whatsappDigitado}&text=${encodeURIComponent(textoPronto)}`, '_blank');
+            if(zap) window.open(`https://api.whatsapp.com/send?phone=55${zap}&text=${encodeURIComponent(texto)}`, '_blank');
+            else window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
+        }
+
+        // REENVIA O ZAP DIRETO DA TABELA DO HISTÓRICO
+        function reativarAtendimentoZap(index) {
+            const item = historicoOrcamentos[index];
+            const foneLimpo = item.zap.replace(/\D/g, "");
+            if(foneLimpo && item.zap !== "Não informado") {
+                window.open(`https://api.whatsapp.com/send?phone=55${foneLimpo}&text=${encodeURIComponent(item.textoBruto)}`, '_blank');
             } else {
-                // Abre o seletor padrão de contatos do WhatsApp
-                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(textoPronto)}`, '_blank');
+                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(item.textoBruto)}`, '_blank');
             }
+        }
+
+        function removerItemHistorico(index) {
+            if(confirm("Deseja deletar esta cotação do histórico?")) {
+                historicoOrcamentos.splice(index, 1);
+                localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
+                renderizarTabelaHistorico();
+                showToast("Registro removido.", "success");
+            }
+        }
+
+        // DESENHA A LISTA DE REGISTROS NA TABELA INFERIOR
+        function renderizarTabelaHistorico() {
+            const tbody = document.getElementById('tbodyHistorico');
+            const badge = document.getElementById('badgeContadorHistorico');
+            tbody.innerHTML = "";
+            
+            badge.innerText = `${historicoOrcamentos.length} registros`;
+
+            if(historicoOrcamentos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400">Nenhum orçamento arquivado no histórico até o momento.</td></tr>`;
+                return;
+            }
+
+            historicoOrcamentos.forEach((item, idx) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 border-b border-gray-100 font-medium">
+                        <td class="py-3 px-4 font-bold text-gray-900">${item.nome}<br><span class="text-gray-400 text-[11px] font-normal">${item.zap}</span></td>
+                        <td class="py-3 px-4 text-gray-600">${item.hotel}</td>
+                        <td class="py-3 px-4 font-semibold text-gray-700">${item.entrada}</td>
+                        <td class="py-3 px-4 font-semibold text-gray-700">${item.saida}</td>
+                        <td class="py-3 px-4 text-center text-gray-500">${parseInt(item.adultos)} Ad / ${parseInt(item.criancas)} Criança(s)</td>
+                        <td class="py-3 px-4 text-blue-600 font-bold">R$ ${item.valor}</td>
+                        <td class="py-3 px-4 text-right space-x-3">
+                            <button onclick="reativarAtendimentoZap(${idx})" class="text-green-500 hover:text-green-700 transition-colors" title="Reenviar pelo WhatsApp"><i data-lucide="message-circle" class="w-4 h-4 inline"></i></button>
+                            <button onclick="removerItemHistorico(${idx})" class="text-gray-400 hover:text-red-600 transition-colors" title="Remover"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
+                        </td>
+                    </tr>`;
+            });
+            lucide.createIcons();
         }
 
         document.addEventListener("DOMContentLoaded", () => {
             carregarAptosNoSelect();
+            
+            // Carrega o histórico da memória
+            const histMemoria = localStorage.getItem('ld_historico_orcamentos');
+            historicoOrcamentos = histMemoria ? JSON.parse(histMemoria) : [];
+            renderizarTabelaHistorico();
+
             const campos = document.querySelectorAll("input, select");
             campos.forEach(campo => {
                 if (campo.id) {
