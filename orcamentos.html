@@ -7,6 +7,10 @@
     <!-- Tailwind CSS e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Flatpickr (Calendário Customizado para PC) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
@@ -40,7 +44,7 @@
     <main class="flex-grow max-w-7xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900">Gerador de Orçamentos</h1>
-            <p class="text-sm text-gray-500 mt-1">Busque a availability e calcule os valores reais salvos no calendário.</p>
+            <p class="text-sm text-gray-500 mt-1">Busque a disponibilidade e calcule os valores reais salvos no calendário.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -68,11 +72,11 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
-                            <input type="date" id="orcCheckin" onchange="ajustarDataCheckoutAutomatica()" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none text-gray-600">
+                            <input type="text" id="orcCheckin" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 bg-white rounded-md py-2 px-3 border outline-none text-gray-600 cursor-pointer placeholder-gray-400" placeholder="Selecione..">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Check-out</label>
-                            <input type="date" id="orcCheckout" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none text-gray-600">
+                            <input type="text" id="orcCheckout" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 bg-white rounded-md py-2 px-3 border outline-none text-gray-600 cursor-pointer placeholder-gray-400" placeholder="Selecione..">
                         </div>
                     </div>
 
@@ -163,7 +167,7 @@
 
                         <!-- Botões de Ação -->
                         <div class="mt-8 flex gap-3">
-                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 flex items-center justify-center gap-2 shadow-sm">
                                 <i data-lucide="copy" class="w-4 h-4"></i> Copiar Texto
                             </button>
                             <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 shadow-sm flex items-center justify-center gap-2">
@@ -175,14 +179,13 @@
             </div>
         </div>
 
-        <!-- SEÇÃO: HISTÓRICO DE COTAÇÕES COM COMPONENTES DE INFALIBILIDADE EM ESCALA -->
+        <!-- SEÇÃO: HISTÓRICO DE COTAÇÕES -->
         <div class="mt-12 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h3 class="font-bold text-gray-900 flex items-center gap-2 shrink-0">
                     <i data-lucide="history" class="w-5 h-5 text-gray-500"></i> Histórico de Orçamentos Gerados
                 </h3>
                 
-                <!-- NOVO: CAMPO DE BUSCA RÁPIDA (NOME, ID OU ZAP) EXATAMENTE NO CAMPO DISPONÍVEL -->
                 <div class="relative w-full sm:max-w-xs">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <i data-lucide="search" class="w-4 h-4"></i>
@@ -211,7 +214,6 @@
                 </table>
             </div>
 
-            <!-- NOVO: CONTROLE DE PAGINAÇÃO CONFORME A REGRA DE 50 CADASTROS POR PÁGINA -->
             <div id="containerPaginacao" class="bg-gray-50 px-6 py-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 font-medium">
                 <span id="txtInfoPaginacao">Mostrando 0-0 de 0 cotações</span>
                 <div id="botoesPaginacaoGrid" class="flex items-center gap-1"></div>
@@ -244,7 +246,6 @@
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8"><p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos.</p></div>
     </footer>
 
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
@@ -253,8 +254,9 @@
         let historicoOrcamentos = [];
         let dadosLocaisUltimoCalculo = null;
         let funcaoCallbackConfirmacao = null;
+        
+        let fpCheckin, fpCheckout;
 
-        // PAGINAÇÃO CONFIGURADA PARA 50 CADASTROS POR PÁGINA
         const limitePorPagina = 50;
         let paginaAtualAtiva = 1;
 
@@ -288,20 +290,33 @@
             };
         }
 
-        function aplicarTravasDeDataOrcamento() {
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('orcCheckin').min = hoje;
-            document.getElementById('orcCheckout').min = hoje;
-        }
+        // INICIALIZADOR DO CALENDÁRIO FLATPICKR DA TELA DE COTAÇÃO
+        function inicializarCalendarioOrcamentoFlatpickr() {
+            fpCheckin = flatpickr("#orcCheckin", {
+                locale: "pt",
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d/m/Y",
+                minDate: "today",
+                disableMobile: true,
+                onChange: function(selectedDates, dateStr) {
+                    if (dateStr) {
+                        let dataMinCheckout = new Date(dateStr + "T12:00:00");
+                        dataMinCheckout.setDate(dataMinCheckout.getDate() + 1);
+                        fpCheckout.set("minDate", dataMinCheckout);
+                        fpCheckout.setDate(dataMinCheckout);
+                    }
+                }
+            });
 
-        function ajustarDataCheckoutAutomatica() {
-            const checkin = document.getElementById('orcCheckin').value;
-            if (!checkin) return;
-            let dataCheckout = new Date(checkin + "T12:00:00");
-            dataCheckout.setDate(dataCheckout.getDate() + 1);
-            const checkoutString = dataCheckout.toISOString().split('T')[0];
-            document.getElementById('orcCheckout').value = checkoutString;
-            document.getElementById('orcCheckout').min = checkoutString;
+            fpCheckout = flatpickr("#orcCheckout", {
+                locale: "pt",
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d/m/Y",
+                minDate: "today",
+                disableMobile: true
+            });
         }
 
         function mascaraTelefoneCliente(input) {
@@ -451,7 +466,6 @@
             let valorTotalGeral = valorAcumuladoBase + valorAcumuladoExtras;
             let msgNoitesTexto = totalNoitesBusca === 1 ? "01 noite" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " noites";
 
-            // PEGA O TOTAL ABSOLUTO HISTÓRICO ATUAL PARA TRAVAR O ID DO CLIENTE COMPATÍVEL
             let proximoIdNumero = historicoOrcamentos.length + 1;
             let idLabelFormatado = proximoIdNumero < 10 ? "0" + proximoIdNumero : proximoIdNumero;
 
@@ -491,10 +505,9 @@
 
         function registrarNoHistorico() {
             if(!dadosLocaisUltimoCalculo) return;
-            
             const novoRegistro = {
                 idCodigo: dadosLocaisUltimoCalculo.idCodigo,
-                timestamp: Date.now(), // Usado para ordenação decrescente perfeita e estável
+                timestamp: Date.now(),
                 nome: document.getElementById('clienteNome').value.trim() || "Não informado",
                 zap: document.getElementById('clienteWhatsapp').value.trim() || "Não informado",
                 hotel: `${dadosLocaisUltimoCalculo.hotelNome} (${dadosLocaisUltimoCalculo.quartoNome}) - ${dadosLocaisUltimoCalculo.regimeNome}`,
@@ -505,21 +518,15 @@
                 valor: dadosLocaisUltimoCalculo.total,
                 textoBruto: construirTextoFinalTemplate()
             };
-            
-            historicoOrcamentos.push(novoRegistro); // Salva no banco de dados local bruto
+            historicoOrcamentos.push(novoRegistro);
             localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
-            
-            paginaAtualAtiva = 1; // Reseta para a primeira página para o atendente ver o card nascer no topo
+            paginaAtualAtiva = 1;
             renderizarTabelaHistorico();
         }
 
         function resetarFormularioReserva() {
-            document.getElementById('orcCheckin').value = "";
-            document.getElementById('orcCheckout').value = "";
-            document.getElementById('orcAdultos').value = "";
-            document.getElementById('orcCriancas').value = "";
-            document.getElementById('clienteNome').value = "";
-            document.getElementById('clienteWhatsapp').value = "";
+            document.getElementById('buscaForm').reset();
+            if(fpCheckin) { fpCheckin.clear(); fpCheckout.clear(); }
             document.getElementById('orcIdadesContainer').classList.add('hidden');
             document.getElementById('orcIdadesGrid').innerHTML = "";
             document.getElementById('resultadoCotacao').classList.add('hidden');
@@ -576,50 +583,35 @@
             renderizarTabelaHistorico();
         }
 
-        // MOTOR DE INFALIBILIDADE EM LARGA ESCALA (ORDENAÇÃO MAIOR -> MENOR, BUSCA COMPLETA E PAGINAÇÃO DE 50)
         function renderizarTabelaHistorico() {
             const tbody = document.getElementById('tbodyHistorico');
             const badge = document.getElementById('badgeContadorHistorico');
             const txtInfo = document.getElementById('txtInfoPaginacao');
             const gridBotoes = document.getElementById('botoesPaginacaoGrid');
-            
-            tbody.innerHTML = "";
-            gridBotoes.innerHTML = "";
+            tbody.innerHTML = ""; gridBotoes.innerHTML = "";
 
-            // REGRA: Ordenar sempre do ID maior para o menor (mais recentes primeiro)
             let listaOrdenadaParaExibicao = [...historicoOrcamentos].sort((a, b) => b.timestamp - a.timestamp);
-
-            // REGRA: Captura da busca por Nome, ID ou WhatsApp
             const termoBusca = document.getElementById('inputBuscaHistorico').value.trim().toLowerCase();
             if(termoBusca) {
                 listaOrdenadaParaExibicao = listaOrdenadaParaExibicao.filter(item => {
-                    return item.nome.toLowerCase().includes(termoBusca) || 
-                           item.idCodigo.includes(termoBusca) || 
-                           item.zap.replace(/\D/g, "").includes(termoBusca);
+                    return item.nome.toLowerCase().includes(termoBusca) || item.idCodigo.includes(termoBusca) || item.zap.replace(/\D/g, "").includes(termoBusca);
                 });
             }
 
             const totalRegistrosFiltrados = listaOrdenadaParaExibicao.length;
             badge.innerText = `${totalRegistrosFiltrados} cotações`;
-
             if(totalRegistrosFiltrados === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-gray-400">Nenhum orçamento correspondente encontrado.</td></tr>`;
-                txtInfo.innerText = "Mostrando 0 de 0 cotações";
-                return;
+                txtInfo.innerText = "Mostrando 0 de 0 cotações"; return;
             }
 
-            // REGRA CÁLCULO DE PAGINAÇÃO MATEMÁTICA (50 por página)
             const totalPaginasCalculadas = Math.ceil(totalRegistrosFiltrados / limitePorPagina);
             if(paginaAtualAtiva > totalPaginasCalculadas) paginaAtualAtiva = totalPaginasCalculadas || 1;
-
             const indexInicial = (paginaAtualAtiva - 1) * limitePorPagina;
             const indexFinal = Math.min(indexInicial + limitePorPagina, totalRegistrosFiltrados);
-
-            // Corta o array para exibir somente os 50 da página atual ativa
             const itensPaginaAtiva = listaOrdenadaParaExibicao.slice(indexInicial, indexFinal);
             txtInfo.innerText = `Mostrando ${indexInicial + 1}-${indexFinal} de ${totalRegistrosFiltrados} cotações`;
 
-            // Renderiza as linhas
             itensPaginaAtiva.forEach((item) => {
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100 font-medium text-gray-700">
@@ -638,7 +630,6 @@
                     </tr>`;
             });
 
-            // Criação dos botões numéricos da paginação (Ex: 1, 2, 3...)
             if(totalPaginasCalculadas > 1) {
                 for(let i = 1; i <= totalPaginasCalculadas; i++) {
                     const ativo = i === paginaAtualAtiva;
@@ -651,11 +642,10 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             carregarAptosNoSelect();
-            aplicarTravasDeDataOrcamento();
+            inicializarCalendarioOrcamentoFlatpickr();
             const histMemoria = localStorage.getItem('ld_historico_orcamentos');
             historicoOrcamentos = histMemoria ? JSON.parse(histMemoria) : [];
             renderizarTabelaHistorico();
-            document.getElementById('buscaForm').reset();
         });
     </script>
 </body>
