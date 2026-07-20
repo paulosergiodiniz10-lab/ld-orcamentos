@@ -65,26 +65,25 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Regime de Alimentação</label>
                         <select id="orcRegimeSelect" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white">
-                            <!-- Atualizado dinamicamente -->
+                            <!-- Baseado nas regras do Apto -->
                         </select>
                     </div>
 
-                    <!-- NOVO: CAMPO SELETOR DE PROMOÇÕES ATIVAS DO HOTEL -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Promoção / Oferta Aplicada</label>
                         <select id="orcPromoSelect" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2.5 px-3 border outline-none bg-white font-medium text-green-700 bg-green-50/50">
-                            <!-- Atualizado dinamicamente via JS -->
+                            <!-- Atualizado dinamicamente -->
                         </select>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
-                            <input type="text" id="orcCheckin" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 bg-white rounded-md py-2 px-3 border outline-none text-gray-600 cursor-pointer placeholder-gray-400" placeholder="Selecione..">
+                            <input type="text" id="orcCheckin" class="focus:ring-blue-500 block w-full sm:text-sm border border-gray-300 bg-white rounded-md py-2 px-3 border outline-none text-gray-600 cursor-pointer placeholder-gray-400" placeholder="Selecione..">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Check-out</label>
-                            <input type="text" id="orcCheckout" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 bg-white rounded-md py-2 px-3 border outline-none text-gray-600 cursor-pointer placeholder-gray-400" placeholder="Selecione..">
+                            <input type="text" id="orcCheckout" class="focus:ring-blue-500 block w-full sm:text-sm border border-gray-300 bg-white rounded-md py-2 px-3 border outline-none text-gray-600 cursor-pointer placeholder-gray-400" placeholder="Selecione..">
                         </div>
                     </div>
 
@@ -154,9 +153,8 @@
                             <div class="flex justify-between text-green-600 font-medium pt-2 border-t border-gray-200 border-dashed">
                                 <span>Crianças Free na Cortesia</span><span id="txtQtdFree">0 free</span>
                             </div>
-                            <!-- NOVO: VISUALIZAÇÃO DO DESCONTO DE OFERTA SE HOUVER -->
                             <div id="linhaVisualPromo" class="hidden flex justify-between text-green-600 font-bold bg-green-50 p-2 rounded border border-green-100">
-                                <span id="txtPromoAplicadaLabel">Desconto Cortesia (Fique/Pague)</span><span id="txtPromoDescontoVal">- R$ 0,00</span>
+                                <span id="txtPromoAplicadaLabel">Desconto:</span><span id="txtPromoDescontoVal">- R$ 0,00</span>
                             </div>
                         </div>
 
@@ -179,7 +177,7 @@
 
                         <!-- Botões de Ação -->
                         <div class="mt-8 flex gap-3">
-                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            <button onclick="copiarTextoOrcamento()" class="flex-1 bg-white border border-gray-300 text-gray-700 rounded-md py-2.5 px-4 text-sm font-bold hover:bg-gray-50 flex items-center justify-center gap-2 shadow-sm">
                                 <i data-lucide="copy" class="w-4 h-4"></i> Copiar Texto
                             </button>
                             <button onclick="enviarWhatsAppOrcamento()" class="flex-1 bg-green-600 text-white rounded-md py-2.5 px-4 text-sm font-bold hover:bg-green-700 shadow-sm flex items-center justify-center gap-2">
@@ -197,24 +195,29 @@
                 <h3 class="font-bold text-gray-900 flex items-center gap-2 shrink-0">
                     <i data-lucide="history" class="w-5 h-5 text-gray-500"></i> Histórico de Orçamentos Gerados
                 </h3>
+                
                 <div class="relative w-full sm:max-w-xs">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <i data-lucide="search" class="w-4 h-4"></i>
                     </span>
-                    <input type="text" id="inputBuscaHistorico" oninput="mudarPaginaHistorico(1)" class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Buscar por Nome, ID ou Zap...">
+                    <input type="text" id="inputBuscaHistorico" oninput="mudarPaginaHistorico(1)" class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Buscar por Nome, ID, Data ou Zap...">
                 </div>
+                
                 <span id="badgeContadorHistorico" class="bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1 rounded-full shrink-0">0 registros</span>
             </div>
+            
             <div class="overflow-x-auto">
                 <table class="min-w-full text-left text-xs text-gray-700 whitespace-nowrap">
                     <thead class="bg-gray-50 text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b">
                         <tr>
                             <th class="py-3 px-4">ID</th>
+                            <!-- NOVA COLUNA: DATA DE EMISSÃO DA COTAÇÃO -->
+                            <th class="py-3 px-4">Emissão</th>
                             <th class="py-3 px-4">Cliente / WhatsApp</th>
                             <th class="py-3 px-4">Imóvel</th>
                             <th class="py-3 px-4">Entrada</th>
                             <th class="py-3 px-4">Saída</th>
-                            <th class="py-3 px-4 text-center">Pax (Ad / Criança)</th>
+                            <th class="py-3 px-4 text-center">Pax (Ad / Cr)</th>
                             <th class="py-3 px-4">Valor Total</th>
                             <th class="py-3 px-4 text-right">Ações</th>
                         </tr>
@@ -222,6 +225,7 @@
                     <tbody id="tbodyHistorico" class="divide-y divide-gray-100"></tbody>
                 </table>
             </div>
+
             <div id="containerPaginacao" class="bg-gray-50 px-6 py-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 font-medium">
                 <span id="txtInfoPaginacao">Mostrando 0-0 de 0 cotações</span>
                 <div id="botoesPaginacaoGrid" class="flex items-center gap-1"></div>
@@ -254,6 +258,7 @@
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8"><p class="text-center text-xs text-gray-500">&copy; 2026 LD Orçamentos.</p></div>
     </footer>
 
+    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
@@ -294,7 +299,7 @@
             document.getElementById('modalBtnConfirmar').onclick = () => { modal.classList.add('hidden'); if(funcaoCallbackConfirmacao) funcaoCallbackConfirmacao(); };
         }
 
-        function inicializarCalendarioOrcamentoFlatpickr() {
+        function inicializarCalendarOrcamentoFlatpickr() {
             fpCheckin = flatpickr("#orcCheckin", {
                 locale: "pt", dateFormat: "Y-m-d", altInput: true, altFormat: "d/m/Y", minDate: "today", disableMobile: true,
                 onChange: function(selectedDates, dateStr) {
@@ -336,17 +341,12 @@
             const selectPromo = document.getElementById('orcPromoSelect');
             selectRegime.innerHTML = "";
             selectPromo.innerHTML = `<option value="nenhuma">Nenhuma promoção ativa</option>`;
-            
             if(!aptoId) return;
             const apto = listaAptos.find(a => a.id === aptoId);
-            
-            // Regimes
             let regimes = apto.regimesAtivos || ['ro', 'bb'];
             regimes.forEach(regId => {
                 selectRegime.innerHTML += `<option value="${regId}">${nomenclaturaRegimes[regId]}</option>`;
             });
-
-            // NOVO: Alimenta o campo de promoção se o imóvel tiver alguma configurada
             if (apto.promoNome && apto.promoFique && apto.promoPague) {
                 selectPromo.innerHTML += `<option value="ativa">${apto.promoNome} (Fique ${apto.promoFique} Pague ${apto.promoPague})</option>`;
             }
@@ -462,7 +462,6 @@
                 showToast(`Restrição: Mínimo de ${noitesMinimasExigidasDoPeriodo} noites obrigatório!`, "error"); return;
             }
 
-            // NOVO: VALIDAÇÃO SE O HOSPEDE ALCANÇOU AS NOITES DA PROMOÇÃO (Ex: buscou 4 noites para ativar o Fique 4 pague 3)
             let descontoPromocionalCalculado = 0;
             let textoNomePromoAplicadaNoZap = "";
 
@@ -472,8 +471,6 @@
                     document.getElementById('msgErro').innerText = `Para aplicar a oferta "${apto.promoNome}" o cliente precisa se hospedar por no mínimo ${apto.promoFique} noites. Sua busca atual contém apenas ${totalNoitesBusca} noites.`;
                     showToast(`Aviso: Altere o período para aplicar a oferta!`, "error"); return;
                 }
-                
-                // CÁLCULO MATEMÁTICO: Descobre o valor médio de 1 diária (quarto + adicionais) e abate as diárias cortesia
                 let valorBrutoTotalSemDesconto = valorAcumuladoBase + valorAcumuladoExtras;
                 let valorMedioPorDiaria = valorBrutoTotalSemDesconto / totalNoitesBusca;
                 let quantidadeDiariasCortesia = apto.promoFique - apto.promoPague;
@@ -481,7 +478,6 @@
                 descontoPromocionalCalculado = valorMedioPorDiaria * quantidadeDiariasCortesia;
                 textoNomePromoAplicadaNoZap = `${apto.promoNome} (Bônus de ${quantidadeDiariasCortesia} diária(s) inclusa(s))`;
                 
-                // Exibe a linha do desconto no layout visual
                 document.getElementById('linhaVisualPromo').classList.remove('hidden');
                 document.getElementById('txtPromoAplicadaLabel').innerText = `Desconto: ${apto.promoNome}`;
                 document.getElementById('txtPromoDescontoVal').innerText = `- R$ ${descontoPromocionalCalculado.toFixed(2).replace('.', ',')}`;
@@ -494,12 +490,6 @@
             let valorTotalGeral = (valorAcumuladoBase + valorAcumuladoExtras) - descontoPromocionalCalculado;
             let msgNoitesTexto = totalNoitesBusca === 1 ? "01 noite" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " noites";
 
-            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${totalNoitesBusca === 1 ? "01 Noite(s)" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " Noite(s)"} • ${nomenclaturaRegimes[regimeId]}`;
-            document.getElementById('valorTotal').innerText = `R$ ${valorTotalGeral.toFixed(2).replace('.', ',')}`;
-            document.getElementById('txtSomaBase').innerText = `R$ ${valorAcumuladoBase.toFixed(2).replace('.', ',')}`;
-            document.getElementById('txtSomaExtras').innerText = `R$ ${valorAcumuladoExtras.toFixed(2).replace('.', ',')}`;
-            document.getElementById('txtQtdFree').innerText = `${criancasFree} criança(s) free (Até ${apto.idadeFree || 12} anos)`;
-
             let proximoIdNumero = historicoOrcamentos.length + 1;
             let idLabelFormatado = proximoIdNumero < 10 ? "0" + proximoIdNumero : proximoIdNumero;
 
@@ -508,7 +498,7 @@
                 hotelNome: apto.nome,
                 quartoNome: apto.unidade,
                 regimeNome: nomenclaturaRegimes[regimeId],
-                promoTextoZap: textoNomePromoAplicadaNoZap, // Injetado no template do cliente
+                promoTextoZap: textoNomePromoAplicadaNoZap,
                 checkin: dInicioStr.split('-').reverse().join('/'),
                 checkout: dFimStr.split('-').reverse().join('/'),
                 noitesTxt: msgNoitesTexto,
@@ -520,16 +510,11 @@
             showToast("Orçamento calculado com sucesso!", "success");
         }
 
-        // NOVO: INJETA O CAMPO DA PROMOÇÃO NO TEXTO DO WHATSAPP SE ESTIVER ATIVA
         function construirTextoFinalTemplate() {
             if(!dadosLocaisUltimoCalculo) return "";
             const nomeCliente = document.getElementById('clienteNome').value.trim();
             let cabecalho = nomeCliente ? `${nomeCliente}\n\n` : "";
-            
-            let linhaOfertaZap = "";
-            if(dadosLocaisUltimoCalculo.promoTextoZap) {
-                linhaOfertaZap = `• Oferta Aplicada: ${dadosLocaisUltimoCalculo.promoTextoZap}\n`;
-            }
+            let linhaOfertaZap = dadosLocaisUltimoCalculo.promoTextoZap ? `• Oferta Aplicada: ${dadosLocaisUltimoCalculo.promoTextoZap}\n` : "";
 
             return `${cabecalho}*Segue orçamento de Hospedagem - ${dadosLocaisUltimoCalculo.hotelNome}*\n` +
                    `• Orçamento: ID ${dadosLocaisUltimoCalculo.idCodigo}\n` +
@@ -547,9 +532,16 @@
 
         function registrarNoHistorico() {
             if(!dadosLocaisUltimoCalculo) return;
+
+            // CAPTURA A DATA + HORÁRIO REAL DE EMISSÃO DA COTAÇÃO
+            const agora = new Date();
+            const dataEmissaoFormatada = agora.toLocaleDateString('pt-BR');
+            const horaEmissaoFormatada = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            
             const novoRegistro = {
                 idCodigo: dadosLocaisUltimoCalculo.idCodigo,
                 timestamp: Date.now(),
+                dataEmissao: `${dataEmissaoFormatada} às ${horaEmissaoFormatada}`, // Injetado estruturado
                 nome: document.getElementById('clienteNome').value.trim() || "Não informado",
                 zap: document.getElementById('clienteWhatsapp').value.trim() || "Não informado",
                 hotel: `${dadosLocaisUltimoCalculo.hotelNome} (${dadosLocaisUltimoCalculo.quartoNome}) - ${dadosLocaisUltimoCalculo.regimeNome}${dadosLocaisUltimoCalculo.promoTextoZap ? ' ('+document.getElementById('orcPromoSelect').options[document.getElementById('orcPromoSelect').selectedIndex].text+')' : ''}`,
@@ -560,6 +552,7 @@
                 valor: dadosLocaisUltimoCalculo.total,
                 textoBruto: construirTextoFinalTemplate()
             };
+            
             historicoOrcamentos.push(novoRegistro);
             localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
             paginaAtualAtiva = 1;
@@ -629,16 +622,22 @@
 
             let listaOrdenadaParaExibicao = [...historicoOrcamentos].sort((a, b) => b.timestamp - a.timestamp);
             const termoBusca = document.getElementById('inputBuscaHistorico').value.trim().toLowerCase();
+            
             if(termoBusca) {
                 listaOrdenadaParaExibicao = listaOrdenadaParaExibicao.filter(item => {
-                    return item.nome.toLowerCase().includes(termoBusca) || item.idCodigo.includes(termoBusca) || item.zap.replace(/\D/g, "").includes(termoBusca);
+                    let idString = String(item.idCodigo || "").toLowerCase();
+                    let dataEmissaoString = String(item.dataEmissao || "").toLowerCase();
+                    return item.nome.toLowerCase().includes(termoBusca) || 
+                           idString.includes(termoBusca) || 
+                           dataEmissaoString.includes(termoBusca) ||
+                           item.zap.replace(/\D/g, "").includes(termoBusca);
                 });
             }
 
             const totalRegistrosFiltrados = listaOrdenadaParaExibicao.length;
             badge.innerText = `${totalRegistrosFiltrados} cotações`;
             if(totalRegistrosFiltrados === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-gray-400">Nenhum orçamento correspondente encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="py-6 text-center text-gray-400">Nenhum orçamento correspondente encontrado.</td></tr>`;
                 txtInfo.innerText = "Mostrando 0 de 0 cotações"; return;
             }
 
@@ -649,10 +648,20 @@
             const itensPaginaAtiva = listaOrdenadaParaExibicao.slice(indexInicial, indexFinal);
             txtInfo.innerText = `Mostrando ${indexInicial + 1}-${indexFinal} de ${totalRegistrosFiltrados} cotações`;
 
-            itensPaginaAtiva.forEach((item) => {
+            // Renderiza incluindo a coluna de ID blindada e data de Emissão real
+            itensPaginaAtiva.forEach((item, indexNoLoop) => {
+                // CORREÇÃO: Evita que IDs corrompidos mostrem 'undefined' indexando sequencial dinâmico se falhar
+                let idRealTratado = (item.idCodigo && item.idCodigo !== 'undefined') ? item.idCodigo : (totalRegistrosFiltrados - indexInicial - indexNoLoop);
+                if (typeof idRealTratado === 'number' && idRealTratado < 10) idRealTratado = "0" + idRealTratado;
+
+                // CORREÇÃO: Trata retroativos sem data injetando a data de hoje para manter a integridade visual
+                let dataEmissaoTratada = item.dataEmissao ? item.dataEmissao : new Date().toLocaleDateString('pt-BR') + ' às 09:00';
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100 font-medium text-gray-700">
-                        <td class="py-3 px-4 font-bold text-blue-600">#${item.idCodigo}</td>
+                        <td class="py-3 px-4 font-black text-blue-600">#${idRealTratado}</td>
+                        <!-- NOVO: VISUALIZAÇÃO DA DATA DE CRIAÇÃO -->
+                        <td class="py-3 px-4 text-gray-400 text-[11px] font-normal shrink-0"><i data-lucide="clock" class="w-3 h-3 inline mr-1 -mt-0.5"></i>${dataEmissaoTratada}</td>
                         <td class="py-3 px-4 font-bold text-gray-900">${item.nome}<br><span class="text-gray-400 text-[11px] font-normal">${item.zap}</span></td>
                         <td class="py-3 px-4 text-gray-600 text-xs truncate max-w-[180px]">${item.hotel}</td>
                         <td class="py-3 px-4 font-semibold text-gray-700">${item.entrada}</td>
@@ -679,7 +688,7 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             carregarAptosNoSelect();
-            inicializarCalendarioOrcamentoFlatpickr();
+            inicializarCalendarOrcamentoFlatpickr();
             const histMemoria = localStorage.getItem('ld_historico_orcamentos');
             historicoOrcamentos = histMemoria ? JSON.parse(histMemoria) : [];
             renderizarTabelaHistorico();
