@@ -74,8 +74,8 @@
                             <input type="text" id="aptoNome" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="Ex: Lacqua diRoma">
                         </div>
                         <div class="sm:col-span-1">
-                            <label class="block text-sm font-medium text-gray-700">Unidade/Apto</label>
-                            <input type="text" id="aptoUnidade" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="101">
+                            <label class="block text-sm font-medium text-gray-700">Identificação / Quarto</label>
+                            <input type="text" id="aptoUnidade" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="Ex: Apto Luxo">
                         </div>
                         <div class="sm:col-span-1">
                             <label class="block text-sm font-medium text-gray-700">Capacidade Máx. Absoluta</label>
@@ -273,24 +273,19 @@
             setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
-        // REGRA DE BLOQUEIO DE DATAS RETROATIVAS
         function aplicarTravasDeData() {
             const hoje = new Date().toISOString().split('T')[0];
-            
             document.getElementById('tInicio').min = hoje;
             document.getElementById('tFim').min = hoje;
             document.getElementById('ajusteInicio').min = hoje;
             document.getElementById('ajusteFim').min = hoje;
         }
 
-        // REGRA DE AJUSTE AUTOMÁTICO DE DATA (FIM = INÍCIO + 1 DIA)
         function ajustarDataFimAutomatica() {
             const inicio = document.getElementById('tInicio').value;
             if (!inicio) return;
-
             let dataFim = new Date(inicio + "T12:00:00");
             dataFim.setDate(dataFim.getDate() + 1);
-
             const dataFimString = dataFim.toISOString().split('T')[0];
             document.getElementById('tFim').value = dataFimString;
             document.getElementById('tFim').min = dataFimString;
@@ -299,10 +294,8 @@
         function ajustarDataFimAjuste() {
             const inicio = document.getElementById('ajusteInicio').value;
             if (!inicio) return;
-
             let dataFim = new Date(inicio + "T12:00:00");
             dataFim.setDate(dataFim.getDate() + 1);
-
             const dataFimString = dataFim.toISOString().split('T')[0];
             document.getElementById('ajusteFim').value = dataFimString;
             document.getElementById('ajusteFim').min = dataFimString;
@@ -333,7 +326,7 @@
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 shrink-0"><i data-lucide="hotel" class="w-6 h-6"></i></div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900">${apto.nome} (Apto: ${apto.unidade})</h3>
+                                <h3 class="text-lg font-bold text-gray-900">${apto.nome} (${apto.unidade})</h3>
                                 <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 mt-1">
                                     <span class="flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5"></i> Até ${apto.capMax || 0} pessoas</span>
                                     <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">${totalDias} Dias Tarifados</span>
