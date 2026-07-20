@@ -7,6 +7,10 @@
     <!-- Tailwind CSS e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Flatpickr (Calendário Customizado para PC) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
@@ -145,11 +149,11 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Data Início</label>
-                                <input type="date" id="tInicio" onchange="ajustarDataFimAutomatica()" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none">
+                                <input type="text" id="tInicio" class="mt-1 border block w-full bg-white rounded-md py-2.5 px-3 border-gray-300 outline-none cursor-pointer placeholder-gray-400" placeholder="Selecione..">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Data Fim</label>
-                                <input type="date" id="tFim" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none">
+                                <input type="text" id="tFim" class="mt-1 border block w-full bg-white rounded-md py-2.5 px-3 border-gray-300 outline-none cursor-pointer placeholder-gray-400" placeholder="Selecione..">
                             </div>
                         </div>
 
@@ -199,11 +203,11 @@
                         <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Data Início</label>
-                                <input type="date" id="ajusteInicio" onchange="ajustarDataFimAjuste()" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none">
+                                <input type="text" id="ajusteInicio" class="mt-1 border block w-full bg-white rounded-md py-2.5 px-3 border-gray-300 outline-none cursor-pointer placeholder-gray-400" placeholder="Selecione..">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Data Fim</label>
-                                <input type="date" id="ajusteFim" class="mt-1 border block w-full rounded-md py-2.5 px-3 border-gray-300 outline-none">
+                                <input type="text" id="ajusteFim" class="mt-1 border block w-full bg-white rounded-md py-2.5 px-3 border-gray-300 outline-none cursor-pointer placeholder-gray-400" placeholder="Selecione..">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Ação</label>
@@ -306,7 +310,7 @@
         </div>
     </main>
 
-    <!-- NOVO MODAL CUSTOMIZADO E ELEGANTE DE CONFIRMAÇÃO (MEIO DA TELA) -->
+    <!-- MODAL CUSTOMIZADO E ELEGANTE DE CONFIRMAÇÃO (MEIO DA TELA) -->
     <div id="modalConfirmacao" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl max-w-sm w-full shadow-xl border border-gray-100 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
             <div class="p-6 text-center">
@@ -334,7 +338,10 @@
         lucide.createIcons();
         let listaAptos = [];
         let aptoAtualId = null;
-        let funcaoCallbackConfirmacao = null; // Guarda a função de exclusão ativa
+        let funcaoCallbackConfirmacao = null;
+        
+        // Instâncias globais do Flatpickr para manipulação dinâmica das travas
+        let fpInicio, fpFim, fpAjusteInicio, fpAjusteFim;
         
         const nomenclaturaRegimes = {
             ro: "Sem refeição (RO)",
@@ -359,14 +366,11 @@
             setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
-        // MOTOR DO POP-UP CUSTOMIZADO CENTRALIZADO
         function chamarModalConfirmacaoExclusao(textoContexto, callbackSucesso) {
             const modal = document.getElementById('modalConfirmacao');
             document.getElementById('modalConfirmacaoTexto').innerText = textoContexto;
             modal.classList.remove('hidden');
-            
             funcaoCallbackConfirmacao = callbackSucesso;
-            
             document.getElementById('modalBtnCancelar').onclick = () => modal.classList.add('hidden');
             document.getElementById('modalBtnConfirmar').onclick = () => {
                 modal.classList.add('hidden');
@@ -374,32 +378,46 @@
             };
         }
 
-        function aplicarTravasDeData() {
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('tInicio').min = hoje;
-            document.getElementById('tFim').min = hoje;
-            document.getElementById('ajusteInicio').min = hoje;
-            document.getElementById('ajusteFim').min = hoje;
-        }
+        // INICIALIZADOR DO CALENDÁRIO FLATPICKR MODERNO (IDÊNTICO AO SEU PRINT)
+        function inicializarCalendariosFlatpickr() {
+            const configBase = {
+                locale: "pt",
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d/m/Y",
+                minDate: "today",
+                disableMobile: true
+            };
 
-        function ajustarDataFimAutomatica() {
-            const inicio = document.getElementById('tInicio').value;
-            if (!inicio) return;
-            let dataFim = new Date(inicio + "T12:00:00");
-            dataFim.setDate(dataFim.getDate() + 1);
-            const dataFimString = dataFim.toISOString().split('T')[0];
-            document.getElementById('tFim').value = dataFimString;
-            document.getElementById('tFim').min = dataFimString;
-        }
+            // Bloco de Tarifas
+            fpInicio = flatpickr("#tInicio", {
+                ...configBase,
+                onChange: function(selectedDates, dateStr) {
+                    if (dateStr) {
+                        let dataMinFim = new Date(dateStr + "T12:00:00");
+                        dataMinFim.setDate(dataMinFim.getDate() + 1);
+                        fpFim.set("minDate", dataMinFim);
+                        fpFim.setDate(dataMinFim);
+                    }
+                }
+            });
 
-        function ajustarDataFimAjuste() {
-            const inicio = document.getElementById('ajusteInicio').value;
-            if (!inicio) return;
-            let dataFim = new Date(inicio + "T12:00:00");
-            dataFim.setDate(dataFim.getDate() + 1);
-            const dataFimString = dataFim.toISOString().split('T')[0];
-            document.getElementById('ajusteFim').value = dataFimString;
-            document.getElementById('ajusteFim').min = dataFimString;
+            fpFim = flatpickr("#tFim", configBase);
+
+            // Bloco de Ajuste em Massa
+            fpAjusteInicio = flatpickr("#ajusteInicio", {
+                ...configBase,
+                onChange: function(selectedDates, dateStr) {
+                    if (dateStr) {
+                        let dataMinFim = new Date(dateStr + "T12:00:00");
+                        dataMinFim.setDate(dataMinFim.getDate() + 1);
+                        fpAjusteFim.set("minDate", dataMinFim);
+                        fpAjusteFim.setDate(dataMinFim);
+                    }
+                }
+            });
+
+            fpAjusteFim = flatpickr("#ajusteFim", configBase);
         }
 
         function carregarListaAptos() {
@@ -449,12 +467,14 @@
             document.getElementById('aptoNome').value = ""; document.getElementById('aptoUnidade').value = ""; document.getElementById('aptoCapMax').value = "";
             document.getElementById('regime_ro').checked = true; document.getElementById('regime_bb').checked = true;
             document.getElementById('regime_map').checked = false; document.getElementById('regime_fap').checked = false;
+            
             zerarCamposPrecoFormulario();
             cacheValoresTemporariosForm = {};
+            if(fpInicio) { fpInicio.clear(); fpFim.clear(); fpAjusteInicio.clear(); fpAjusteFim.clear(); }
+
             document.getElementById('blocoTarifasAdicionais').classList.add('hidden');
             document.getElementById('secaoListagem').classList.add('hidden');
             document.getElementById('secaoFormulario').classList.remove('hidden');
-            aplicarTravasDeData();
         }
 
         function abrirFormularioEdicao(id) {
@@ -466,19 +486,23 @@
             document.getElementById('aptoCapMax').value = apto.capMax || "";
             document.getElementById('aptoIdadeFree').value = apto.idadeFree || "12";
             document.getElementById('aptoQtdFree').value = apto.qtdFree || "2";
+
             document.getElementById('regime_ro').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('ro') : true;
             document.getElementById('regime_bb').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('bb') : true;
             document.getElementById('regime_map').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('map') : false;
             document.getElementById('regime_fap').checked = apto.regimesAtivos ? apto.regimesAtivos.includes('fap') : false;
+
             document.getElementById('blocoTarifasAdicionais').classList.remove('hidden');
             document.getElementById('secaoListagem').classList.add('hidden');
             document.getElementById('secaoFormulario').classList.remove('hidden');
+            
             zerarCamposPrecoFormulario();
             cacheValoresTemporariosForm = {};
-            aplicarTravasDeData();
+            if(fpInicio) { fpInicio.clear(); fpFim.clear(); fpAjusteInicio.clear(); fpAjusteFim.clear(); }
+
             montarAbasDeRegimeFormulario(apto);
             atualizarDropdownFiltroTarifas(apto);
-            renderizarLinhasCalendario();
+            renderizarLinesCalendario();
         }
 
         function zerarCamposPrecoFormulario() {
@@ -560,7 +584,6 @@
             showToast("Imóvel e regimes salvos com sucesso!", "success");
         }
 
-        // POP-UP CUSTOMIZADO PARA EXCLUIR IMÓVEL
         function deletarApto(id) {
             chamarModalConfirmacaoExclusao("Tem certeza que deseja excluir permanentemente este apartamento e todas as suas diárias cadastradas?", () => {
                 listaAptos = listaAptos.filter(a => a.id !== id);
@@ -579,10 +602,6 @@
             const minNoites = parseInt(document.getElementById('tMinNoites').value) || 1;
 
             if(!dInicioStr || !dFimStr) { alert("Preencha o período de datas!"); return; }
-            if(new Date(dFimStr) < new Date(dInicioStr)) {
-                let temp = dInicioStr; dInicioStr = dFimStr; dFimStr = temp;
-                document.getElementById('tInicio').value = dInicioStr; document.getElementById('tFim').value = dFimStr;
-            }
             let apto = listaAptos.find(a => a.id === aptoAtualId);
             let dCorrente = new Date(dInicioStr + "T12:00:00");
             let dFinal = new Date(dFimStr + "T12:00:00");
@@ -599,7 +618,7 @@
             apto.calendario.sort((a,b) => new Date(a.data) - new Date(b.data));
             salvarListaAptos();
             atualizarDropdownFiltroTarifas(apto);
-            renderizarLinhasCalendario();
+            renderizarLinesCalendario();
             showToast(`Tarifas aplicadas em ${contadorDiasInjetados} dias de ${nomenclaturaRegimes[regimeAtivoAba]}!`, "success");
         }
 
@@ -627,7 +646,7 @@
                 }
             });
             salvarListaAptos();
-            renderizarLinhasCalendario();
+            renderizarLinesCalendario();
             if(alterados > 0) {
                 let regimeLabel = regimeFiltro === "todos" ? "todos os regimes" : nomenclaturaRegimes[regimeFiltro];
                 showToast(`Reajuste de ${porcentagem}% aplicado em ${alterados} diárias de ${regimeLabel}!`, "success");
@@ -650,10 +669,9 @@
             document.getElementById('filtroMes').value = "todos";
             document.getElementById('filtroTarifa').value = "todas";
             document.getElementById('filtroRegime').value = "todos";
-            renderizarLinhasCalendario();
+            renderizarLinesCalendario();
         }
 
-        // POP-UP CUSTOMIZADO PARA EXCLUIR UMA DIÁRIA DO CALENDÁRIO
         function deletarDiaCalendario(dataStr, regId) {
             chamarModalConfirmacaoExclusao("Tem certeza que deseja excluir esta diária específica do calendário?", () => {
                 let apto = listaAptos.find(a => a.id === aptoAtualId);
@@ -662,7 +680,7 @@
                     return !eAlvo;
                 });
                 salvarListaAptos(); 
-                renderizarLinhasCalendario();
+                renderizarLinesCalendario();
                 showToast("Diária removida com sucesso!", "success");
             });
         }
@@ -673,8 +691,12 @@
             if(!dia) return;
             let regimeAlvo = dia.regime || "ro";
             document.getElementById('tNome').value = dia.nome || "";
-            document.getElementById('tInicio').value = dia.data;
-            document.getElementById('tFim').value = dia.data;
+            
+            if(fpInicio && fpFim) {
+                fpInicio.setDate(dia.data);
+                fpFim.setDate(dia.data);
+            }
+            
             mudarAbaRegimePreco(regimeAlvo);
             document.getElementById('tSingle').value = dia.single;
             document.getElementById('tDuplo').value = dia.duplo;
@@ -684,7 +706,7 @@
             showToast("Valores carregados no painel de edição acima!", "success");
         }
 
-        function renderizarLinhasCalendario() {
+        function renderizarLinesCalendario() {
             const tbody = document.getElementById('tbodyCalendario');
             const contador = document.getElementById('contadorDias');
             tbody.innerHTML = "";
@@ -738,7 +760,10 @@
             lucide.createIcons();
         }
 
-        document.addEventListener("DOMContentLoaded", carregarListaAptos);
+        document.addEventListener("DOMContentLoaded", () => {
+            carregarListaAptos();
+            inicializarCalendariosFlatpickr();
+        });
     </script>
 </body>
 </html>
