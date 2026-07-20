@@ -347,7 +347,6 @@
             
             let regimes = apto.regimesAtivos || ['ro', 'bb'];
             
-            // NOVO: Adiciona a opção de todos os regimes no topo
             selectRegime.innerHTML = `<option value="todos">Todos os Regimes Disponíveis</option>`;
             regimes.forEach(regId => {
                 selectRegime.innerHTML += `<option value="${regId}">${nomenclaturaRegimes[regId]}</option>`;
@@ -430,7 +429,6 @@
             let pagantesAdicionais = criancasPagantes;
             let adultosEfetivos = adultos;
 
-            // NOVO MOTOR DE CÁLCULO: Prepara a lista de regimes que serão calculados
             let regimesParaCalcular = regimeId === "todos" ? (apto.regimesAtivos || ['ro']) : [regimeId];
             let resultadosGerais = [];
             let erroEncontrado = false;
@@ -526,7 +524,6 @@
             document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${msgNoitesTexto} • ${txtResumoRegime}`;
             document.getElementById('txtQtdFree').innerText = `${criancasFree} criança(s) free (Até ${idadeFreeMax} anos)`;
 
-            // ALTERAÇÃO DO PAINEL VISUAL CONFORME A OPÇÃO TODOS
             if (regimeId === "todos") {
                 let htmlTotais = "";
                 resultadosGerais.forEach(r => {
@@ -599,6 +596,7 @@
             showToast("Orçamento calculado com sucesso!", "success");
         }
 
+        // LÓGICA DO TEXTO ALTERADA PARA POSICIONAR O ID NO FINAL DO WHATSAPP
         function construirTextoFinalTemplate() {
             if(!dadosLocaisUltimoCalculo) return "";
             
@@ -615,7 +613,6 @@
 
             let linhaObs = obsTexto ? `\n*Informações Importantes:*\n${obsTexto}` : "";
 
-            // LÓGICA CONDICIONAL DE REGIME
             let linhaRegime = dadosLocaisUltimoCalculo.isTodosRegimes ? "" : `• Regime: ${dadosLocaisUltimoCalculo.regimeNome}\n`;
             
             let blocoValorTotal = "";
@@ -628,8 +625,7 @@
                 blocoValorTotal = `\n*Valor total do Pacote: R$ ${dadosLocaisUltimoCalculo.totalFormatado}*\n`;
             }
 
-            return `${cabecalho}*Segue orçamento de Hospedagem em Caldas Novas*\n` +
-                   `• Orçamento: ID #${dadosLocaisUltimoCalculo.idCodigo}\n` +
+            return `${cabecalho}*Segue orçamento de Hospedagem em Caldas Novas*\n\n` +
                    `• *${dadosLocaisUltimoCalculo.hotelNome.toUpperCase()}*\n` +
                    `• Entrada: ${dadosLocaisUltimoCalculo.checkin}\n` +
                    `• Saída: ${dadosLocaisUltimoCalculo.checkout}\n` +
@@ -641,7 +637,8 @@
                    `• ${dadosLocaisUltimoCalculo.adQtd} Adulto(s)\n` +
                    linhaCriancas + 
                    blocoValorTotal +
-                   linhaObs;
+                   linhaObs +
+                   `\n\n• Orçamento: ID #${dadosLocaisUltimoCalculo.idCodigo}`;
         }
 
         function registrarNoHistorico() {
@@ -772,7 +769,6 @@
                 let idDisplay = item.idCodigo ? item.idCodigo.toString().padStart(2, '0') : "00";
                 let dataEmissaoTratada = item.dataEmissao ? item.dataEmissao : new Date(item.timestamp).toLocaleDateString('pt-BR') + ' às 09:00';
                 
-                // Formatação garantida para o campo de valores (retrocompatível com os salvos antigos)
                 let valorExibicao = item.valor;
                 if(valorExibicao === "Vários Regimes") {
                     valorExibicao = "<span class='text-[10px] uppercase text-gray-400 font-bold'>Vários Regimes</span>";
