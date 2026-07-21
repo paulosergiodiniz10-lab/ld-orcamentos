@@ -1,6 +1,6 @@
 {
-  "name": "LD Orçamentos",
-  "short_name": "LD Orçamentos",
+  "name": "HTL Orçamentos",
+  "short_name": "HTL Orçamentos",
   "description": "Gerador inteligente de orçamentos e reservas.",
   "start_url": "./index.html",
   "display": "standalone",
