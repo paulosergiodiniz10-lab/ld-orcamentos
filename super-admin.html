@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin - HTL Orçamentos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYLQe83O55AQszAvfUx0fcXxICsu8XWss",
+            authDomain: "htl-orcamentos.firebaseapp.com",
+            projectId: "htl-orcamentos",
+            storageBucket: "htl-orcamentos.firebasestorage.app",
+            messagingSenderId: "743021262224",
+            appId: "1:743021262224:web:bbb3f6238d82e5a5536f15"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // O TRUQUE DE SAAS: Cria um App Secundário só para cadastrar os clientes sem deslogar o Admin!
+        const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
+        const secondaryAuth = getAuth(secondaryApp);
+
+        // Bloqueia quem não é você
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.email.toLowerCase() !== "cnviagem@gmail.com") {
+                window.location.href = "login.html"; 
+            }
+        });
+
+        window.fazerLogout = function() {
+            signOut(auth).then(() => window.location.href = "login.html");
+        }
+
+        window.cadastrarNovaEmpresa = async function() {
+            const btn = document.getElementById('btnCadastrar');
+            const email = document.getElementById('cliEmail').value.trim();
+            const nome = document.getElementById('cliNome').value.trim();
+            
+            if(!email || !nome) { alert("Preencha o Nome e o E-mail."); return; }
+
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Cadastrando...';
+            btn.disabled = true; lucide.createIcons();
+
+            try {
+                // 1. Cria o usuário com a senha padrão mudar123 (No App Secundário)
+                const userCred = await createUserWithEmailAndPassword(secondaryAuth, email, "mudar123");
+                const novoUid = userCred.user.uid;
+
+                // 2. Cria a gaveta dele no Banco de Dados
+                await setDoc(doc(db, "empresas", novoUid), {
+                    dadosEmpresa: { nome: nome },
+                    primeiroAcesso: true,
+                    criadoEm: new Date().toISOString(),
+                    ativo: true
+                });
+
+                // 3. Desloga o app secundário para limpar a memória
+                await signOut(secondaryAuth);
+
+                alert("Empresa cadastrada com sucesso! A senha padrão é: mudar123");
+                document.getElementById('formCadastro').reset();
+            } catch (error) {
+                if(error.code === 'auth/email-already-in-use') {
+                    alert("Este e-mail já está cadastrado no sistema.");
+                } else {
+                    alert("Erro ao cadastrar: " + error.message);
+                }
+            }
+            
+            btn.innerHTML = '<i data-lucide="plus" class="w-4 h-4"></i> Criar Conta da Empresa';
+            btn.disabled = false; lucide.createIcons();
+        }
+    </script>
+</head>
+<body class="bg-gray-900 font-sans text-gray-800 antialiased min-h-screen">
+
+    <nav class="bg-black text-white shadow-md border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="font-bold text-xl tracking-tight flex items-center gap-2 text-purple-400">
+                    <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    Painel do Dono (Super Admin)
+                </div>
+                <div>
+                    <button type="button" onclick="fazerLogout()" class="text-gray-400 hover:text-white transition-colors flex items-center gap-2 text-sm font-bold">
+                        Sair <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto w-full py-12 px-4">
+        <div class="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-700 bg-gray-800/50">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i data-lucide="building" class="w-5 h-5 text-purple-400"></i> Cadastrar Nova Empresa (Cliente)
+                </h2>
+            </div>
+            
+            <div class="p-6">
+                <form id="formCadastro" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Nome do Hotel/Empresa</label>
+                            <input type="text" id="cliNome" class="block w-full bg-gray-900 border border-gray-700 rounded-md py-2 px-3 text-white focus:ring-2 focus:ring-purple-500 outline-none" placeholder="Ex: Pousada do Sol">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">E-mail do Cliente (Login)</label>
+                            <input type="email" id="cliEmail" class="block w-full bg-gray-900 border border-gray-700 rounded-md py-2 px-3 text-white focus:ring-2 focus:ring-purple-500 outline-none" placeholder="contato@empresa.com">
+                        </div>
+                    </div>
+                    
+                    <div class="bg-purple-900/30 border border-purple-800 rounded-lg p-4 mt-4 text-sm text-purple-200">
+                        <i data-lucide="info" class="w-4 h-4 inline mr-1 -mt-0.5"></i>
+                        A senha inicial será gerada automaticamente como <strong>mudar123</strong>. O sistema forçará a troca no primeiro acesso.
+                    </div>
+
+                    <div class="pt-4 text-right">
+                        <button type="button" id="btnCadastrar" onclick="cadastrarNovaEmpresa()" class="bg-purple-600 hover:bg-purple-700 text-white rounded-md py-2.5 px-6 font-bold transition-all shadow-md flex items-center gap-2 inline-flex">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Criar Conta da Empresa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>
