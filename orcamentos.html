@@ -16,10 +16,11 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
-    <!-- FIREBASE SDK & PROTEÇÃO DE ROTA -->
+    <!-- FIREBASE SDK & FIRESTORE (BANCO DE DADOS NA NUVEM) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCYLQe83O55AQszAvfUx0fcXxICsu8XWss",
@@ -32,21 +33,47 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // O GUARDA-COSTAS: Se não estiver logado, expulsa pra tela de login
+        // FUNÇÕES DO BANCO DE DADOS
+        window.dbCarregarDados = async function(uid) {
+            try {
+                const docRef = doc(db, "empresas", uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    return docSnap.data();
+                }
+                return { aptos: [], historico: [] };
+            } catch(e) {
+                console.error("Erro ao carregar do banco:", e);
+                return { aptos: [], historico: [] };
+            }
+        };
+
+        window.dbSalvarHistorico = async function(uid, historicoData) {
+            try {
+                const docRef = doc(db, "empresas", uid);
+                await setDoc(docRef, { historico: historicoData }, { merge: true });
+            } catch(e) {
+                console.error("Erro ao salvar histórico no banco:", e);
+                throw e;
+            }
+        };
+
+        // O GUARDA-COSTAS E INICIALIZADOR
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = "login.html"; 
+            } else {
+                window.currentUserUid = user.uid; // Salva a Digital da Empresa
+                if(window.iniciarAppComUsuario) window.iniciarAppComUsuario(); 
             }
         });
 
-        // Função do botão de Sair
         window.fazerLogout = function() {
             signOut(auth).then(() => {
                 window.location.href = "login.html";
-            }).catch((error) => {
-                console.error("Erro ao sair", error);
-            });
+            }).catch((error) => console.error("Erro ao sair", error));
         }
     </script>
 </head>
@@ -324,6 +351,35 @@
             fap: "Pensão Completa"
         };
 
+        // INICIA O APP APÓS O FIREBASE VALIDAR O LOGIN
+        window.iniciarAppComUsuario = async function() {
+            inicializarCalendarOrcamentoFlatpickr();
+            
+            // Puxa da nuvem
+            const dadosBanco = await window.dbCarregarDados(window.currentUserUid);
+            listaAptos = dadosBanco.aptos || [];
+            historicoOrcamentos = dadosBanco.historico || [];
+            
+            // Correção de IDs legados no histórico (caso existam)
+            let precisaSalvar = false;
+            historicoOrcamentos.forEach((item, idx) => {
+                if (!item.idCodigo || item.idCodigo === "undefined" || item.idCodigo === "NaN") {
+                    item.idCodigo = (historicoOrcamentos.length - idx).toString().padStart(2, '0');
+                    precisaSalvar = true;
+                }
+                if (!item.timestamp) {
+                    item.timestamp = Date.now() - (idx * 60000);
+                    precisaSalvar = true;
+                }
+            });
+            if(precisaSalvar) {
+                window.dbSalvarHistorico(window.currentUserUid, historicoOrcamentos).catch(e => console.error(e));
+            }
+
+            carregarAptosNaTela(); 
+            renderizarTabelaHistorico();
+        };
+
         function normalizarDataIn(val) {
             if(!val) return "";
             if(val.includes('/')) {
@@ -374,9 +430,7 @@
             input.value = value;
         }
 
-        function carregarAptosNoSelect() {
-            const memoria = localStorage.getItem('ld_lista_aptos');
-            listaAptos = memoria ? JSON.parse(memoria) : [];
+        function carregarAptosNaTela() {
             const select = document.getElementById('orcAptoSelect');
             select.innerHTML = "";
             if(listaAptos.length === 0) {
@@ -832,7 +886,10 @@
             };
             
             historicoOrcamentos.push(novoRegistro);
-            localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
+            
+            // SALVA O HISTÓRICO NA NUVEM!
+            window.dbSalvarHistorico(window.currentUserUid, historicoOrcamentos).catch(e => console.error(e));
+            
             paginaAtualAtiva = 1;
             renderizarTabelaHistorico();
         }
@@ -863,7 +920,7 @@
             navigator.clipboard.writeText(texto);
             registrarNoHistorico();
             resetarFormularioReserva();
-            showToast("Orçamento copiado e salvo no histórico!", "success");
+            showToast("Orçamento copiado e salvo no histórico da nuvem!", "success");
         }
 
         function enviarWhatsAppOrcamento() {
@@ -890,9 +947,12 @@
         }
 
         function removerItemHistorico(timestampAlvo) {
-            chamarModalConfirmacaoExclusao("Tem certeza que deseja deletar este orçamento permanentemente do seu histórico?", () => {
+            chamarModalConfirmacaoExclusao("Tem certeza que deseja deletar este orçamento permanentemente do seu histórico na nuvem?", () => {
                 historicoOrcamentos = historicoOrcamentos.filter(h => h.timestamp.toString() !== timestampAlvo.toString());
-                localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
+                
+                // DELETA O ITEM DO HISTÓRICO E SALVA NA NUVEM!
+                window.dbSalvarHistorico(window.currentUserUid, historicoOrcamentos).catch(e => console.error(e));
+                
                 renderizarTabelaHistorico();
                 showToast("Orçamento removido do histórico.", "success");
             });
@@ -979,29 +1039,6 @@
             }
             lucide.createIcons();
         }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            carregarAptosNoSelect();
-            inicializarCalendarOrcamentoFlatpickr();
-            const histMemoria = localStorage.getItem('ld_historico_orcamentos');
-            let tempHist = histMemoria ? JSON.parse(histMemoria) : [];
-            
-            let precisaSalvar = false;
-            tempHist.forEach((item, idx) => {
-                if (!item.idCodigo || item.idCodigo === "undefined" || item.idCodigo === "NaN") {
-                    item.idCodigo = (tempHist.length - idx).toString().padStart(2, '0');
-                    precisaSalvar = true;
-                }
-                if (!item.timestamp) {
-                    item.timestamp = Date.now() - (idx * 60000);
-                    precisaSalvar = true;
-                }
-            });
-            historicoOrcamentos = tempHist;
-            if(precisaSalvar) localStorage.setItem('ld_historico_orcamentos', JSON.stringify(historicoOrcamentos));
-
-            renderizarTabelaHistorico();
-        });
     </script>
 </body>
 </html>
