@@ -12,7 +12,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -28,7 +28,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // O PORTEIRO INTELIGENTE
         async function rotearUsuario(user) {
             // 1. É o Dono do Sistema?
             if (user.email.toLowerCase() === "cnviagem@gmail.com") {
@@ -36,20 +35,37 @@
                 return;
             }
 
-            // 2. É um cliente. Vamos olhar o cadastro dele no Banco
+            // 2. É um cliente. Confere no banco de dados.
             const docRef = doc(db, "empresas", user.uid);
             const docSnap = await getDoc(docRef);
 
-            if (docSnap.exists() && docSnap.data().primeiroAcesso === true) {
-                // É o primeiro acesso! Força a troca de senha.
-                window.location.href = "primeiro-acesso.html";
+            if (docSnap.exists()) {
+                const dados = docSnap.data();
+                
+                // VERIFICA SE O SUPER ADMIN BLOQUEOU A EMPRESA
+                if (dados.ativo === false) {
+                    await signOut(auth);
+                    const msgErro = document.getElementById('msgErro');
+                    msgErro.className = "bg-red-50 text-red-600 border border-red-200 text-sm p-3 rounded-lg text-center font-bold mb-6";
+                    msgErro.innerHTML = "<i data-lucide='lock' class='w-4 h-4 inline mb-0.5 mr-1'></i> Acesso Bloqueado pelo Administrador.";
+                    msgErro.classList.remove('hidden');
+                    lucide.createIcons();
+                    document.getElementById('btnEntrar').innerHTML = 'Entrar no Sistema';
+                    document.getElementById('btnEntrar').disabled = false;
+                    return;
+                }
+
+                // VERIFICA SE É O PRIMEIRO ACESSO (mudar123)
+                if (dados.primeiroAcesso === true) {
+                    window.location.href = "primeiro-acesso.html";
+                } else {
+                    window.location.href = "index.html";
+                }
             } else {
-                // Já trocou a senha, vai pro painel dele.
                 window.location.href = "index.html";
             }
         }
 
-        // Verifica se já estava logado (F5 na página)
         onAuthStateChanged(auth, (user) => {
             if (user) { rotearUsuario(user); }
         });
@@ -85,7 +101,6 @@
             });
         });
 
-        // RECUPERAÇÃO E OLHINHO AQUI (Mantidos)
         document.getElementById('btnEsqueciSenha').addEventListener('click', (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
