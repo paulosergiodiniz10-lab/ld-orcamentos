@@ -31,6 +31,8 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        let logoBase64 = "";
+
         // FUNÇÕES DO BANCO DE DADOS
         window.dbCarregarEmpresa = async function(uid) {
             const docRef = doc(db, "empresas", uid);
@@ -46,7 +48,7 @@
             await setDoc(docRef, { dadosEmpresa: dados }, { merge: true });
         }
 
-        // GUARDA-COSTAS
+        // GUARDA-COSTAS E PREENCHIMENTO DE DADOS
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = "login.html"; 
@@ -57,14 +59,22 @@
                 const dados = await window.dbCarregarEmpresa(user.uid);
                 if(dados) {
                     document.getElementById('empresaNome').value = dados.nome || '';
+                    document.getElementById('empresaEmail').value = dados.emailComercial || '';
                     
                     let cnpjInput = document.getElementById('empresaCnpj');
                     cnpjInput.value = dados.cnpj || '';
-                    if(dados.cnpj) window.mascaraCNPJ(cnpjInput); // Formata ao carregar
+                    if(dados.cnpj) window.mascaraCpfCnpj(cnpjInput);
 
                     let zapInput = document.getElementById('empresaWhatsapp');
                     zapInput.value = dados.whatsapp || '';
-                    if(dados.whatsapp) window.mascaraTelefone(zapInput); // Formata ao carregar
+                    if(dados.whatsapp) window.mascaraTelefone(zapInput);
+
+                    if(dados.logo) {
+                        logoBase64 = dados.logo;
+                        document.getElementById('previewLogo').src = dados.logo;
+                        document.getElementById('previewLogo').classList.remove('hidden');
+                        document.getElementById('iconLogo').classList.add('hidden');
+                    }
                 }
             }
         });
@@ -74,11 +84,14 @@
             const btn = document.getElementById('btnSalvar');
             btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Salvando...';
             lucide.createIcons();
+            btn.disabled = true;
             
             const dados = {
                 nome: document.getElementById('empresaNome').value.trim(),
                 cnpj: document.getElementById('empresaCnpj').value.trim(),
-                whatsapp: document.getElementById('empresaWhatsapp').value.trim()
+                whatsapp: document.getElementById('empresaWhatsapp').value.trim(),
+                emailComercial: document.getElementById('empresaEmail').value.trim(),
+                logo: logoBase64
             };
 
             try {
@@ -88,7 +101,8 @@
                 window.showToast("Erro ao salvar na nuvem.", "error");
             }
             
-            btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Salvar Alterações';
+            btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Salvar Dados';
+            btn.disabled = false;
             lucide.createIcons();
         }
 
@@ -112,27 +126,80 @@
             setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
-        // MÁSCARAS DE FORMATAÇÃO
-        window.mascaraCNPJ = function(input) {
-            let value = input.value.replace(/\D/g, "");
-            value = value.replace(/^(\d{2})(\d)/, "$1.$2");
-            value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
-            value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
-            value = value.replace(/(\d{4})(\d)/, "$1-$2");
-            input.value = value.substring(0, 18);
+        // MÁSCARA INTELIGENTE PARA CPF OU CNPJ
+        window.mascaraCpfCnpj = function(input) {
+            let v = input.value.replace(/\D/g, "");
+            if (v.length <= 11) { // CPF
+                v = v.replace(/(\d{3})(\d)/, "$1.$2");
+                v = v.replace(/(\d{3})(\d)/, "$1.$2");
+                v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+            } else { // CNPJ
+                v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+                v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+                v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
+                v = v.replace(/(\d{4})(\d)/, "$1-$2");
+            }
+            input.value = v.substring(0, 18);
         }
 
+        // MÁSCARA PARA TELEFONE / WHATSAPP
         window.mascaraTelefone = function(input) {
-            let value = input.value.replace(/\D/g, "");
-            value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
-            value = value.replace(/(\d)(\d{4})$/, "$1-$2");
-            input.value = value.substring(0, 15);
+            let v = input.value.replace(/\D/g, "");
+            v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+            v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+            input.value = v.substring(0, 15);
+        }
+
+        // PROCESSADOR DE IMAGEM DA LOGO
+        window.processarImagemLogo = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.match('image.*')) {
+                window.showToast('Selecione uma imagem válida.', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 300; 
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        }
+                    } else {
+                        if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    logoBase64 = canvas.toDataURL('image/png', 0.9);
+                    document.getElementById('previewLogo').src = logoBase64;
+                    document.getElementById('previewLogo').classList.remove('hidden');
+                    document.getElementById('iconLogo').classList.add('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
     </script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Menu Superior Protegido -->
+    <!-- Menu Superior -->
     <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -164,39 +231,61 @@
     </nav>
 
     <main class="flex-grow max-w-4xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
-        <div class="mb-8 flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Configurações da Empresa</h1>
-                <p class="text-sm text-gray-500 mt-1">Gerencie os dados oficiais e informações de contato do seu negócio.</p>
-            </div>
-        </div>
-
+        
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="p-6 sm:p-8 space-y-6">
+            <div class="p-6 sm:p-8 space-y-8">
                 
-                <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-                    <div class="sm:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700">Nome da Empresa / Razão Social</label>
-                        <input type="text" id="empresaNome" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="Ex: Hotel e Turismo LTDA">
+                <!-- SESSÃO: LOGOTIPO -->
+                <div>
+                    <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4">Logotipo da Agência</h3>
+                    <div class="flex items-center gap-4 border-b border-gray-100 pb-8">
+                        <div class="w-24 h-24 rounded-lg border border-blue-100 bg-blue-50 overflow-hidden flex items-center justify-center shrink-0 shadow-sm">
+                            <img id="previewLogo" src="" class="w-full h-full object-contain hidden bg-white">
+                            <i id="iconLogo" data-lucide="image" class="w-8 h-8 text-blue-300"></i>
+                        </div>
+                        <div class="flex-1 relative h-24">
+                            <input type="file" accept="image/jpeg, image/png, image/jpg" onchange="processarImagemLogo(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            <div class="h-full border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-blue-600 bg-white hover:bg-blue-50 transition-colors">
+                                <i data-lucide="cloud-upload" class="w-6 h-6 mb-1 text-blue-400"></i>
+                                <span class="text-sm font-medium">Clique para selecionar a logo</span>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">CNPJ (Opcional)</label>
-                        <!-- Adicionado evento oninput e maxlength para a máscara -->
-                        <input type="text" id="empresaCnpj" oninput="mascaraCNPJ(this)" maxlength="18" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="00.000.000/0000-00">
-                    </div>
+                </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Telefone / WhatsApp Comercial</label>
-                        <!-- Adicionado evento oninput e type tel para a máscara -->
-                        <input type="tel" id="empresaWhatsapp" oninput="mascaraTelefone(this)" maxlength="15" class="mt-1 border block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border-gray-300" placeholder="(00) 00000-0000">
+                <!-- SESSÃO: INFORMAÇÕES COMERCIAIS -->
+                <div>
+                    <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4">Informações Comerciais</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome Fantasia / Razão Social</label>
+                            <input type="text" id="empresaNome" class="block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border border-gray-300 transition-colors" placeholder="Ex: Hotel Le Jardin">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">CPF ou CNPJ</label>
+                            <input type="text" id="empresaCnpj" oninput="mascaraCpfCnpj(this)" maxlength="18" class="block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border border-gray-300 transition-colors" placeholder="00.000.000/0000-00">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp Comercial</label>
+                            <input type="tel" id="empresaWhatsapp" oninput="mascaraTelefone(this)" maxlength="15" class="block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border border-gray-300 transition-colors" placeholder="(00) 00000-0000">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">E-mail Comercial</label>
+                            <input type="email" id="empresaEmail" class="block w-full rounded-md py-2.5 px-3 outline-none focus:ring-2 focus:ring-blue-500 border border-gray-300 transition-colors" placeholder="teste@teste.com">
+                        </div>
+                        
                     </div>
                 </div>
 
             </div>
+            
             <div class="bg-gray-50 px-6 py-4 flex justify-end border-t border-gray-200">
                 <button type="button" id="btnSalvar" onclick="salvarAlteracoes()" class="bg-blue-600 text-white rounded-md py-2.5 px-6 text-sm font-bold hover:bg-blue-700 flex items-center gap-2 shadow-sm transition-colors">
-                    <i data-lucide="save" class="w-4 h-4"></i> Salvar Alterações
+                    <i data-lucide="save" class="w-4 h-4"></i> Salvar Dados
                 </button>
             </div>
         </div>
