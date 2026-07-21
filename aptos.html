@@ -18,10 +18,11 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
-    <!-- FIREBASE SDK & PROTEÇÃO DE ROTA -->
+    <!-- FIREBASE SDK & FIRESTORE (BANCO DE DADOS NA NUVEM) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCYLQe83O55AQszAvfUx0fcXxICsu8XWss",
@@ -34,21 +35,47 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // O GUARDA-COSTAS: Se não estiver logado, expulsa pra tela de login
+        // Funções Globais para comunicar com o Banco de Dados
+        window.dbCarregarAptos = async function(uid) {
+            try {
+                const docRef = doc(db, "empresas", uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists() && docSnap.data().aptos) {
+                    return docSnap.data().aptos;
+                }
+                return [];
+            } catch(e) {
+                console.error("Erro ao carregar do banco:", e);
+                return [];
+            }
+        };
+
+        window.dbSalvarAptos = async function(uid, aptosData) {
+            try {
+                const docRef = doc(db, "empresas", uid);
+                await setDoc(docRef, { aptos: aptosData }, { merge: true });
+            } catch(e) {
+                console.error("Erro ao salvar no banco:", e);
+                throw e;
+            }
+        };
+
+        // Guarda-Costas + Gatilho de Carregamento
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = "login.html"; 
+            } else {
+                window.currentUserUid = user.uid; // Salva a Digital do Hotel
+                if(window.iniciarAppComUsuario) window.iniciarAppComUsuario(); // Dispara a tela
             }
         });
 
-        // Função do botão de Sair
         window.fazerLogout = function() {
             signOut(auth).then(() => {
                 window.location.href = "login.html";
-            }).catch((error) => {
-                console.error("Erro ao sair", error);
-            });
+            }).catch((error) => console.error("Erro ao sair", error));
         }
     </script>
 </head>
@@ -565,15 +592,21 @@
             fpAjusteFim = flatpickr("#ajusteFim", configBase);
         }
 
-        function carregarListaAptos() {
-            const memoria = localStorage.getItem('ld_lista_aptos');
-            listaAptos = memoria ? JSON.parse(memoria) : [];
+        // CARREGA DADOS DO BANCO EM VEZ DO LOCALSTORAGE
+        async function carregarListaAptos() {
+            document.getElementById('gridCardsAptos').innerHTML = '<div class="text-center p-8 text-gray-500"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2"></i> Carregando dados da nuvem...</div>';
+            lucide.createIcons();
+            
+            listaAptos = await window.dbCarregarAptos(window.currentUserUid);
             renderizarListagemCards();
         }
 
+        // SALVA DADOS NO BANCO EM VEZ DO LOCALSTORAGE
         function salvarListaAptos() {
-            localStorage.setItem('ld_lista_aptos', JSON.stringify(listaAptos));
-            renderizarListagemCards();
+            renderizarListagemCards(); // Atualiza a tela primeiro pra parecer super rápido
+            window.dbSalvarAptos(window.currentUserUid, listaAptos).catch(e => {
+                showToast("Erro ao sincronizar com a nuvem.", "error");
+            });
         }
 
         function renderizarListagemCards() {
@@ -992,10 +1025,11 @@
             lucide.createIcons();
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            carregarListaAptos();
+        // DISPARA O INÍCIO APENAS APÓS O LOGIN SER VALIDADO PELO FIREBASE
+        window.iniciarAppComUsuario = async function() {
             inicializarCalendariosFlatpickr();
-        });
+            await carregarListaAptos();
+        };
     </script>
 </body>
 </html>
