@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTL Orçamentos - Login</title>
+    
+    <!-- PWA Configs -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- FIREBASE SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        // SUAS CHAVES OFICIAIS DO FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYLQe83O55AQszAvfUx0fcXxICsu8XWss",
+            authDomain: "htl-orcamentos.firebaseapp.com",
+            projectId: "htl-orcamentos",
+            storageBucket: "htl-orcamentos.firebasestorage.app",
+            messagingSenderId: "743021262224",
+            appId: "1:743021262224:web:bbb3f6238d82e5a5536f15"
+        };
+
+        // INICIALIZANDO O FIREBASE
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Verifica se já está logado
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = "index.html"; 
+            }
+        });
+
+        // FUNÇÃO DE LOGIN
+        document.getElementById('btnEntrar').addEventListener('click', (e) => {
+            e.preventDefault(); 
+            
+            const email = document.getElementById('email').value.trim();
+            const senha = document.getElementById('senha').value;
+            const msgErro = document.getElementById('msgErro');
+            const btnEntrar = document.getElementById('btnEntrar');
+
+            if(!email || !senha) {
+                msgErro.innerText = "Por favor, preencha e-mail e senha.";
+                msgErro.classList.remove('hidden');
+                return;
+            }
+
+            btnEntrar.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Entrando...';
+            btnEntrar.disabled = true;
+            lucide.createIcons();
+
+            signInWithEmailAndPassword(auth, email, senha)
+                .then((userCredential) => {
+                    // Login com sucesso!
+                    window.location.href = "index.html";
+                })
+                .catch((error) => {
+                    btnEntrar.innerHTML = 'Entrar no Sistema';
+                    btnEntrar.disabled = false;
+                    msgErro.classList.remove('hidden');
+                    
+                    if(error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                        msgErro.innerText = "E-mail ou senha incorretos.";
+                    } else {
+                        msgErro.innerText = "Erro ao fazer login. Tente novamente.";
+                    }
+                });
+        });
+    </script>
+</head>
+<body class="bg-blue-600 font-sans text-gray-800 antialiased min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+
+    <!-- Efeito de fundo decorativo -->
+    <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-700 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative z-10">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+                <i data-lucide="building-2" class="w-8 h-8"></i>
+            </div>
+            <h1 class="text-2xl font-black text-gray-900 tracking-tight">HTL Orçamentos</h1>
+            <p class="text-sm text-gray-500 mt-2">Faça login para acessar o painel da sua empresa.</p>
+        </div>
+
+        <div id="msgErro" class="hidden bg-red-50 text-red-600 border border-red-200 text-sm p-3 rounded-lg text-center font-medium mb-6">
+            E-mail ou senha incorretos.
+        </div>
+
+        <form class="space-y-5">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">E-mail de Acesso</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="mail" class="w-5 h-5 text-gray-400"></i>
+                    </div>
+                    <input type="email" id="email" class="pl-10 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-lg py-3 px-3 border outline-none bg-gray-50 focus:bg-white transition-colors" placeholder="voce@empresa.com">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Senha</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="lock" class="w-5 h-5 text-gray-400"></i>
+                    </div>
+                    <input type="password" id="senha" class="pl-10 focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-lg py-3 px-3 border outline-none bg-gray-50 focus:bg-white transition-colors" placeholder="••••••••">
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button type="button" id="btnEntrar" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-3 px-4 text-sm font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                    Entrar no Sistema
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-8 text-center text-xs text-gray-400">
+            &copy; 2026 HTL Orçamentos. Sistema protegido.
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
