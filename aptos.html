@@ -17,10 +17,44 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+
+    <!-- FIREBASE SDK & PROTEÇÃO DE ROTA -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYLQe83O55AQszAvfUx0fcXxICsu8XWss",
+            authDomain: "htl-orcamentos.firebaseapp.com",
+            projectId: "htl-orcamentos",
+            storageBucket: "htl-orcamentos.firebasestorage.app",
+            messagingSenderId: "743021262224",
+            appId: "1:743021262224:web:bbb3f6238d82e5a5536f15"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // O GUARDA-COSTAS: Se não estiver logado, expulsa pra tela de login
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "login.html"; 
+            }
+        });
+
+        // Função do botão de Sair
+        window.fazerLogout = function() {
+            signOut(auth).then(() => {
+                window.location.href = "login.html";
+            }).catch((error) => {
+                console.error("Erro ao sair", error);
+            });
+        }
+    </script>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Menu Superior Padrão -->
+    <!-- Menu Superior Protegido -->
     <nav class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -28,7 +62,7 @@
                     <i data-lucide="building-2" class="w-6 h-6"></i>
                     HTL Orçamentos
                 </div>
-                <div class="hidden md:flex space-x-2">
+                <div class="hidden md:flex space-x-2 items-center">
                     <button type="button" onclick="window.location.href='empresa.html'" class="cursor-pointer hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2">
                          <i data-lucide="briefcase" class="w-4 h-4"></i> Minha Empresa
                     </button>
@@ -38,8 +72,13 @@
                     <button type="button" onclick="window.location.href='aptos.html'" class="cursor-pointer bg-blue-700/50 hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2">
                         <i data-lucide="bed-double" class="w-4 h-4"></i> Aptos
                     </button>
-                    <button type="button" onclick="window.location.href='orcamentos.html'" class="cursor-pointer bg-orange-500 hover:bg-orange-600 px-5 py-2 rounded-md text-sm font-bold shadow-sm transition-colors flex items-center gap-2 ml-4">
+                    <button type="button" onclick="window.location.href='orcamentos.html'" class="cursor-pointer hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ml-4">
                         <i data-lucide="calculator" class="w-4 h-4"></i> Orçamentos
+                    </button>
+                    
+                    <div class="h-6 w-px bg-blue-400/50 mx-2"></div>
+                    <button type="button" onclick="fazerLogout()" class="cursor-pointer text-blue-100 hover:text-white hover:bg-red-500 px-3 py-2 rounded-md text-sm font-bold transition-colors flex items-center gap-2" title="Sair do Sistema">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> Sair
                     </button>
                 </div>
             </div>
@@ -957,17 +996,6 @@
             carregarListaAptos();
             inicializarCalendariosFlatpickr();
         });
-    </script>
-    
-    <!-- Registrador do PWA -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('PWA ativado com sucesso!', reg))
-            .catch(err => console.log('Falha ao ativar PWA', err));
-        });
-      }
     </script>
 </body>
 </html>
