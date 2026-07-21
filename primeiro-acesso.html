@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTL Orçamentos - Redefinir Senha</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYLQe83O55AQszAvfUx0fcXxICsu8XWss",
+            authDomain: "htl-orcamentos.firebaseapp.com",
+            projectId: "htl-orcamentos",
+            storageBucket: "htl-orcamentos.firebasestorage.app",
+            messagingSenderId: "743021262224",
+            appId: "1:743021262224:web:bbb3f6238d82e5a5536f15"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) { window.location.href = "login.html"; }
+        });
+
+        document.getElementById('btnSalvar').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const senha1 = document.getElementById('senha1').value;
+            const senha2 = document.getElementById('senha2').value;
+            const btn = document.getElementById('btnSalvar');
+
+            if(senha1.length < 6) { alert("A senha deve ter no mínimo 6 caracteres."); return; }
+            if(senha1 !== senha2) { alert("As senhas não coincidem."); return; }
+
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Atualizando...';
+            btn.disabled = true; lucide.createIcons();
+
+            try {
+                // Atualiza a senha no Firebase Auth
+                await updatePassword(auth.currentUser, senha1);
+                
+                // Tira a etiqueta de "primeiro acesso" no Banco de Dados
+                await setDoc(doc(db, "empresas", auth.currentUser.uid), { primeiroAcesso: false }, { merge: true });
+                
+                // Manda o usuário pro sistema oficial
+                window.location.href = "index.html";
+            } catch (error) {
+                alert("Erro ao alterar senha. Saia e faça login novamente.");
+                btn.innerHTML = 'Salvar e Acessar Sistema';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full border border-gray-100">
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-orange-100 text-orange-600 mb-4">
+                <i data-lucide="shield-alert" class="w-6 h-6"></i>
+            </div>
+            <h1 class="text-xl font-bold text-gray-900">Bem-vindo!</h1>
+            <p class="text-sm text-gray-500 mt-2">Este é o seu primeiro acesso. Por questões de segurança, cadastre uma nova senha pessoal.</p>
+        </div>
+
+        <form class="space-y-4">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Nova Senha</label>
+                <input type="password" id="senha1" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-lg py-2.5 px-3 border outline-none bg-gray-50" placeholder="Mínimo de 6 caracteres">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Repetir Nova Senha</label>
+                <input type="password" id="senha2" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-lg py-2.5 px-3 border outline-none bg-gray-50" placeholder="Repita a senha">
+            </div>
+            <div class="pt-2">
+                <button type="button" id="btnSalvar" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-3 px-4 text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2">
+                    Salvar e Acessar Sistema
+                </button>
+            </div>
+        </form>
+    </div>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
