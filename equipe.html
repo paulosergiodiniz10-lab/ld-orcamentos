@@ -12,10 +12,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- FIREBASE SDK & PROTEÇÃO DE ROTA -->
+    <!-- FIREBASE SDK & FIRESTORE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCYLQe83O55AQszAvfUx0fcXxICsu8XWss",
@@ -28,18 +29,205 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // O GUARDA-COSTAS: Se não estiver logado, expulsa pra tela de login
-        onAuthStateChanged(auth, (user) => {
+        // App Secundário para cadastrar a equipe sem deslogar o dono
+        const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
+        const secondaryAuth = getAuth(secondaryApp);
+
+        let dadosEmpresaGlobais = null;
+        let equipeLocal = [];
+        let indexParaEditar = null;
+
+        // GUARDA-COSTAS
+        onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = "login.html"; 
+            } else {
+                window.currentUserUid = user.uid;
+                window.currentUserEmail = user.email;
+                await carregarDados();
             }
         });
 
+        async function carregarDados() {
+            document.getElementById('tbodyEquipe').innerHTML = '<tr><td colspan="5" class="py-8 text-center text-gray-500"><i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto"></i></td></tr>';
+            lucide.createIcons();
+
+            const docRef = doc(db, "empresas", window.currentUserUid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                dadosEmpresaGlobais = docSnap.data();
+                equipeLocal = dadosEmpresaGlobais.equipe || [];
+                renderizarTabela();
+            }
+        }
+
+        async function salvarEquipeNoBanco() {
+            const docRef = doc(db, "empresas", window.currentUserUid);
+            await setDoc(docRef, { equipe: equipeLocal }, { merge: true });
+            renderizarTabela();
+        }
+
+        function renderizarTabela() {
+            const tbody = document.getElementById('tbodyEquipe');
+            tbody.innerHTML = '';
+
+            // LINHA 1: O DONO DO SISTEMA (Você)
+            const nomeDono = dadosEmpresaGlobais?.dadosEmpresa?.nome || "Administrador Principal";
+            tbody.innerHTML += `
+                <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 bg-blue-50/30">
+                    <td class="py-4 px-6 font-bold text-gray-900 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">AD</div>
+                        ${nomeDono} <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full ml-2">Você</span>
+                    </td>
+                    <td class="py-4 px-6 text-gray-500 text-sm">${window.currentUserEmail}</td>
+                    <td class="py-4 px-6"><span class="bg-purple-100 text-purple-700 px-2.5 py-1 rounded text-xs font-bold border border-purple-200">Dono</span></td>
+                    <td class="py-4 px-6"><span class="flex items-center gap-1.5 text-green-600 text-xs font-bold"><div class="w-2 h-2 rounded-full bg-green-500"></div> Ativo</span></td>
+                    <td class="py-4 px-6 text-right space-x-3">
+                        <button onclick="window.location.href='empresa.html'" class="text-blue-500 hover:text-blue-700 transition-colors" title="Editar Nome (Vai para Empresa)"><i data-lucide="edit" class="w-4 h-4 inline"></i></button>
+                        <button class="text-gray-300 cursor-not-allowed" disabled title="Você não pode bloquear a si mesmo"><i data-lucide="lock" class="w-4 h-4 inline"></i></button>
+                        <button class="text-gray-300 cursor-not-allowed" disabled title="Você não pode se excluir"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
+                    </td>
+                </tr>
+            `;
+
+            // LINHAS EXTRAS: ATENDENTES
+            if (equipeLocal.length === 0) {
+                tbody.innerHTML += `
+                    <tr>
+                        <td colspan="5" class="py-12 text-center text-gray-400">
+                            <div class="flex flex-col items-center justify-center">
+                                <i data-lucide="users" class="w-12 h-12 text-gray-200 mb-3"></i>
+                                <p>Nenhum atendente extra cadastrado.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                equipeLocal.forEach((membro, index) => {
+                    const statusBadge = membro.ativo 
+                        ? `<span class="flex items-center gap-1.5 text-green-600 text-xs font-bold"><div class="w-2 h-2 rounded-full bg-green-500"></div> Ativo</span>`
+                        : `<span class="flex items-center gap-1.5 text-red-600 text-xs font-bold"><div class="w-2 h-2 rounded-full bg-red-500"></div> Bloqueado</span>`;
+                    
+                    const blockIcon = membro.ativo ? 'lock' : 'unlock';
+                    const blockTitle = membro.ativo ? 'Bloquear Acesso' : 'Desbloquear Acesso';
+                    const blockColor = membro.ativo ? 'text-orange-500 hover:text-orange-700' : 'text-green-500 hover:text-green-700';
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100">
+                            <td class="py-4 px-6 font-bold text-gray-700 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-xs">AT</div>
+                                ${membro.nome}
+                            </td>
+                            <td class="py-4 px-6 text-gray-500 text-sm">${membro.email}</td>
+                            <td class="py-4 px-6"><span class="bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-xs font-bold border border-gray-200">Atendente</span></td>
+                            <td class="py-4 px-6">${statusBadge}</td>
+                            <td class="py-4 px-6 text-right space-x-3">
+                                <button onclick="abrirModalEditar(${index})" class="text-blue-500 hover:text-blue-700 transition-colors" title="Editar"><i data-lucide="edit" class="w-4 h-4 inline"></i></button>
+                                <button onclick="alternarBloqueio(${index})" class="${blockColor} transition-colors" title="${blockTitle}"><i data-lucide="${blockIcon}" class="w-4 h-4 inline"></i></button>
+                                <button onclick="excluirMembro(${index})" class="text-red-400 hover:text-red-600 transition-colors" title="Excluir"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            lucide.createIcons();
+        }
+
+        // FUNÇÕES DO MODAL NOVO
+        window.abrirModalNovo = function() {
+            document.getElementById('formNovoMembro').reset();
+            document.getElementById('modalNovo').classList.remove('hidden');
+        }
+        window.fecharModalNovo = function() { document.getElementById('modalNovo').classList.add('hidden'); }
+
+        window.salvarNovoMembro = async function() {
+            const nome = document.getElementById('novoNome').value.trim();
+            const email = document.getElementById('novoEmail').value.trim();
+            const btn = document.getElementById('btnSalvarNovo');
+
+            if(!nome || !email) { showToast("Preencha todos os campos.", "error"); return; }
+
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Criando...';
+            btn.disabled = true; lucide.createIcons();
+
+            try {
+                // Cria o atendente no Auth do Firebase usando o app secundário
+                const userCred = await createUserWithEmailAndPassword(secondaryAuth, email, "mudar123");
+                const newUid = userCred.user.uid;
+                await signOut(secondaryAuth);
+
+                // Salva na lista da Empresa
+                equipeLocal.push({
+                    uid: newUid,
+                    nome: nome,
+                    email: email,
+                    ativo: true,
+                    criadoEm: new Date().toISOString()
+                });
+
+                await salvarEquipeNoBanco();
+                showToast("Atendente criado! A senha temporária é: mudar123", "success");
+                fecharModalNovo();
+            } catch (error) {
+                if(error.code === 'auth/email-already-in-use') showToast("Este e-mail já está em uso.", "error");
+                else showToast("Erro ao criar usuário.", "error");
+            }
+
+            btn.innerHTML = 'Salvar e Criar Acesso';
+            btn.disabled = false;
+        }
+
+        // FUNÇÕES DO MODAL EDITAR
+        window.abrirModalEditar = function(index) {
+            indexParaEditar = index;
+            document.getElementById('editNome').value = equipeLocal[index].nome;
+            document.getElementById('modalEditar').classList.remove('hidden');
+        }
+        window.fecharModalEditar = function() { document.getElementById('modalEditar').classList.add('hidden'); }
+
+        window.salvarEdicao = async function() {
+            const novoNome = document.getElementById('editNome').value.trim();
+            if(!novoNome) return;
+
+            equipeLocal[indexParaEditar].nome = novoNome;
+            await salvarEquipeNoBanco();
+            showToast("Nome atualizado com sucesso!", "success");
+            fecharModalEditar();
+        }
+
+        // AÇÕES RÁPIDAS
+        window.alternarBloqueio = async function(index) {
+            equipeLocal[index].ativo = !equipeLocal[index].ativo;
+            await salvarEquipeNoBanco();
+            showToast(equipeLocal[index].ativo ? "Acesso liberado!" : "Acesso bloqueado!", "success");
+        }
+
+        window.excluirMembro = async function(index) {
+            if(confirm(`Tem certeza que deseja excluir o acesso de ${equipeLocal[index].nome}?`)) {
+                equipeLocal.splice(index, 1);
+                await salvarEquipeNoBanco();
+                showToast("Membro removido da equipe.", "success");
+            }
+        }
+
         window.fazerLogout = function() {
-            signOut(auth).then(() => {
-                window.location.href = "login.html";
-            }).catch((error) => console.error("Erro ao sair", error));
+            signOut(auth).then(() => window.location.href = "login.html");
+        }
+
+        window.showToast = function(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+            toast.className = `${bgColor} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i><span class="font-medium text-sm">${message}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
+            setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
     </script>
 </head>
@@ -83,7 +271,7 @@
                 <h1 class="text-2xl font-bold text-gray-900">Gestão de Equipe</h1>
                 <p class="text-sm text-gray-500 mt-1">Cadastre seus atendentes para que eles tenham acesso ao gerador de orçamentos.</p>
             </div>
-            <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md text-sm font-bold shadow transition-colors flex items-center justify-center gap-2">
+            <button type="button" onclick="abrirModalNovo()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md text-sm font-bold shadow transition-colors flex items-center justify-center gap-2">
                 <i data-lucide="user-plus" class="w-4 h-4"></i> Novo Atendente
             </button>
         </div>
@@ -93,53 +281,75 @@
                 <table class="min-w-full text-left text-sm whitespace-nowrap">
                     <thead class="bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-500 border-b">
                         <tr>
-                            <th class="py-4 px-6">Nome do Atendente</th>
+                            <th class="py-4 px-6">Nome do Usuário</th>
                             <th class="py-4 px-6">E-mail de Login</th>
                             <th class="py-4 px-6">Nível de Acesso</th>
                             <th class="py-4 px-6">Status</th>
                             <th class="py-4 px-6 text-right">Ações</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 text-gray-700">
-                        
-                        <!-- Linha de Exemplo (Sua conta Admin) -->
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="py-4 px-6 font-bold text-gray-900 flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
-                                    AD
-                                </div>
-                                Administrador Principal
-                            </td>
-                            <td class="py-4 px-6 text-gray-500">Seu e-mail de acesso</td>
-                            <td class="py-4 px-6"><span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-bold">Admin</span></td>
-                            <td class="py-4 px-6"><span class="flex items-center gap-1.5 text-green-600 text-xs font-bold"><div class="w-2 h-2 rounded-full bg-green-500"></div> Ativo</span></td>
-                            <td class="py-4 px-6 text-right space-x-2">
-                                <button class="text-gray-400 cursor-not-allowed" disabled title="Não é possível excluir o dono da conta"><i data-lucide="lock" class="w-4 h-4 inline"></i></button>
-                            </td>
-                        </tr>
-
-                        <!-- Estado Vazio para novos usuários -->
-                        <tr>
-                            <td colspan="5" class="py-12 text-center text-gray-400">
-                                <div class="flex flex-col items-center justify-center">
-                                    <i data-lucide="users" class="w-12 h-12 text-gray-200 mb-3"></i>
-                                    <p>Nenhum atendente extra cadastrado.</p>
-                                </div>
-                            </td>
-                        </tr>
-
+                    <tbody id="tbodyEquipe" class="divide-y divide-gray-100 text-gray-700">
+                        <!-- Preenchido via JS -->
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
 
+    <!-- Modal Novo Atendente -->
+    <div id="modalNovo" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-md w-full shadow-xl border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i data-lucide="user-plus" class="w-5 h-5 text-blue-600"></i> Cadastrar Atendente</h3>
+            </div>
+            <div class="p-6">
+                <form id="formNovoMembro" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                        <input type="text" id="novoNome" class="block w-full border border-gray-300 rounded-md py-2 px-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ex: Maria Silva">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">E-mail de Login</label>
+                        <input type="email" id="novoEmail" class="block w-full border border-gray-300 rounded-md py-2 px-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="maria@hotel.com">
+                    </div>
+                    <div class="bg-blue-50 text-blue-800 text-xs p-3 rounded-lg border border-blue-100 mt-2">
+                        <i data-lucide="info" class="w-4 h-4 inline mr-1 -mt-0.5"></i> A senha temporária será <strong>mudar123</strong>. O sistema forçará a troca no primeiro acesso do atendente.
+                    </div>
+                </form>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end border-t border-gray-100">
+                <button type="button" onclick="fecharModalNovo()" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-2 px-4 rounded-md text-sm transition-colors">Cancelar</button>
+                <button type="button" id="btnSalvarNovo" onclick="salvarNovoMembro()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md text-sm transition-colors shadow-sm">Salvar e Criar Acesso</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Atendente -->
+    <div id="modalEditar" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-md w-full shadow-xl border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2"><i data-lucide="edit" class="w-5 h-5 text-blue-600"></i> Editar Atendente</h3>
+            </div>
+            <div class="p-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                    <input type="text" id="editNome" class="block w-full border border-gray-300 rounded-md py-2 px-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="bg-gray-50 text-gray-500 text-xs p-3 rounded-lg border border-gray-200 mt-4">
+                    <i data-lucide="shield-alert" class="w-4 h-4 inline mr-1 -mt-0.5"></i> O e-mail não pode ser alterado por segurança. Se precisar alterar o e-mail, exclua este usuário e crie um novo.
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end border-t border-gray-100">
+                <button type="button" onclick="fecharModalEditar()" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-2 px-4 rounded-md text-sm transition-colors">Cancelar</button>
+                <button type="button" onclick="salvarEdicao()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md text-sm transition-colors shadow-sm">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
     <footer class="bg-white border-t border-gray-200 mt-auto">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8"><p class="text-center text-xs text-gray-500">&copy; 2026 HTL Orçamentos.</p></div>
     </footer>
-
-    <script>
-        lucide.createIcons();
-    </script>
 </body>
 </html>
