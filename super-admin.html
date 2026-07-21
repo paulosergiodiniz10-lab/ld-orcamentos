@@ -70,10 +70,9 @@
                 const userCred = await createUserWithEmailAndPassword(secondaryAuth, email, "mudar123");
                 const novoUid = userCred.user.uid;
 
-                // CORREÇÃO: emailLogin salvo na raiz do documento para não ser apagado!
                 await setDoc(doc(db, "empresas", novoUid), {
                     emailLogin: email,
-                    dadosEmpresa: { nome: nome },
+                    dadosEmpresa: { nome: nome, emailComercial: email },
                     primeiroAcesso: true,
                     criadoEm: new Date().toISOString(),
                     ativo: true
@@ -114,8 +113,11 @@
                     const data = doc.data();
                     const uid = doc.id;
                     const nome = data.dadosEmpresa?.nome || "Sem Nome";
-                    // Busca o e-mail na raiz ou dentro dos dados
-                    const email = data.emailLogin || data.dadosEmpresa?.email || "Sem E-mail";
+                    
+                    // Pega o E-mail e Telefone (WhatsApp) corretamente do banco
+                    const email = data.emailLogin || data.dadosEmpresa?.emailComercial || data.dadosEmpresa?.email || "Sem E-mail";
+                    const whatsapp = data.dadosEmpresa?.whatsapp || "Não informado";
+                    
                     const ativo = data.ativo !== false; 
                     
                     const statusBadge = ativo 
@@ -126,23 +128,22 @@
                     const blockActionIcon = ativo ? "lock" : "unlock";
                     const blockActionColor = ativo ? "text-orange-400 hover:text-orange-300" : "text-green-400 hover:text-green-300";
 
-                    // Esconde a própria conta da lista para não se auto-bloquear
                     if (email.toLowerCase() === "cnviagem@gmail.com") return;
 
                     const escapedNome = nome.replace(/'/g, "\\'");
 
                     tbody.innerHTML += `
                         <tr class="border-b border-gray-700/50 hover:bg-gray-800/50 transition-colors">
-                            <td class="py-3 px-4 text-sm font-bold text-gray-200">${nome}</td>
-                            <td class="py-3 px-4 text-sm text-gray-400">${email}</td>
-                            <td class="py-3 px-4">${statusBadge}</td>
-                            <td class="py-3 px-4 text-sm text-gray-500">${new Date(data.criadoEm || Date.now()).toLocaleDateString('pt-BR')}</td>
-                            <td class="py-3 px-4 text-right space-x-3">
-                                <!-- BOTÃO LÁPIS ADICIONADO AQUI -->
+                            <td class="py-4 px-4 text-sm font-bold text-gray-200">${nome}</td>
+                            <td class="py-4 px-4">
+                                <div class="text-sm text-gray-300 mb-1">${email}</div>
+                                <div class="text-xs text-gray-500 flex items-center gap-1"><i data-lucide="message-circle" class="w-3 h-3"></i> ${whatsapp}</div>
+                            </td>
+                            <td class="py-4 px-4">${statusBadge}</td>
+                            <td class="py-4 px-4 text-sm text-gray-500">${new Date(data.criadoEm || Date.now()).toLocaleDateString('pt-BR')}</td>
+                            <td class="py-4 px-4 text-right space-x-3">
                                 <button onclick="abrirModalEditar('${uid}', '${escapedNome}')" class="text-blue-400 hover:text-blue-300 transition-colors" title="Editar Nome"><i data-lucide="edit" class="w-4 h-4 inline"></i></button>
-                                
                                 <button onclick="alternarStatusEmpresa('${uid}', ${ativo})" class="${blockActionColor} transition-colors" title="${blockActionTitle}"><i data-lucide="${blockActionIcon}" class="w-4 h-4 inline"></i></button>
-                                
                                 <button onclick="confirmarExclusao('${uid}')" class="text-gray-500 hover:text-red-500 transition-colors" title="Excluir Dados"><i data-lucide="trash-2" class="w-4 h-4 inline"></i></button>
                             </td>
                         </tr>
@@ -155,7 +156,6 @@
             }
         }
 
-        // --- FUNÇÕES DE EDIÇÃO ---
         window.abrirModalEditar = function(uid, nomeAtual) {
             uidParaEditar = uid;
             document.getElementById('editNome').value = nomeAtual;
@@ -173,7 +173,6 @@
             if(!novoNome) { showToast("O nome não pode ficar vazio.", "error"); return; }
             
             try {
-                // Atualiza apenas o nome no banco de dados sem apagar os outros dados
                 await updateDoc(doc(db, "empresas", uidParaEditar), {
                     "dadosEmpresa.nome": novoNome
                 });
@@ -185,7 +184,6 @@
             }
         }
 
-        // --- FUNÇÕES DE STATUS E EXCLUSÃO ---
         window.alternarStatusEmpresa = async function(uid, statusAtual) {
             try {
                 await updateDoc(doc(db, "empresas", uid), { ativo: !statusAtual });
@@ -244,7 +242,6 @@
 
     <main class="max-w-6xl mx-auto w-full py-10 px-4 space-y-8">
         
-        <!-- Bloco de Cadastro -->
         <div class="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-700 bg-gray-800/50">
                 <h2 class="text-base font-bold text-white flex items-center gap-2">
@@ -275,7 +272,6 @@
             </div>
         </div>
 
-        <!-- Bloco de Listagem -->
         <div class="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-700 bg-gray-800/50 flex justify-between items-center">
                 <h2 class="text-base font-bold text-white flex items-center gap-2">
@@ -288,7 +284,7 @@
                     <thead class="bg-gray-900/50 text-[11px] font-bold uppercase tracking-wider text-gray-500 border-b border-gray-700">
                         <tr>
                             <th class="py-3 px-4">Hotel / Empresa</th>
-                            <th class="py-3 px-4">E-mail de Login</th>
+                            <th class="py-3 px-4">Contatos (E-mail / Zap)</th>
                             <th class="py-3 px-4">Status</th>
                             <th class="py-3 px-4">Cadastrado em</th>
                             <th class="py-3 px-4 text-right">Ações</th>
