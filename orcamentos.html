@@ -40,7 +40,7 @@
     <main class="flex-grow max-w-7xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900">Gerador de Orçamentos</h1>
-            <p class="text-sm text-gray-500 mt-1">Busque a disponibilidade e calcule os valores reais salvos no calendário.</p>
+            <p class="text-sm text-gray-500 mt-1">Crie cotações para uma família ou grupos usando multi-apartamentos simultâneos.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -68,7 +68,7 @@
                         </select>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-4 border-b pb-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
                             <input type="text" id="orcCheckin" class="focus:ring-blue-500 block w-full sm:text-sm border border-gray-300 bg-white rounded-md py-2 px-3 border outline-none text-gray-600 cursor-pointer placeholder-gray-400" placeholder="Selecione..">
@@ -79,21 +79,33 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 pt-2">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Adultos</label>
-                            <input type="number" id="orcAdultos" min="1" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none" placeholder="Ex: 2">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Crianças</label>
-                            <input type="number" id="orcCriancas" min="0" onchange="gerarCamposIdade()" class="focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none" placeholder="Ex: 0">
+                    <!-- NOVO: SISTEMA DE MULTI APARTAMENTOS (GRUPOS) -->
+                    <div id="listaAptosContainer" class="space-y-4 pt-1">
+                        <!-- Quarto 1 (Fixo) -->
+                        <div class="quarto-item bg-gray-50 border border-gray-200 rounded-lg p-4 relative" id="quarto_1">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="text-sm font-bold text-gray-700 flex items-center gap-2"><i data-lucide="bed" class="w-4 h-4"></i> Apto 1</h4>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Adultos</label>
+                                    <input type="number" min="1" class="orc-adultos focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none bg-white" placeholder="Ex: 2">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Crianças</label>
+                                    <input type="number" min="0" onchange="gerarCamposIdade(1)" class="orc-criancas focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none bg-white" placeholder="Ex: 0">
+                                </div>
+                            </div>
+                            <div id="orcIdadesContainer_1" class="hidden bg-blue-100/40 p-3 rounded border border-blue-100 mt-3 space-y-2">
+                                <p class="text-[10px] font-bold text-blue-800 uppercase">Idades das Crianças (Apto 1)</p>
+                                <div id="orcIdadesGrid_1" class="grid grid-cols-3 gap-2"></div>
+                            </div>
                         </div>
                     </div>
 
-                    <div id="orcIdadesContainer" class="hidden bg-blue-50 p-4 rounded-lg border border-blue-100 mt-3 space-y-3">
-                        <p class="text-xs font-semibold text-blue-800 uppercase">Idade das Crianças</p>
-                        <div id="orcIdadesGrid" class="grid grid-cols-3 gap-3"></div>
-                    </div>
+                    <button type="button" onclick="adicionarNovoQuarto()" class="w-full bg-white hover:bg-gray-50 text-blue-600 border border-blue-200 border-dashed rounded-md py-2 text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-sm">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Adicionar outro Apto
+                    </button>
 
                     <div class="pt-4 border-t mt-6">
                         <button type="button" onclick="calcularOrcamentoReal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-md py-3 px-4 text-sm font-bold transition-colors shadow-sm flex items-center justify-center gap-2">
@@ -132,13 +144,13 @@
                             </div>
                         </div>
 
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Detalhamento dos Valores</h4>
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Soma Total (Todos os Aptos)</h4>
                         <div class="bg-gray-50 rounded-lg p-4 border border-gray-100 space-y-3 text-sm mb-6">
                             <div class="flex justify-between text-gray-700">
-                                <span>Soma das Diárias Base (Quarto)</span><span id="txtSomaBase" class="font-medium">R$ 0,00</span>
+                                <span>Soma das Diárias Base (Quartos)</span><span id="txtSomaBase" class="font-medium">R$ 0,00</span>
                             </div>
                             <div class="flex justify-between text-gray-700">
-                                <span>Soma dos Adicionais (Extra)</span><span id="txtSomaExtras" class="font-medium">R$ 0,00</span>
+                                <span>Soma dos Adicionais (Extras)</span><span id="txtSomaExtras" class="font-medium">R$ 0,00</span>
                             </div>
                             <div class="flex justify-between text-green-600 font-medium pt-2 border-t border-gray-200 border-dashed">
                                 <span>Crianças Free na Cortesia</span><span id="txtQtdFree">0 free</span>
@@ -259,6 +271,7 @@
         let fpCheckin, fpCheckout;
         const limitePorPagina = 50;
         let paginaAtualAtiva = 1;
+        let contadorQuartosInjetados = 1;
 
         const nomenclaturaRegimes = {
             ro: "Sem refeição",
@@ -361,10 +374,64 @@
             }
         }
 
-        function gerarCamposIdade() {
-            const qtd = parseInt(document.getElementById('orcCriancas').value) || 0;
-            const container = document.getElementById('orcIdadesContainer');
-            const grid = document.getElementById('orcIdadesGrid');
+        // NOVO: GESTÃO DO DOM DE MULTI APARTAMENTOS
+        function adicionarNovoQuarto() {
+            contadorQuartosInjetados++;
+            const idGerado = contadorQuartosInjetados;
+            const container = document.getElementById('listaAptosContainer');
+            const html = `
+                <div class="quarto-item bg-gray-50 border border-gray-200 rounded-lg p-4 relative animate-in fade-in zoom-in-95 duration-200" id="quarto_${idGerado}">
+                    <div class="flex justify-between items-center mb-3 border-b border-gray-200 pb-2">
+                        <h4 class="text-sm font-bold text-gray-700 flex items-center gap-2"><i data-lucide="bed" class="w-4 h-4 text-blue-600"></i> Apto ${idGerado}</h4>
+                        <button type="button" onclick="removerQuarto(${idGerado})" class="text-red-500 hover:bg-red-50 p-1 rounded transition-colors" title="Remover este apto"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Adultos</label>
+                            <input type="number" min="1" class="orc-adultos focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none bg-white" placeholder="Ex: 2">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Crianças</label>
+                            <input type="number" min="0" onchange="gerarCamposIdade(${idGerado})" class="orc-criancas focus:ring-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border outline-none bg-white" placeholder="Ex: 0">
+                        </div>
+                    </div>
+                    <div id="orcIdadesContainer_${idGerado}" class="hidden bg-blue-100/40 p-3 rounded border border-blue-100 mt-3 space-y-2">
+                        <p class="text-[10px] font-bold text-blue-800 uppercase">Idades das Crianças (Apto ${idGerado})</p>
+                        <div id="orcIdadesGrid_${idGerado}" class="grid grid-cols-3 gap-2"></div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            lucide.createIcons();
+            atualizarTitulosDosQuartos();
+        }
+
+        function removerQuarto(idAlvo) {
+            const item = document.getElementById(`quarto_${idAlvo}`);
+            if(item) {
+                item.remove();
+                atualizarTitulosDosQuartos();
+            }
+        }
+
+        function atualizarTitulosDosQuartos() {
+            let idx = 1;
+            document.querySelectorAll('.quarto-item').forEach(el => {
+                const header = el.querySelector('h4');
+                header.innerHTML = `<i data-lucide="bed" class="w-4 h-4 text-blue-600"></i> Apto ${idx}`;
+                idx++;
+            });
+            lucide.createIcons();
+        }
+
+        function gerarCamposIdade(idQuartoAtual = 1) {
+            const divQuarto = document.getElementById(`quarto_${idQuartoAtual}`);
+            if(!divQuarto) return;
+            const inputCriancas = divQuarto.querySelector('.orc-criancas');
+            const qtd = parseInt(inputCriancas.value) || 0;
+            const container = document.getElementById(`orcIdadesContainer_${idQuartoAtual}`);
+            const grid = document.getElementById(`orcIdadesGrid_${idQuartoAtual}`);
+            
             grid.innerHTML = '';
             if (qtd > 0) {
                 container.classList.remove('hidden');
@@ -376,22 +443,52 @@
             }
         }
 
+        // RECONSTRUÇÃO TOTAL DO MOTOR (LOOP POR CADA APTO SELECIONADO NA TELA)
         function calcularOrcamentoReal() {
             const aptoId = document.getElementById('orcAptoSelect').value;
             const regimeId = document.getElementById('orcRegimeSelect').value;
             const promoAplicada = document.getElementById('orcPromoSelect').value;
             const dInicioStr = normalizarDataIn(document.getElementById('orcCheckin').value);
             const dFimStr = normalizarDataIn(document.getElementById('orcCheckout').value);
-            const adultos = parseInt(document.getElementById('orcAdultos').value) || 0;
-            const criancas = parseInt(document.getElementById('orcCriancas').value) || 0;
 
-            if(!aptoId || !dInicioStr || !dFimStr || !regimeId || isNaN(adultos) || adultos <= 0) {
-                showToast("Selecione o imóvel, o regime, datas e quantidade de adultos!", "error");
+            if(!aptoId || !dInicioStr || !dFimStr || !regimeId) {
+                showToast("Selecione o imóvel, datas e regime de alimentação!", "error");
                 return;
             }
 
             const apto = listaAptos.find(a => a.id === aptoId);
-            const totalPessoas = adultos + criancas;
+            
+            // CAPTURA A ESTRUTURA DE TODOS OS APARTAMENTOS (QUARTOS) ADICIONADOS NA TELA
+            const quartosDOM = document.querySelectorAll('.quarto-item');
+            let quartosDadosEstruturados = [];
+            let formValido = true;
+            let totalAdultosGlobaisSoma = 0;
+            let totalCriancasGlobaisSoma = 0;
+
+            quartosDOM.forEach((qDOM, index) => {
+                let ad = parseInt(qDOM.querySelector('.orc-adultos').value) || 0;
+                let cr = parseInt(qDOM.querySelector('.orc-criancas').value) || 0;
+                if(ad <= 0) formValido = false;
+                
+                let arrIdades = [];
+                qDOM.querySelectorAll('.orc-idade-input').forEach(inp => arrIdades.push(parseInt(inp.value) || 0));
+                
+                totalAdultosGlobaisSoma += ad;
+                totalCriancasGlobaisSoma += cr;
+
+                quartosDadosEstruturados.push({
+                    indexReal: index + 1,
+                    ad: ad,
+                    cr: cr,
+                    idadesArray: arrIdades,
+                    idadesTxt: arrIdades.length > 0 ? arrIdades.join(', ') + " anos" : ""
+                });
+            });
+
+            if(!formValido) {
+                showToast("É obrigatório informar pelo menos 1 adulto em cada apartamento!", "error");
+                return;
+            }
 
             const divVazia = document.getElementById('estadoVazio');
             const divResult = document.getElementById('resultadoCotacao');
@@ -401,10 +498,14 @@
             divVazia.classList.add('hidden');
             divResult.classList.remove('hidden');
 
-            if(totalPessoas > apto.capMax) {
-                alertaErro.classList.remove('hidden'); areaValores.classList.add('hidden');
-                document.getElementById('msgErro').innerText = `A capacidade deste apartamento é de no máximo ${apto.capMax} pessoas. Sua busca contém ${totalPessoas} pessoas.`;
-                showToast("Capacidade máxima do quarto violada!", "error"); return;
+            // VERIFICA CAPACIDADE INDIVIDUAL DE CADA APTO
+            for(let q of quartosDadosEstruturados) {
+                if((q.ad + q.cr) > apto.capMax) {
+                    alertaErro.classList.remove('hidden'); areaValores.classList.add('hidden');
+                    document.getElementById('msgErro').innerText = `A capacidade deste apartamento é de no máximo ${apto.capMax} pessoas. O Apto ${q.indexReal} da sua busca possui ${q.ad + q.cr} pessoas.`;
+                    showToast("Capacidade máxima do quarto violada!", "error"); 
+                    return;
+                }
             }
 
             let dCorrenteCalculoNoites = new Date(dInicioStr + "T12:00:00");
@@ -415,98 +516,101 @@
                 dCorrenteCalculoNoites.setDate(dCorrenteCalculoNoites.getDate() + 1);
             }
 
-            let idades = [];
-            document.querySelectorAll('.orc-idade-input').forEach(input => idades.push(parseInt(input.value) || 0));
-
-            let criancasFree = 0; let criancasPagantes = 0;
-            let limiteFreeMax = apto.qtdFree || 2; let idadeFreeMax = apto.idadeFree || 12;
-
-            idades.sort((a,b) => b - a).forEach(idade => {
-                if (idade <= idadeFreeMax && criancasFree < limiteFreeMax) criancasFree++;
-                else criancasPagantes++;
-            });
-
-            let pagantesAdicionais = criancasPagantes;
-            let adultosEfetivos = adultos;
-
             let regimesParaCalcular = regimeId === "todos" ? (apto.regimesAtivos || ['ro']) : [regimeId];
-            let resultadosGerais = [];
+            let resultadosGlobaisPorRegime = {};
+            regimesParaCalcular.forEach(r => resultadosGlobaisPorRegime[r] = { base:0, extras:0, desconto:0, total:0, promoTextoZap:"" });
+
             let erroEncontrado = false;
             let msgErroFinal = "";
+            let limiteFreeMax = apto.qtdFree || 2; 
+            let idadeFreeMax = apto.idadeFree || 12;
+            let totalFreeCriancasGlobais = 0;
 
-            for (let rId of regimesParaCalcular) {
-                let valorAcumuladoBase = 0; 
-                let valorAcumuladoExtras = 0;
-                let erroFaltaTarifa = false;
-                let noitesMinimasExigidasDoPeriodo = 0;
+            // LOOP PODEROSO: CALCULA CADA APARTAMENTO INDIVIDUALMENTE MULTIPLICADO PELOS REGIMES
+            for (let q of quartosDadosEstruturados) {
+                let criancasFree = 0; let criancasPagantes = 0;
                 
-                let dCorrente = new Date(dInicioStr + "T12:00:00");
-                let dFinal = new Date(dFimStr + "T12:00:00");
-
-                while(dCorrente < dFinal) {
-                    let dataIso = dCorrente.toISOString().split('T')[0];
-                    let tarifaDia = apto.calendario ? apto.calendario.find(c => c.data === dataIso && c.regime === rId) : null;
-                    
-                    if(!tarifaDia) { erroFaltaTarifa = true; break; }
-
-                    if(tarifaDia.minNoites && tarifaDia.minNoites > noitesMinimasExigidasDoPeriodo) {
-                        noitesMinimasExigidasDoPeriodo = tarifaDia.minNoites;
-                    }
-
-                    let totalAdultosEfetivosNoDia = adultosEfetivos + pagantesAdicionais;
-                    let precoBaseQuarto = 0;
-
-                    if (totalAdultosEfetivosNoDia === 1) {
-                        precoBaseQuarto = tarifaDia.single;
-                    } else {
-                        precoBaseQuarto = tarifaDia.duplo;
-                        let extrasNoDia = (totalAdultosEfetivosNoDia - 2) > 0 ? (totalAdultosEfetivosNoDia - 2) : 0;
-                        valorAcumuladoExtras += (extrasNoDia * tarifaDia.extra);
-                    }
-                    valorAcumuladoBase += precoBaseQuarto;
-                    dCorrente.setDate(dCorrente.getDate() + 1);
-                }
-
-                if(erroFaltaTarifa) {
-                    erroEncontrado = true;
-                    msgErroFinal = `Não há tarifas para o regime "${nomenclaturaRegimes[rId]}" cadastradas neste período.`;
-                    break;
-                }
-
-                if(totalNoitesBusca < noitesMinimasExigidasDoPeriodo) {
-                    erroEncontrado = true;
-                    msgErroFinal = `O período de ${totalNoitesBusca} noites não é permitido para o plano ${nomenclaturaRegimes[rId]}. Exige mínimo de ${noitesMinimasExigidasDoPeriodo} noites.`;
-                    break;
-                }
-
-                let descontoPromocionalCalculado = 0;
-                let textoNomePromoAplicadaNoZap = "";
-
-                if(promoAplicada === "ativa" && apto.promoFique && apto.promoPague) {
-                    if(totalNoitesBusca < apto.promoFique) {
-                        erroEncontrado = true;
-                        msgErroFinal = `Para aplicar a oferta "${apto.promoNome}" o cliente precisa se hospedar por no mínimo ${apto.promoFique} noites.`;
-                        break;
-                    }
-                    let valorBrutoTotalSemDesconto = valorAcumuladoBase + valorAcumuladoExtras;
-                    let valorMedioPorDiaria = valorBrutoTotalSemDesconto / totalNoitesBusca;
-                    let quantidadeDiariasCortesia = apto.promoFique - apto.promoPague;
-                    
-                    descontoPromocionalCalculado = valorMedioPorDiaria * quantidadeDiariasCortesia;
-                    textoNomePromoAplicadaNoZap = apto.promoNome;
-                }
-
-                let valorTotalGeral = (valorAcumuladoBase + valorAcumuladoExtras) - descontoPromocionalCalculado;
-
-                resultadosGerais.push({
-                    regimeId: rId,
-                    regimeNome: nomenclaturaRegimes[rId],
-                    base: valorAcumuladoBase,
-                    extras: valorAcumuladoExtras,
-                    desconto: descontoPromocionalCalculado,
-                    promoTextoZap: textoNomePromoAplicadaNoZap,
-                    total: valorTotalGeral
+                q.idadesArray.sort((a,b) => b - a).forEach(idade => {
+                    if (idade <= idadeFreeMax && criancasFree < limiteFreeMax) criancasFree++;
+                    else criancasPagantes++;
                 });
+                
+                q.freeQtd = criancasFree;
+                totalFreeCriancasGlobais += criancasFree;
+
+                let pagantesAdicionais = criancasPagantes;
+                let adultosEfetivos = q.ad;
+                
+                q.resultadosRegimesApto = [];
+
+                for (let rId of regimesParaCalcular) {
+                    let valorAcumuladoBase = 0; 
+                    let valorAcumuladoExtras = 0;
+                    let erroFaltaTarifa = false;
+                    let noitesMinimasExigidasDoPeriodo = 0;
+                    
+                    let dCorrente = new Date(dInicioStr + "T12:00:00");
+                    let dFinal = new Date(dFimStr + "T12:00:00");
+
+                    while(dCorrente < dFinal) {
+                        let dataIso = dCorrente.toISOString().split('T')[0];
+                        let tarifaDia = apto.calendario ? apto.calendario.find(c => c.data === dataIso && c.regime === rId) : null;
+                        
+                        if(!tarifaDia) { erroFaltaTarifa = true; break; }
+
+                        if(tarifaDia.minNoites && tarifaDia.minNoites > noitesMinimasExigidasDoPeriodo) {
+                            noitesMinimasExigidasDoPeriodo = tarifaDia.minNoites;
+                        }
+
+                        let totalAdultosEfetivosNoDia = adultosEfetivos + pagantesAdicionais;
+                        let precoBaseQuarto = 0;
+
+                        if (totalAdultosEfetivosNoDia === 1) {
+                            precoBaseQuarto = tarifaDia.single;
+                        } else {
+                            precoBaseQuarto = tarifaDia.duplo;
+                            let extrasNoDia = (totalAdultosEfetivosNoDia - 2) > 0 ? (totalAdultosEfetivosNoDia - 2) : 0;
+                            valorAcumuladoExtras += (extrasNoDia * tarifaDia.extra);
+                        }
+                        valorAcumuladoBase += precoBaseQuarto;
+                        dCorrente.setDate(dCorrente.getDate() + 1);
+                    }
+
+                    if(erroFaltaTarifa) { erroEncontrado = true; msgErroFinal = `Não há tarifas para o regime "${nomenclaturaRegimes[rId]}" cadastradas neste período.`; break; }
+                    if(totalNoitesBusca < noitesMinimasExigidasDoPeriodo) { erroEncontrado = true; msgErroFinal = `O período selecionado de ${totalNoitesBusca} noites não é permitido para o plano ${nomenclaturaRegimes[rId]}. Exige mínimo de ${noitesMinimasExigidasDoPeriodo} noites.`; break; }
+
+                    let descontoPromocionalCalculado = 0;
+                    let textoNomePromoAplicadaNoZap = "";
+
+                    if(promoAplicada === "ativa" && apto.promoFique && apto.promoPague) {
+                        if(totalNoitesBusca < apto.promoFique) {
+                            erroEncontrado = true; msgErroFinal = `Para aplicar a oferta "${apto.promoNome}" o cliente precisa se hospedar por no mínimo ${apto.promoFique} noites.`; break;
+                        }
+                        let valorBrutoTotalSemDesconto = valorAcumuladoBase + valorAcumuladoExtras;
+                        let valorMedioPorDiaria = valorBrutoTotalSemDesconto / totalNoitesBusca;
+                        let quantidadeDiariasCortesia = apto.promoFique - apto.promoPague;
+                        
+                        descontoPromocionalCalculado = valorMedioPorDiaria * quantidadeDiariasCortesia;
+                        textoNomePromoAplicadaNoZap = apto.promoNome;
+                    }
+
+                    let valorTotalGeralIndividual = (valorAcumuladoBase + valorAcumuladoExtras) - descontoPromocionalCalculado;
+
+                    // Acumula na soma global (Para mostrar o sumário na tela e no fim do zap)
+                    resultadosGlobaisPorRegime[rId].base += valorAcumuladoBase;
+                    resultadosGlobaisPorRegime[rId].extras += valorAcumuladoExtras;
+                    resultadosGlobaisPorRegime[rId].desconto += descontoPromocionalCalculado;
+                    resultadosGlobaisPorRegime[rId].total += valorTotalGeralIndividual;
+                    resultadosGlobaisPorRegime[rId].promoTextoZap = textoNomePromoAplicadaNoZap;
+
+                    // Salva os valores específicos DESTE apartamento para o Zap
+                    q.resultadosRegimesApto.push({
+                        regimeId: rId,
+                        nome: nomenclaturaRegimes[rId],
+                        total: valorTotalGeralIndividual
+                    });
+                }
+                if(erroEncontrado) break;
             }
 
             if (erroEncontrado) {
@@ -520,36 +624,42 @@
 
             let msgNoitesTexto = totalNoitesBusca === 1 ? "01 noite" : (totalNoitesBusca < 10 ? "0" + totalNoitesBusca : totalNoitesBusca) + " noites";
             let txtResumoRegime = regimeId === "todos" ? "Todos os Regimes" : nomenclaturaRegimes[regimeId];
+            let msgQuantidadeQuartosStr = quartosDadosEstruturados.length > 1 ? ` • ${quartosDadosEstruturados.length} Aptos` : '';
             
-            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade}) • ${msgNoitesTexto} • ${txtResumoRegime}`;
-            document.getElementById('txtQtdFree').innerText = `${criancasFree} criança(s) free (Até ${idadeFreeMax} anos)`;
+            document.getElementById('resumoReserva').innerText = `${apto.nome} (${apto.unidade})${msgQuantidadeQuartosStr} • ${msgNoitesTexto} • ${txtResumoRegime}`;
+            document.getElementById('txtQtdFree').innerText = `${totalFreeCriancasGlobais} criança(s) free (Até ${idadeFreeMax} anos)`;
+
+            let htmlTotaisArrayParaZap = [];
 
             if (regimeId === "todos") {
                 let htmlTotais = "";
-                resultadosGerais.forEach(r => {
-                    htmlTotais += `<div class="text-sm font-semibold text-gray-700 w-full flex justify-between gap-4 border-b border-gray-100 pb-1 last:border-0 last:pb-0"><span class="font-normal text-gray-500">${r.regimeNome}</span> <span>R$ ${r.total.toFixed(2).replace('.', ',')}</span></div>`;
+                regimesParaCalcular.forEach(rId => {
+                    let resG = resultadosGlobaisPorRegime[rId];
+                    htmlTotais += `<div class="text-sm font-semibold text-gray-700 w-full flex justify-between gap-4 border-b border-gray-100 pb-1 last:border-0 last:pb-0"><span class="font-normal text-gray-500">${nomenclaturaRegimes[rId]}</span> <span>R$ ${resG.total.toFixed(2).replace('.', ',')}</span></div>`;
+                    htmlTotaisArrayParaZap.push({ nome: nomenclaturaRegimes[rId], total: resG.total });
                 });
                 document.getElementById('valorTotal').innerHTML = `<div class="flex flex-col gap-1.5 items-end mt-2 w-full">${htmlTotais}</div>`;
                 
                 document.getElementById('txtSomaBase').innerText = "Varia por regime";
                 document.getElementById('txtSomaExtras').innerText = "Varia por regime";
                 
-                if (resultadosGerais[0].desconto > 0) {
+                let refBasePromo = resultadosGlobaisPorRegime[regimesParaCalcular[0]];
+                if (refBasePromo.desconto > 0) {
                     document.getElementById('linhaVisualPromo').classList.remove('hidden');
-                    document.getElementById('txtPromoAplicadaLabel').innerText = `Desconto: ${resultadosGerais[0].promoTextoZap}`;
+                    document.getElementById('txtPromoAplicadaLabel').innerText = `Desconto: ${refBasePromo.promoTextoZap}`;
                     document.getElementById('txtPromoDescontoVal').innerText = "Varia por regime";
                 } else {
                     document.getElementById('linhaVisualPromo').classList.add('hidden');
                 }
             } else {
-                let r = resultadosGerais[0];
-                document.getElementById('valorTotal').innerHTML = `R$ ${r.total.toFixed(2).replace('.', ',')}`;
-                document.getElementById('txtSomaBase').innerText = `R$ ${r.base.toFixed(2).replace('.', ',')}`;
-                document.getElementById('txtSomaExtras').innerText = `R$ ${r.extras.toFixed(2).replace('.', ',')}`;
-                if (r.desconto > 0) {
+                let resG = resultadosGlobaisPorRegime[regimeId];
+                document.getElementById('valorTotal').innerHTML = `R$ ${resG.total.toFixed(2).replace('.', ',')}`;
+                document.getElementById('txtSomaBase').innerText = `R$ ${resG.base.toFixed(2).replace('.', ',')}`;
+                document.getElementById('txtSomaExtras').innerText = `R$ ${resG.extras.toFixed(2).replace('.', ',')}`;
+                if (resG.desconto > 0) {
                     document.getElementById('linhaVisualPromo').classList.remove('hidden');
-                    document.getElementById('txtPromoAplicadaLabel').innerText = `Desconto: ${r.promoTextoZap}`;
-                    document.getElementById('txtPromoDescontoVal').innerText = `- R$ ${r.desconto.toFixed(2).replace('.', ',')}`;
+                    document.getElementById('txtPromoAplicadaLabel').innerText = `Desconto: ${resG.promoTextoZap}`;
+                    document.getElementById('txtPromoDescontoVal').innerText = `- R$ ${resG.desconto.toFixed(2).replace('.', ',')}`;
                 } else {
                     document.getElementById('linhaVisualPromo').classList.add('hidden');
                 }
@@ -573,53 +683,78 @@
 
             let strCheckinText = `${dInicioStr.split('-').reverse().join('/')} (${diasSemana[dataCheckinObj.getDay()]})`;
             let strCheckoutText = `${dFimStr.split('-').reverse().join('/')} (${diasSemana[dataCheckoutObj.getDay()]})`;
-            let idadesTxt = idades.length > 0 ? idades.join(', ') + " anos" : "";
 
+            // DADOS SALVOS NA MEMÓRIA PARA O BOTÃO DO WHATSAPP ACESSAR O TEXTO FINAL
             dadosLocaisUltimoCalculo = {
                 idCodigo: idLabelFormatado,
                 hotelNome: apto.nome,
                 quartoNome: apto.unidade,
                 isTodosRegimes: regimeId === "todos",
-                regimeNome: regimeId === "todos" ? "Todos os Regimes" : resultadosGerais[0].regimeNome,
-                resultadosRegimes: resultadosGerais,
-                promoTextoZap: resultadosGerais[0].promoTextoZap,
+                regimeNome: regimeId === "todos" ? "Todos os Regimes" : nomenclaturaRegimes[regimeId],
+                resultadosGlobais: resultadosGlobaisPorRegime,
+                htmlTotaisArrayParaZap: htmlTotaisArrayParaZap,
+                promoTextoZap: resultadosGlobaisPorRegime[regimesParaCalcular[0]].promoTextoZap,
                 checkin: strCheckinText,
                 checkout: strCheckoutText,
                 noitesTxt: msgNoitesTexto,
-                adQtd: adultos < 10 ? "0" + adultos : adultos,
-                criQtd: criancas < 10 ? "0" + criancas : criancas,
-                freeQtd: criancasFree,
-                idadesTxt: idadesTxt,
-                totalFormatado: regimeId === "todos" ? "Vários Regimes" : resultadosGerais[0].total.toFixed(2).replace('.', ',')
+                totalAdultosGlobaisSoma,
+                totalCriancasGlobaisSoma,
+                quartos: quartosDadosEstruturados,
+                totalFormatado: regimeId === "todos" ? "Vários Regimes" : resultadosGlobaisPorRegime[regimeId].total.toFixed(2).replace('.', ',')
             };
             
             showToast("Orçamento calculado com sucesso!", "success");
         }
 
-        // LÓGICA DO TEXTO ALTERADA PARA POSICIONAR O ID NO FINAL DO WHATSAPP
+        // NOVO: CONSTRUTOR DE TEXTO COM SUPORTE PERFEITO A GRUPOS / MULTI-APARTAMENTOS
         function construirTextoFinalTemplate() {
             if(!dadosLocaisUltimoCalculo) return "";
             
             const nomeCliente = document.getElementById('clienteNome').value.trim();
             const obsTexto = document.getElementById('orcObs').value.trim();
+            const ehGrupo = dadosLocaisUltimoCalculo.quartos.length > 1;
             
             let cabecalho = nomeCliente ? `Olá, ${nomeCliente}!\n\n` : "";
             let linhaOfertaZap = dadosLocaisUltimoCalculo.promoTextoZap ? `• *Oferta Aplicada:* ${dadosLocaisUltimoCalculo.promoTextoZap}\n` : "";
-            
-            let linhaCriancas = "";
-            if (parseInt(dadosLocaisUltimoCalculo.criQtd) > 0) {
-                linhaCriancas += `• ${dadosLocaisUltimoCalculo.criQtd} criança(s) (Idades: ${dadosLocaisUltimoCalculo.idadesTxt})\n`;
-            }
-
             let linhaObs = obsTexto ? `\n*Informações Importantes:*\n${obsTexto}` : "";
 
-            let linhaRegime = dadosLocaisUltimoCalculo.isTodosRegimes ? "" : `• Regime: ${dadosLocaisUltimoCalculo.regimeNome}\n`;
-            
+            let linhaRegimeBase = (dadosLocaisUltimoCalculo.isTodosRegimes || ehGrupo) ? "" : `• Regime: ${dadosLocaisUltimoCalculo.regimeNome}\n`;
+
+            // BLOCO CONFIGURAÇÃO INTELIGENTE (1 APTO X GRUPO)
+            let blocoConfiguracao = "";
+            if (!ehGrupo) {
+                let q = dadosLocaisUltimoCalculo.quartos[0];
+                blocoConfiguracao += `\n*Configuração*\n`;
+                blocoConfiguracao += `• ${q.ad < 10 ? '0'+q.ad : q.ad} Adulto(s)\n`;
+                if (q.cr > 0) {
+                    blocoConfiguracao += `• ${q.cr < 10 ? '0'+q.cr : q.cr} criança(s) (Idades: ${q.idadesTxt})\n`;
+                }
+            } else {
+                blocoConfiguracao += `\n*Configuração (Grupos)*\n`;
+                dadosLocaisUltimoCalculo.quartos.forEach(q => {
+                    blocoConfiguracao += `\n*Apto ${q.indexReal}*\n`;
+                    blocoConfiguracao += `• ${q.ad < 10 ? '0'+q.ad : q.ad} Adulto(s)\n`;
+                    if (q.cr > 0) {
+                        blocoConfiguracao += `• ${q.cr < 10 ? '0'+q.cr : q.cr} criança(s) (Idades: ${q.idadesTxt})\n`;
+                    }
+                    if (dadosLocaisUltimoCalculo.isTodosRegimes) {
+                        q.resultadosRegimesApto.forEach(r => {
+                            blocoConfiguracao += `• ${r.nome} = R$ ${r.total.toFixed(2).replace('.', ',')}\n`;
+                        });
+                    } else {
+                        let r = q.resultadosRegimesApto[0];
+                        blocoConfiguracao += `• Regime: ${r.nome} = R$ ${r.total.toFixed(2).replace('.', ',')}\n`;
+                    }
+                });
+            }
+
+            // BLOCO VALOR TOTAL INTELIGENTE
             let blocoValorTotal = "";
             if (dadosLocaisUltimoCalculo.isTodosRegimes) {
-                blocoValorTotal = `\n*Valor total do Pacote:*\n`;
-                dadosLocaisUltimoCalculo.resultadosRegimes.forEach(r => {
-                    blocoValorTotal += `• ${r.regimeNome} = R$ ${r.total.toFixed(2).replace('.', ',')}\n`;
+                let textoSomaAdd = ehGrupo ? " (Soma de todos os Aptos)" : "";
+                blocoValorTotal = `\n*Valor total do Pacote${textoSomaAdd}:*\n`;
+                dadosLocaisUltimoCalculo.htmlTotaisArrayParaZap.forEach(r => {
+                    blocoValorTotal += `• ${r.nome} = R$ ${r.total.toFixed(2).replace('.', ',')}\n`;
                 });
             } else {
                 blocoValorTotal = `\n*Valor total do Pacote: R$ ${dadosLocaisUltimoCalculo.totalFormatado}*\n`;
@@ -630,12 +765,10 @@
                    `• Entrada: ${dadosLocaisUltimoCalculo.checkin}\n` +
                    `• Saída: ${dadosLocaisUltimoCalculo.checkout}\n` +
                    `• Total de noites: ${dadosLocaisUltimoCalculo.noitesTxt}\n` +
-                   `• Acomodação: ${dadosLocaisUltimoCalculo.quartoNome}\n` +
-                   linhaRegime +
+                   `• Acomodação: ${dadosLocaisUltimoCalculo.quartoNome}${ehGrupo ? ' ('+dadosLocaisUltimoCalculo.quartos.length+' Quartos)' : ''}\n` +
+                   linhaRegimeBase +
                    linhaOfertaZap + 
-                   `\n*Configuração*\n` +
-                   `• ${dadosLocaisUltimoCalculo.adQtd} Adulto(s)\n` +
-                   linhaCriancas + 
+                   blocoConfiguracao + 
                    blocoValorTotal +
                    linhaObs +
                    `\n\n• Orçamento: ID #${dadosLocaisUltimoCalculo.idCodigo}`;
@@ -656,8 +789,8 @@
                 hotel: `${dadosLocaisUltimoCalculo.hotelNome} (${dadosLocaisUltimoCalculo.quartoNome}) - ${dadosLocaisUltimoCalculo.regimeNome}${dadosLocaisUltimoCalculo.promoTextoZap ? ' ('+document.getElementById('orcPromoSelect').options[document.getElementById('orcPromoSelect').selectedIndex].text+')' : ''}`,
                 entrada: dadosLocaisUltimoCalculo.checkin.split(' ')[0], 
                 saida: dadosLocaisUltimoCalculo.checkout.split(' ')[0], 
-                adultos: dadosLocaisUltimoCalculo.adQtd,
-                criancas: dadosLocaisUltimoCalculo.criQtd,
+                adultos: dadosLocaisUltimoCalculo.totalAdultosGlobaisSoma,
+                criancas: dadosLocaisUltimoCalculo.totalCriancasGlobaisSoma,
                 valor: dadosLocaisUltimoCalculo.isTodosRegimes ? "Vários Regimes" : `R$ ${dadosLocaisUltimoCalculo.totalFormatado}`,
                 textoBruto: construirTextoFinalTemplate()
             };
@@ -671,8 +804,16 @@
         function resetarFormularioReserva() {
             document.getElementById('buscaForm').reset();
             if(fpCheckin) { fpCheckin.clear(); fpCheckout.clear(); }
-            document.getElementById('orcIdadesContainer').classList.add('hidden');
-            document.getElementById('orcIdadesGrid').innerHTML = "";
+            
+            // NOVO: Remove todos os quartos extras que foram inseridos
+            const quartosNode = document.querySelectorAll('.quarto-item');
+            for(let i = 1; i < quartosNode.length; i++) {
+                quartosNode[i].remove();
+            }
+            contadorQuartosInjetados = 1;
+
+            document.getElementById('orcIdadesContainer_1').classList.add('hidden');
+            document.getElementById('orcIdadesGrid_1').innerHTML = "";
             document.getElementById('linhaVisualPromo').classList.add('hidden');
             document.getElementById('orcObs').value = ""; 
             document.getElementById('resultadoCotacao').classList.add('hidden');
